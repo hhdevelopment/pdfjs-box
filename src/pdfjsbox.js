@@ -71,6 +71,7 @@
 		 * @param {type} document
 		 * @param {type} pdfDocument
 		 * @param {type} items
+		 * @param {type} offset
 		 * @param {type} idx
 		 * @param {type} t0
 		 */
@@ -87,7 +88,7 @@
 			});
 		}
 		/**
-		 * Charge les pages de facon récursive ou mix si max est inferieur à 
+		 * Charge les pages de facon récursive ou mix si max est inferieur à numPages 
 		 * @param {type} scope
 		 * @param {type} document
 		 * @param {type} pdfDocument
