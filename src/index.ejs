@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<title>Demo pdfjs-box</title>
+	</head>
+	<body ng-app="app" ng-controller="AppCtrl as ctrl">
+		<div class="container-fluid">
+			<div class="page-header">
+				<h1>PDFJS-BOX Demo</h1>
+			</div>
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="list-group">
+						<a ng-repeat="doc in ctrl.documents track by $index" href class="list-group-item" ng-class="{'active':ctrl.selectedDocument === doc}"
+							ng-bind="::ctrl.labelSupplier(doc, ctrl.globalData, $index) || doc.label || doc.name || ('document ' + $index)"
+							ng-click="ctrl.selectDocument(doc)"></a>
+					</div>
+				</div>
+			</div>
+			<pdf-document ng-document="ctrl.selectedDocument" ng-model="ctrl.items" 
+							  url-supplier="ctrl.urlSupplier({'document':doc, 'data':ctrl.globalData, 'index':$index})" 
+							  ng-data="ctrl.globalData"
+							  on-pdfinfo="ctrl.onPdfinfo(pdfinfo)"></pdf-document>
+			<div class="row">
+				<div class="col-lg-12">
+					<pdf-thumbnails class="pdf-thumbnails-horizontal"
+										 ng-height="100" 
+										 ng-model="ctrl.items2"
+										 allow-drag="true" allow-drop="true"
+										 ></pdf-thumbnails>
+					<pdf-thumbnails class="pdf-thumbnails-horizontal"
+										 ng-height="100" 
+										 ng-model="ctrl.items"
+										 allow-drag="true" allow-drop="true"
+										 on-select="ctrl.onSelectItem(item)"
+										 selected-index="ctrl.selectedIndex"></pdf-thumbnails>
+				</div>
+				<div>{{ctrl.items.length}}</div>
+			</div>
+			<div ng-if="ctrl.pdfInfo" ng-mouseenter="commands = true" ng-mouseleave="commands = false" ng-click="commands = !commands" style="background-color: #ddd;padding:10px 0px;">
+				<pdf-commands ng-show="commands" class="lg" ng-index="ctrl.selectedIndex" ng-total="ctrl.pdfInfo.numPages" ng-rotate="ctrl.selectedItem.rotate" ng-scale="ctrl.scale"></pdf-commands>
+				<pdf-view pdf-page="ctrl.selectedItem.pdfPage" rotate="ctrl.selectedItem.rotate" ng-scale="ctrl.scale"></pdf-view>
+			</div>
+		</div>
+	</body>
+</html>
