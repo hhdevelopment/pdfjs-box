@@ -10,7 +10,7 @@ require('./pdfjsbox.js');
 (function (ng, __) {
 	'use strict';
 	ng.module('app', ['pdfjs-box'])
-			  .constant('pdfjsConfig', { workerSrc: './pdf.worker.bundle.js', preloadPages:'recursive' } )
+			  .constant('pdfjsConfig', { workerSrc: './pdf.worker.bundle.js', preloadRecursivePages:7 } )
 			  .controller('AppCtrl', AppCtrl);
 	function AppCtrl() {
 		var ctrl = this;

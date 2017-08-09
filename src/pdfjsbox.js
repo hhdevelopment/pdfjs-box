@@ -56,22 +56,25 @@
 						scope.onPdfinfo({pdfinfo: pdfDocument.pdfInfo});
 					}
 					var t0 = new Date().getTime();
-					if(pdfjsConfig.preloadPages !== 'recursive') {
-						for (var idx = 0; idx < pdfDocument.numPages; idx++) {
-							computeItemAndPage(scope, ngDocument, pdfDocument, scope.ngModel, idx, t0);
-						}
-					} else {
-						return loadPage(scope, ngDocument, pdfDocument, scope.ngModel, 0).then(function () {
-							console.log('Preload '+pdfDocument.numPages+' pages in %sms', new Date().getTime()-t0);
-						});
-					}
+					return loadRecursivePage(scope, ngDocument, pdfDocument, scope.ngModel, 0, pdfjsConfig.preloadRecursivePages).then(function () {
+						console.log('Preload recursive '+Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages)+' pages in %sms', new Date().getTime()-t0);
+					});
 				}).catch(function (reason) {
 					console.error('Error: ' + reason);
 				});
 			}
 			return null;
 		}
-		function computeItemAndPage(scope, document, pdfDocument, items, idx, t0) {
+		/**
+		 * Charge une page, utilisé dans le mode séquenciel
+		 * @param {type} scope
+		 * @param {type} document
+		 * @param {type} pdfDocument
+		 * @param {type} items
+		 * @param {type} idx
+		 * @param {type} t0
+		 */
+		function loadSinglePage(scope, document, pdfDocument, items, offset, idx, t0) {
 			var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: null, items: items};
 			items.push(item);
 			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
@@ -79,19 +82,33 @@
 				item.rotate = 0; // c'est ca qui lance le lancement du render
 				scope.$apply();
 				if((idx + 1) === pdfDocument.numPages) {
-					console.log('Preload '+pdfDocument.numPages+' pages in %sms', new Date().getTime()-t0);
+					console.log('Preload sequence '+(pdfDocument.numPages-offset)+' pages in %sms', new Date().getTime()-t0);
 				}
 			});
 		}
-		function loadPage(scope, document, pdfDocument, items, idx) {
-			if (idx < pdfDocument.numPages) { // on s'assure que l'on a pas changé de document
-				var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: 0, items: items};
+		/**
+		 * Charge les pages de facon récursive ou mix si max est inferieur à 
+		 * @param {type} scope
+		 * @param {type} document
+		 * @param {type} pdfDocument
+		 * @param {type} items
+		 * @param {type} idx
+		 * @param {type} max
+		 */
+		function loadRecursivePage(scope, document, pdfDocument, items, idx, max) {
+			if (idx < max && idx < pdfDocument.numPages) { 
 				return pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-					item.pdfPage = pdfPage;
-					items.push(item);
-					scope.$apply();
-					return loadPage(scope, document, pdfDocument, items, idx + 1);
+					var item = {document: document, pdfPage: pdfPage, pageIdx: idx + 1, rotate: 0, items: items};
+					if(scope.ngDocument === document) { // on s'assure que l'on a pas changé de document
+						items.push(item);
+						scope.$apply();
+						return loadRecursivePage(scope, document, pdfDocument, items, idx + 1, max);
+					}
 				});
+			} else {
+				for (var i = idx; i < pdfDocument.numPages; i++) {
+					loadSinglePage(scope, document, pdfDocument, scope.ngModel, idx, i, new Date().getTime());
+				}
 			}
 			return null;
 		}
@@ -169,32 +186,24 @@
 			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
-				'ngModel': '=', // la liste de items represantant les pages du document
-				'ngDocument': '<', // le document sous forme d'objet
+				'ngValues': '=', // la liste de items represantant les pages du document
 				'allowDrag':'<', // Les miniatures sont elles draggables
 				'allowDrop':'<', // Les miniatures sont elles droppables ici
-				'ngData': '<', // Un objet exposant des données global 
-				'urlSupplier': '=', // une fonction retournant l'url a partir du document et de l'objet globalData. 
 				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedIndex': '=', // l'index de la miniature sélectionnée
-				'onSelect': '&', // qd on selection une miniature
-				'onPdfinfo': '&' // qd on charge un document pdf
+				'onSelect': '&' // qd on selection une miniature
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				watcherClears.push(scope.$watch('ngDocument', function (v1, v2, s) {
-					updateNgDocument(s, s.ctrl, elm, v1);
-				}, true));
-				watcherClears.push(scope.$watch('selectedIndex', function (v1, v2, s) {
-					updateSelectedIndex(s, s.ctrl, elm, v1);
+				watcherClears.push(scope.$watchGroup(['selectedIndex', 'ngValues.length'], function (vs1, vs2, s) {
+					updateSelectedIndex(s, s.ctrl, elm, vs1[0]);
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
-				ctrl.items = scope.ngModel || [];
 				var container = elm.get(0).firstChild;
 				manageScrollHandler(scope, container);
 				manageResizeHandler(scope, container);
 				manageDragAndDropHandler(scope, elm);
-				updateNgDocument(scope, ctrl, elm, scope.ngDocument);
+				updateSelectedIndex(scope, ctrl, elm, scope.selectedIndex);
 			}
 		};
 		function manageDragAndDropHandler(scope, elm) {
@@ -334,7 +343,7 @@
 		/**
 		 * Dessine tous les miniatures notrendered dans la zone visible dans le clientRect
 		 * @param {type} clientRect
-		 * @param {type} height : hauterur de la miniature
+		 * @param {type} height : hauteur de la miniature
 		 * @returns {undefined}
 		 */
 		function drawVisiblePfgThumbnails(clientRect, height) {
@@ -363,9 +372,9 @@
 		 */
 		function updateSelectedIndex(scope, ctrl, elm, selectedIndex) {
 			ctrl.selectedItem = null;
-			if (!ctrl.items)
+			if (!scope.ngValues)
 				return;
-			var item = ctrl.items[selectedIndex || 0];
+			var item = scope.ngValues[selectedIndex || 0];
 			if (!item)
 				return;
 			ctrl.selectedItem = item;
@@ -376,73 +385,9 @@
 				scope.onSelect({item: item});
 			}
 		}
-		/**
-		 * Changement de document
-		 * @param {type} scope
-		 * @param {type} ctrl
-		 * @param {type} elm
-		 * @param {type} ngDocument
-		 * @returns {undefined}
-		 */
-		function updateNgDocument(scope, ctrl, elm, ngDocument) {
-			ctrl.items.splice(0, ctrl.items.length);
-			if (ngDocument) {
-				ctrl.selectedItem = null;
-				var url = scope.urlSupplier ? scope.urlSupplier({'document': ngDocument, 'data': scope.ngData}) : (ngDocument.url || ngDocument);
-				var task = PDFJS.getDocument(url);
-				return task.promise.then(function (pdfDocument) {
-					if (scope.onPdfinfo) {
-						scope.onPdfinfo({pdfinfo: pdfDocument.pdfInfo});
-					}
-					var t0 = new Date().getTime();
-					if(pdfjsConfig.preloadPages !== 'recursive') {
-						for (var idx = 0; idx < pdfDocument.numPages; idx++) {
-							computeItemAndPage(scope, ctrl, elm, ngDocument, pdfDocument, ctrl.items, idx, t0);
-						}
-					} else {
-						loadPage(scope, ctrl, elm, ngDocument, pdfDocument, ctrl.items, 0).then(function () {
-							console.log('Preload '+pdfDocument.numPages+' pages in %sms', new Date().getTime()-t0);
-						});
-					}
-				}).catch(function (reason) {
-					console.error('Error: ' + reason);
-				});
-			}
-			return null;
-		}
-		function computeItemAndPage(scope, ctrl, elm, document, pdfDocument, items, idx, t0) {
-			var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: null, items: items};
-			items.push(item);
-			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-				item.pdfPage = pdfPage;
-				item.rotate = 0; // c'est ca qui lance le lancement du render
-				scope.$apply();
-				if(idx === scope.selectedIndex) {
-					updateSelectedIndex(scope, ctrl, elm, scope.selectedIndex);
-				}
-				if((idx + 1) === pdfDocument.numPages) {
-					console.log('Preload '+pdfDocument.numPages+' pages in %sms', new Date().getTime()-t0);
-				}
-			});
-		}
-		function loadPage(scope, ctrl, elm, document, pdfDocument, items, idx) {
-			if (idx < pdfDocument.numPages && items === ctrl.items) { // on s'assure que l'on a pas changé de document
-				return pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-					var item = {document: document, pdfPage: pdfPage, pageIdx: idx + 1, rotate: 0, items: items};
-					items.push(item);
-					scope.$apply();
-					if(idx === scope.selectedIndex) {
-						updateSelectedIndex(scope, ctrl, elm, idx);
-					}
-					return loadPage(scope, ctrl, elm, document, pdfDocument, items, idx + 1);
-				});
-			}
-			return null;
-		}
 	}
 	function PdfThumbnailsCtrl($scope) {
 		var ctrl = this;
-		ctrl.items;
 		ctrl.selectedItem = null;
 		ctrl.selectByClick = selectByClick;
 

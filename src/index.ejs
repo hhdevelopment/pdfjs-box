@@ -26,17 +26,16 @@
 				<div class="col-lg-12">
 					<pdf-thumbnails class="pdf-thumbnails-horizontal"
 										 ng-height="100" 
-										 ng-model="ctrl.items2"
+										 ng-values="ctrl.items2"
 										 allow-drag="true" allow-drop="true"
 										 ></pdf-thumbnails>
 					<pdf-thumbnails class="pdf-thumbnails-horizontal"
 										 ng-height="100" 
-										 ng-model="ctrl.items"
+										 ng-values="ctrl.items"
 										 allow-drag="true" allow-drop="true"
 										 on-select="ctrl.onSelectItem(item)"
 										 selected-index="ctrl.selectedIndex"></pdf-thumbnails>
 				</div>
-				<div>{{ctrl.items.length}}</div>
 			</div>
 			<div ng-if="ctrl.pdfInfo" ng-mouseenter="commands = true" ng-mouseleave="commands = false" ng-click="commands = !commands" style="background-color: #ddd;padding:10px 0px;">
 				<pdf-commands ng-show="commands" class="lg" ng-index="ctrl.selectedIndex" ng-total="ctrl.pdfInfo.numPages" ng-rotate="ctrl.selectedItem.rotate" ng-scale="ctrl.scale"></pdf-commands>
