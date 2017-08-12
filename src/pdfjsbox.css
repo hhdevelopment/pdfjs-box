@@ -30,7 +30,7 @@ pdf-thumbnail:last-child {
 	border-top-right-radius:6px;
 	border-bottom-right-radius:6px;
 }
-pdf-commands {
+pdf-view pdf-commands {
 	position:absolute;
 	z-index: 3;
 	width: 100%;
@@ -96,20 +96,43 @@ pdf-commands.sm .pager > li:last-child > a {
 pdf-thumbnail {
 	cursor:pointer;
 }
+pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove,
+pdf-thumbnails[selectable="true"] pdf-thumbnail input[type="checkbox"] {
+	display: initial;
+}
+pdf-thumbnails pdf-thumbnail span.glyphicon-remove,
+pdf-thumbnails pdf-thumbnail input[type="checkbox"] {
+	display:none;
+}
+pdf-thumbnail input[type="checkbox"]{
+	z-index: 5;
+	position:absolute;
+	top: 15px;
+	left:20px;
+	-webkit-transform: scale(1.5); /* Safari and Chrome */
+	-moz-transform: scale(1.5); /* FF */
+	-ms-transform: scale(1.5); /* IE */
+	-o-transform: scale(1.5); /* Opera */
+	margin: 0px;
+}
+pdf-thumbnail span.glyphicon-remove {
+	position:absolute;
+	top: 15px;
+	right:17px;
+}
 pdf-thumbnails[ng-draggable=true] pdf-thumbnail[draggable=true] {
 	cursor: move;
 }
 pdf-thumbnail.moving {
-	-webkit-transform: scale(0.8);
-	-moz-transform: scale(0.8);
-	-ms-transform: scale(0.8);
-	-o-transform: scale(0.8);
+	-webkit-transform: scale(0.8); /* Safari and Chrome */
+	-moz-transform: scale(0.8); /* FF */
+	-ms-transform: scale(0.8); /* IE */
+	-o-transform: scale(0.8); /* Opera */
 }
 [draggable] {
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	-webkit-user-select: none;
-	user-select: none;
 	/* Required to make elements draggable in old WebKit */
 	-khtml-user-drag: element;
 	-webkit-user-drag: element;

@@ -57,7 +57,7 @@
 					}
 					var t0 = new Date().getTime();
 					return loadRecursivePage(scope, ngDocument, pdfDocument, scope.ngModel, 0, pdfjsConfig.preloadRecursivePages).then(function () {
-						console.log('Preload recursive '+Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages)+' pages in %sms', new Date().getTime()-t0);
+						console.log('Preload recursive ' + Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
 					});
 				}).catch(function (reason) {
 					console.error('Error: ' + reason);
@@ -81,9 +81,8 @@
 			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
 				item.pdfPage = pdfPage;
 				item.rotate = 0; // c'est ca qui lance le lancement du render
-				scope.$apply();
-				if((idx + 1) === pdfDocument.numPages) {
-					console.log('Preload sequence '+(pdfDocument.numPages-offset)+' pages in %sms', new Date().getTime()-t0);
+				if ((idx + 1) === pdfDocument.numPages) {
+					console.log('Preload sequence ' + (pdfDocument.numPages - offset) + ' pages in %sms', new Date().getTime() - t0);
 				}
 			});
 		}
@@ -97,10 +96,10 @@
 		 * @param {type} max
 		 */
 		function loadRecursivePage(scope, document, pdfDocument, items, idx, max) {
-			if (idx < max && idx < pdfDocument.numPages) { 
+			if (idx < max && idx < pdfDocument.numPages) {
 				return pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-					var item = {document: document, pdfPage: pdfPage, pageIdx: idx + 1, rotate: 0, items: items};
-					if(scope.ngDocument === document) { // on s'assure que l'on a pas changé de document
+					if (scope.ngDocument === document) { // on s'assure que l'on a pas changé de document
+						var item = {document: document, pdfPage: pdfPage, pageIdx: idx + 1, rotate: 0, items: items};
 						items.push(item);
 						scope.$apply();
 						return loadRecursivePage(scope, document, pdfDocument, items, idx + 1, max);
@@ -110,6 +109,7 @@
 				for (var i = idx; i < pdfDocument.numPages; i++) {
 					loadSinglePage(scope, document, pdfDocument, scope.ngModel, idx, i, new Date().getTime());
 				}
+				scope.$apply();
 			}
 			return null;
 		}
@@ -130,7 +130,9 @@
 				'ngIndex': '=',
 				'ngTotal': '<',
 				'ngScale': '=',
-				'ngRotate': '='
+				'ngRotate': '=',
+				'onPrint': '&',
+				'onDownload': '&'
 			}
 		};
 	}
@@ -145,6 +147,8 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnail.html',
+			controller: PdfThumbnailCtrl,
+			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
 				'ngItem': '<', // un item portant le pdfDocument, l'index de la page, l'angle de rotation
@@ -160,16 +164,34 @@
 		};
 		function updateNgItem(scope, elm, item) {
 			if (item && item.pdfPage) {
-				var tumbnail = elm.get(0);
-				var render = isHVisibleIn(tumbnail.getClientRects()[0], tumbnail.parentElement.getClientRects()[0]);
+				var thumbnail = elm.get(0);
+				var render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
 				var pdfPage = item.pdfPage;
 				var view = pdfPage.view;
 				var scale = (scope.ngHeight || 100) / Math.max(view[2], view[3]);
-				var tumbnail = drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
-				tumbnail.item = item;
+				var thumbnail = drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
+				thumbnail.item = item;
+				item.selected = true;
 			} else {
 				drawPdfPageToThumbnail(elm, null, 0, scale, render);
 			}
+		}
+	}
+	function PdfThumbnailCtrl($scope, $timeout) {
+		var ctrl = this;
+		ctrl.switchThumbnailSelected = switchThumbnailSelected;
+		ctrl.removeThumbnail = removeThumbnail;
+		function switchThumbnailSelected(evt) {
+			evt.stopPropagation();
+			evt.stopImmediatePropagation();
+		}
+
+		function removeThumbnail(evt) {
+			evt.stopPropagation();
+			evt.preventDefault();
+			var idx = $scope.ngItem.items.indexOf($scope.ngItem);
+			$scope.ngItem.items.splice(idx, 1);
+//			$scope.ngItem.items.splice(idx + 1, 0, $scope.ngItem);
 		}
 	}
 	/*******************************************************************
@@ -179,7 +201,7 @@
 	 ******************************************************************/
 	pdfbox.directive('pdfThumbnails', pdfThumbnails);
 	/* @ngInject */
-	function pdfThumbnails($timeout, $window, pdfjsConfig) {
+	function pdfThumbnails($timeout, $window) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnails.html',
@@ -188,8 +210,8 @@
 			scope: {
 				// nom interne : nom externe
 				'ngValues': '=', // la liste de items represantant les pages du document
-				'allowDrag':'<', // Les miniatures sont elles draggables
-				'allowDrop':'<', // Les miniatures sont elles droppables ici
+				'allowDrag': '<', // Les miniatures sont elles draggables
+				'allowDrop': '<', // Les miniatures sont elles droppables ici
 				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedIndex': '=', // l'index de la miniature sélectionnée
 				'onSelect': '&' // qd on selection une miniature
@@ -208,16 +230,17 @@
 			}
 		};
 		function manageDragAndDropHandler(scope, elm) {
-			if(!window.dataTransfer) {
+			if (!window.dataTransfer) {
 				window.dataTransfer = {};
 			}
-			if(scope.allowDrag) {
+			if (scope.allowDrag) {
 				elm.bind('dragstart', window.dataTransfer, handleDragStartJQuery);
 			}
-			if(scope.allowDrop) {
+			if (scope.allowDrop) {
 				elm.bind('dragover', window.dataTransfer, handleDragOverJQuery);
 				elm.bind('drop', window.dataTransfer, handleDropJQuery);
-				elm.bind('dropeend', window.dataTransfer, handleDropJQuery);
+				elm.bind('dropend', window.dataTransfer, handleDropendJQuery);
+				elm.bind('dropleave', window.dataTransfer, handleDropleaveJQuery);
 			}
 			function handleDragStartJQuery(jqe) {
 				return handleDragStart(jqe.originalEvent, jqe.data);
@@ -229,94 +252,96 @@
 				return handleDrop(jqe.originalEvent, jqe.data);
 			}
 			function handleDropendJQuery(jqe) {
-				return handleDropend(jqe.originalEvent, jqe.data);
+				console.log('dropend');
+			}
+			function handleDropleaveJQuery(jqe) {
+				console.log('dropleave');
 			}
 			function handleDragStart(e, data) {
-				data.srcNode = null;
 				var currentDrag = e.path.filter(function (e) {
 					return e.nodeName === 'PDF-THUMBNAIL';
 				})[0];
-				data.srcNode = currentDrag;
-				data.srcNode.classList.add('moving');
-				data.srcClone = cloneThumbnail(currentDrag);
-				data.srcClone.classList.remove('active');
-				data.srcClone.classList.add('moving');
+				data.item = currentDrag.item;
+				data.item.moving = true;
 				e.dataTransfer.effectAllowed = 'move';
 			}
 			function handleDragOver(e, data) {
-				if(data.srcNode) {
+				if (e.preventDefault) {
+					e.preventDefault(); // Necessary. Allows us to drop.
+				}
+				if (data.item) {
 					e.dataTransfer.dropEffect = 'move';
-					var currentOver = e.path.filter(function (e) {
-						return e.nodeName === 'PDF-THUMBNAIL';
+					var pdfthumbnails = e.path.filter(function (e) {
+						return e.nodeName === 'PDF-THUMBNAILS';
 					})[0];
-					var parentTarget = e.path.filter(function (e) {
-						return e.nodeName === 'DIV';
-					})[0];
-					var srcNode = data.srcClone;
-					// si on reviens sur le conteneur d'origine, on supprime la copie
-					if(data.srcNode.parentElement === parentTarget) {
-						srcNode = data.srcNode;
-						if(data.srcClone.parentElement) {
-							data.srcClone.parentElement.removeChild(data.srcClone);
-						}
+					if (pdfthumbnails) {
+						var currentOver = e.path.filter(function (e) {
+							return e.nodeName === 'PDF-THUMBNAIL';
+						})[0];
+						moveOrCopyThumbnail(scope, data.item, scope.ngValues, currentOver, e.clientX);
 					}
-					moveThumbnailAndItem(srcNode, currentOver, parentTarget, e.clientX);
 				}
 				return false;
 			}
 			function handleDrop(e, data) {
-				if(data.srcNode) {
-					data.srcNode.classList.remove('moving');
-				}
-				if(data.srcClone) {
-					data.srcClone.classList.remove('moving');
-				}
+				data.item.moving = false;
+				scope.$apply();
+				data.item = null;
 				return false;
 			}
-			function handleDropend(e, data) {
-				if(data.srcNode) {
-					data.srcNode.classList.remove('moving');
-				}
-				if(data.srcClone && data.srcClone.parentElement) {
-					var parentTarget = e.path.filter(function (e) {
-						return e.nodeName === 'DIV';
-					})[0];
-					if(parentTarget !== data.srcClone.parentElement) {
-						data.srcClone.parentElement.removeChild(data.srcClone);
+		}
+		function moveOrCopyThumbnail(scope, item, items, currentOver, clientX) {
+			item = getItemInListOrClone(scope, item, items);
+			if (!item) {
+				return;
+			}
+			var currentIdx = getIndexOfItemInList(item, items);
+			if (currentOver) {
+				if (currentOver.item && currentOver.item !== item) { // on n'est pas dessus
+					items.splice(currentIdx, 1);
+					var idx = getIndexOfItemInList(currentOver.item, items);
+					var median = getHMedian(currentOver.getClientRects()[0]);
+					if (clientX < median) {
+						items.splice(idx, 0, item);
+					} else {
+						items.splice(idx + 1, 0, item);
 					}
-					data.srcClone.classList.remove('moving');
+					scope.$apply();
 				}
-				return false;
+			} else {
+				if (currentIdx === -1) {
+					items.push(item);
+					scope.$apply();
+				}
 			}
 		}
-		function cloneThumbnail(thumbnail) {
-				var clone = thumbnail.cloneNode(true);
-				clone.item = thumbnail.item;			
-				var canvasSrc = ng.element(thumbnail).find('canvas').get(0);
-				var canvasTg = ng.element(clone).find('canvas').get(0);
-				var context = canvasTg.getContext('2d');
-				context.drawImage(canvasSrc, 0, 0);				
-				return clone;
-		}
-		function moveThumbnailAndItem(currentDrag, currentOver, parentTarget, clientX) {
-			if (currentDrag !== currentOver) {
-				var median = 100000;
-				if(currentOver) {
-					var clientRect = currentOver.getClientRects()[0];
-					median = ((clientRect.right - clientRect.left) / 2) + clientRect.left;
-				}
-//				var items = currentDrag.item.items;
-//				var idx = items.indexOf(currentDrag.item);
-//				items.splice(idx, 1);
-//				var idxTg = items.indexOf(currentOver.item);
-				if (clientX < median) {
-					parentTarget.insertBefore(currentDrag, currentOver);
+		function getItemInListOrClone(scope, item, items) {
+			if (item.items !== items) { // copy, on drag dans une autre liste de miniature.
+				item.moving = false; // end of move
+				var currentIdx = getIndexOfItemInList(item, items);
+				if (currentIdx === -1) { // n'existe ps, on clone
+					item = {document: item.document, pdfPage: item.pdfPage, pageIdx: item.pageIdx, rotate: item.rotate, items: items};
 				} else {
-//					idxTg++;
-					parentTarget.insertBefore(currentDrag, currentOver.nextSibling);
+					item = getItemInList(item, items);
 				}
-//				items.splice(idxTg, 0, currentDrag.item);
+				window.dataTransfer.item = item;
+				item.moving = true;
+				scope.$apply();
 			}
+			return item;
+		}
+		function getHMedian(clientRect) {
+			return ((clientRect.right - clientRect.left) / 2) + clientRect.left;
+		}
+		function getIndexOfItemInList(item, items) {
+			return __.findIndex(items, function (it) {
+				return it.document === item.document && it.pageIdx === item.pageIdx;
+			});
+		}
+		function getItemInList(item, items) {
+			return __.find(items, function (it) {
+				return it.document === item.document && it.pageIdx === item.pageIdx;
+			});
 		}
 		/**
 		 * Gestion du resize s
@@ -350,16 +375,16 @@
 		function drawVisiblePfgThumbnails(clientRect, height) {
 			var first = document.elementFromPoint(clientRect.left + 5, clientRect.top + 5);
 			if (first.nodeName === 'PDF-THUMBNAIL') {
-				var tumbnail = first;
-				while (tumbnail !== null && isHVisibleIn(tumbnail.getClientRects()[0], tumbnail.parentElement.getClientRects()[0])) {
-					var parent = ng.element(tumbnail);
+				var thumbnail = first;
+				while (thumbnail !== null && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0])) {
+					var parent = ng.element(thumbnail);
 					if (parent.hasClass('notrendered')) {
-						var item = tumbnail.item;
+						var item = thumbnail.item;
 						var view = item.pdfPage.view;
 						var scale = (height || 100) / Math.max(view[2], view[3]);
 						drawPdfPageToThumbnail(parent, item.pdfPage, item.rotate, scale, true);
 					}
-					tumbnail = tumbnail.nextElementSibling;
+					thumbnail = thumbnail.nextElementSibling;
 				}
 			}
 		}
@@ -380,8 +405,8 @@
 				return;
 			ctrl.selectedItem = item;
 			var container = elm.get(0).firstChild;
-			var tumbnail = container.children[selectedIndex];
-			ensureIsHVisibleIn(tumbnail, container);
+			var thumbnail = container.children[selectedIndex];
+			ensureIsHVisibleIn(thumbnail, container);
 			if (scope.onSelect) {
 				scope.onSelect({item: item});
 			}
@@ -391,7 +416,6 @@
 		var ctrl = this;
 		ctrl.selectedItem = null;
 		ctrl.selectByClick = selectByClick;
-
 		function selectByClick(item, index) {
 			$scope.selectedIndex = index;
 			ctrl.selectedItem = item;
@@ -411,6 +435,7 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfview.html',
+			transclude: true,
 			scope: {
 				// nom interne : nom externe
 				'pdfPage': '<',
@@ -421,15 +446,16 @@
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['pdfPage', 'rotate', 'ngScale'], function (vs1, vs2, s) {
 					if (!__.isEqual(vs1, vs2)) {
-						elm.addClass('notrendered');
 						updateView(elm, vs1[0], vs1[1], vs1[2]);
 					}
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
+				updateView(elm, scope.pdfPage, scope.rotate, scope.ngScale);
 			}
 		};
 		function updateView(elm, pdfPage, rotate, scale) {
-			drawPdfPage(elm, pdfPage, rotate, scale, true);
+			elm.addClass('notrendered');
+			drawPdfPageToView(elm, pdfPage, rotate, scale, true);
 		}
 	}
 	/*
@@ -449,7 +475,7 @@
 		});
 	}
 	/**
-	 * 
+	 * Dessine la page du pdf dans elm, elm etant un pdf-view 
 	 * @param {type} elm
 	 * @param {type} pdfPage
 	 * @param {type} rotate
@@ -457,7 +483,7 @@
 	 * @param {type} render
 	 * return 
 	 */
-	function drawPdfPage(elm, pdfPage, rotate, scale, render) {
+	function drawPdfPageToView(elm, pdfPage, rotate, scale, render) {
 		var canvas = elm.find('canvas').get(0);
 		var page = elm.find('.page').get(0);
 		var textLayer = elm.find('.textLayer').get(0);
@@ -505,6 +531,15 @@
 		}
 		return null;
 	}
+	/**
+	 * Dessine la page du pdf dans elm, elm etant un pdf-thumbnail 
+	 * @param {type} elm
+	 * @param {type} pdfPage
+	 * @param {type} rotate
+	 * @param {type} scale
+	 * @param {type} render
+	 * @returns {thumbnail}
+	 */
 	function drawPdfPageToThumbnail(elm, pdfPage, rotate, scale, render) {
 		var canvas = elm.find('canvas').get(0);
 		if (canvas) {
@@ -526,28 +561,26 @@
 				canvas.height = 87;
 				elm.addClass('notrendered');
 			}
-			var tumbnail = elm.get(0);
-			var clientRect = tumbnail.getClientRects()[0];
-			var padding = Math.max(clientRect.width - canvas.width, 0) / 2;
-			tumbnail.style.paddingLeft = padding + "px";
-			tumbnail.style.paddingRight = padding + "px";
-			return tumbnail;
+			var thumbnail = elm.get(0);
+			return thumbnail;
 		}
 		return null;
 	}
 	/**
-	 * S'assure que le tumbnail est visible dans le container (horizontalement) et scroll si nécessaire
-	 * @param {type} tumbnail
+	 * S'assure que le thumbnail est visible dans le container (horizontalement) et scroll si nécessaire
+	 * @param {type} thumbnail
 	 * @param {type} container
 	 */
-	function ensureIsHVisibleIn(tumbnail, container) {
-		var clientRects1 = tumbnail.getClientRects()[0];
-		var clientRects2 = container.getClientRects()[0];
-		if (!isCompletlyHVisibleIn(clientRects1, clientRects2)) {
-			if (clientRects1.right > clientRects2.right) { // l'element dépasse à droite
-				container.scrollLeft += clientRects1.right - clientRects2.right;
-			} else { // l'element dépasse à gauche
-				container.scrollLeft -= clientRects2.left - clientRects1.left;
+	function ensureIsHVisibleIn(thumbnail, container) {
+		if (thumbnail && container) {
+			var clientRects1 = thumbnail.getClientRects()[0];
+			var clientRects2 = container.getClientRects()[0];
+			if (!isCompletlyHVisibleIn(clientRects1, clientRects2)) {
+				if (clientRects1.right > clientRects2.right) { // l'element dépasse à droite
+					container.scrollLeft += clientRects1.right - clientRects2.right;
+				} else { // l'element dépasse à gauche
+					container.scrollLeft -= clientRects2.left - clientRects1.left;
+				}
 			}
 		}
 	}
@@ -570,12 +603,12 @@
 		return clientRects1.right <= clientRects2.right && clientRects1.left >= clientRects2.left;
 	}
 	/**
-	 * S'assure que le tumbnail est visible dans le container (verticalement) et scroll si nécessaire
-	 * @param {type} tumbnail
+	 * S'assure que le thumbnail est visible dans le container (verticalement) et scroll si nécessaire
+	 * @param {type} thumbnail
 	 * @param {type} container
 	 */
-	function ensureIsVVisibleIn(tumbnail, container) {
-		var clientRects1 = tumbnail.getClientRects()[0];
+	function ensureIsVVisibleIn(thumbnail, container) {
+		var clientRects1 = thumbnail.getClientRects()[0];
 		var clientRects2 = container.getClientRects()[0];
 		if (!isCompletlyVVisibleIn(clientRects1, clientRects2)) {
 			if (clientRects1.bottom > clientRects2.bottom) { // l'element dépasse en bas

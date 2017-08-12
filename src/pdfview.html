@@ -1,4 +1,5 @@
-<div class="pdfViewer removePageBorders">
+<div class="pdfViewer removePageBorders" ng-mouseenter="commands = true" ng-mouseleave="commands = false" ng-click="commands = !commands">
+	<ng-transclude ng-show="commands"></ng-transclude>
 	<div class="page">
 		<div class="loadingIcon"></div>
 		<div class="canvasWrapper">
