@@ -1,18 +1,18 @@
 <nav aria-label="...">
 	<ul class="pager">
 		<li>
-			<a href aria-label="Previous" ng-disabled="ngIndex <= 0" ng-click="$event.stopPropagation();ngIndex = ngIndex ? ngIndex - 1 : ngIndex;">
+			<a href aria-label="Previous" ng-disabled="ctrl.index <= 0" ng-click="ctrl.previous($event);">
 				<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
 			</a>
 		</li>
-		<li><a disabled="true" class="info">{{ngIndex + 1}}/{{ngTotal}}</a></li>
+		<li><a disabled="true" class="info">{{ctrl.index + 1}}/{{ctrl.total}}</a></li>
 		<li>
-			<a href aria-label="Next" ng-disabled="ngIndex + 1 >= ngTotal" ng-click="$event.stopPropagation();ngIndex = ngIndex + 1 < ngTotal ? ngIndex + 1 : ngIndex;">
+			<a href aria-label="Next" ng-disabled="ctrl.index + 1 >= ctrl.total" ng-click="ctrl.next($event);">
 				<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
 			</a>
 		</li>
 		<li>
-			<a href aria-label="Rotate" ng-click="$event.stopPropagation();ngRotate = (ngRotate + 90) % 360;">
+			<a href aria-label="Rotate" ng-click="ctrl.rotate($event);">
 				<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
 			</a>
 		</li>

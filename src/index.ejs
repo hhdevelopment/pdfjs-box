@@ -18,7 +18,7 @@
 					</div>
 				</div>
 			</div>
-			<pdf-document ng-document="ctrl.selectedDocument" ng-model="ctrl.items" 
+			<pdf-document ng-document="ctrl.selectedDocument" ng-items="ctrl.items" 
 							  url-supplier="ctrl.urlSupplier({'document':doc, 'data':ctrl.globalData, 'index':$index})" 
 							  ng-data="ctrl.globalData"
 							  on-pdfinfo="ctrl.onPdfinfo(pdfinfo)"></pdf-document>
@@ -26,21 +26,20 @@
 				<div class="col-lg-12">
 					<pdf-thumbnails class="pdf-thumbnails-horizontal"
 										 ng-height="100" 
-										 ng-values="ctrl.items2"
+										 ng-items="ctrl.items2"
 										 allow-drag="true" allow-drop="true"
-										 ></pdf-thumbnails>
+										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
 					<pdf-thumbnails class="pdf-thumbnails-horizontal" 
 										 selectable="false" removable="true"
 										 ng-height="100" 
-										 ng-values="ctrl.items"
+										 ng-items="ctrl.items"
 										 allow-drag="true" allow-drop="true"
-										 on-select="ctrl.onSelectItem(item)"
-										 selected-index="ctrl.selectedIndex"></pdf-thumbnails>
+										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
 				</div>
 			</div>
-			<div ng-if="ctrl.pdfInfo" style="background-color: #ddd;padding:10px 0px;">
-				<pdf-view pdf-page="ctrl.selectedItem.pdfPage" rotate="ctrl.selectedItem.rotate" ng-scale="ctrl.scale">
-					<pdf-commands class="lg" ng-index="ctrl.selectedIndex" ng-total="ctrl.pdfInfo.numPages" ng-rotate="ctrl.selectedItem.rotate" ng-scale="ctrl.scale"></pdf-commands>
+			<div style="background-color: #ddd;padding:10px 0px;">
+				<pdf-view ng-item="ctrl.selectedItem" ng-scale="1">
+					<pdf-commands class="lg" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale"></pdf-commands>
 				</pdf-view>
 			</div>
 		</div>

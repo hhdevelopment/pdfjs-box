@@ -28,17 +28,15 @@
 				'ngDocument': '<', // le document sous forme d'objet
 				'ngData': '<', // Un objet exposant des données global 
 				'urlSupplier': '=', // une fonction retournant l'url a partir du document et de l'objet globalData. 
-				'ngModel': '=', // la liste de items representant les pages du document
-				'onPdfinfo': '&' // qd on charge un document pdf
+				'ngItems': '=' // la liste de items representant les pages du document
 			},
 			link: function (scope, elm, attrs, ctrl) {
-				var p;
 				var watcherClears = [];
 				watcherClears.push(scope.$watch('ngDocument', function (v1, v2, s) {
-					p = updateNgDocument(s, v1);
+					updateNgDocument(s, v1);
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
-				p = updateNgDocument(scope, scope.ngDocument);
+				updateNgDocument(scope, scope.ngDocument);
 			}
 		};
 		/**
@@ -47,16 +45,14 @@
 		 * @param {type} ngDocument
 		 */
 		function updateNgDocument(scope, ngDocument) {
-			scope.ngModel.splice(0, scope.ngModel.length);
+			var items = scope.ngItems || [];
+			items.splice(0, items.length);
 			if (ngDocument) {
 				var url = scope.urlSupplier ? scope.urlSupplier({'document': ngDocument, 'data': scope.ngData}) : (ngDocument.url || ngDocument);
 				var task = PDFJS.getDocument(url);
 				return task.promise.then(function (pdfDocument) {
-					if (scope.onPdfinfo) {
-						scope.onPdfinfo({pdfinfo: pdfDocument.pdfInfo});
-					}
 					var t0 = new Date().getTime();
-					return loadRecursivePage(scope, ngDocument, pdfDocument, scope.ngModel, 0, pdfjsConfig.preloadRecursivePages).then(function () {
+					return loadRecursivePage(scope, ngDocument, pdfDocument, items, 0, pdfjsConfig.preloadRecursivePages).then(function () {
 						console.log('Preload recursive ' + Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
 					});
 				}).catch(function (reason) {
@@ -107,7 +103,7 @@
 				});
 			} else {
 				for (var i = idx; i < pdfDocument.numPages; i++) {
-					loadSinglePage(scope, document, pdfDocument, scope.ngModel, idx, i, new Date().getTime());
+					loadSinglePage(scope, document, pdfDocument, items, idx, i, new Date().getTime());
 				}
 				scope.$apply();
 			}
@@ -125,16 +121,60 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfcommands.html',
+			controller: PdfCommandsCtrl,
+			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
-				'ngIndex': '=',
-				'ngTotal': '<',
+				'ngItem': '=',
 				'ngScale': '=',
-				'ngRotate': '=',
 				'onPrint': '&',
 				'onDownload': '&'
+			},
+			link: function (scope, elm, attrs, ctrl) {
+				var watcherClears = [];
+				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx'], function (vs1, vs2, s) {
+					updateNgItem(s.ctrl, s.ngItem);
+				}, true));
+				cleanWatchersOnDestroy(scope, watcherClears);
+				updateNgItem(ctrl, scope.ngItem);
 			}
 		};
+		function updateNgItem(ctrl, item) {
+			if (item && item.items) {
+				ctrl.total = item.items.length;
+				ctrl.index = getIndexOfItemInList(item, item.items);
+			} else {
+				ctrl.index = 0;
+				ctrl.total = 0;
+			}
+		}
+		function PdfCommandsCtrl($scope) {
+			var ctrl = this;
+			ctrl.index;
+			ctrl.total;
+			ctrl.previous = previous;
+			ctrl.next = next;
+			ctrl.rotate = rotate;
+			function previous(evt) {
+				evt.stopPropagation();
+				var idx = getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
+				if (idx > 0) {
+					$scope.ngItem = $scope.ngItem.items[idx - 1];
+				}
+			}
+			function next(evt) {
+				evt.stopPropagation();
+				var idx = getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
+				if (idx < $scope.ngItem.items.length - 1) {
+					$scope.ngItem = $scope.ngItem.items[idx + 1];
+				}
+
+			}
+			function rotate(evt) {
+				evt.stopPropagation();
+				$scope.ngItem.rotate = ($scope.ngItem.rotate + 90) % 360;
+			}
+		}
 	}
 	/*******************************************************************
 	 * 
@@ -177,7 +217,7 @@
 			}
 		}
 	}
-	function PdfThumbnailCtrl($scope, $timeout) {
+	function PdfThumbnailCtrl($scope) {
 		var ctrl = this;
 		ctrl.switchThumbnailSelected = switchThumbnailSelected;
 		ctrl.removeThumbnail = removeThumbnail;
@@ -191,7 +231,6 @@
 			evt.preventDefault();
 			var idx = $scope.ngItem.items.indexOf($scope.ngItem);
 			$scope.ngItem.items.splice(idx, 1);
-//			$scope.ngItem.items.splice(idx + 1, 0, $scope.ngItem);
 		}
 	}
 	/*******************************************************************
@@ -209,24 +248,23 @@
 			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
-				'ngValues': '=', // la liste de items represantant les pages du document
+				'ngItems': '=', // la liste de items represantant les pages du document
 				'allowDrag': '<', // Les miniatures sont elles draggables
 				'allowDrop': '<', // Les miniatures sont elles droppables ici
 				'ngHeight': '<', // la hauteur désiré des miniatures
-				'selectedIndex': '=', // l'index de la miniature sélectionnée
-				'onSelect': '&' // qd on selection une miniature
+				'selectedItem': '=' // l'item sélectionné
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				watcherClears.push(scope.$watchGroup(['selectedIndex', 'ngValues.length'], function (vs1, vs2, s) {
-					updateSelectedIndex(s, s.ctrl, elm, vs1[0]);
+				watcherClears.push(scope.$watchGroup(['selectedItem', 'ngItems.length'], function (vs1, vs2, s) {
+					updateSelectedItem(elm, vs1[0], s.ngItems);
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
 				var container = elm.get(0).firstChild;
 				manageScrollHandler(scope, container);
 				manageResizeHandler(scope, container);
 				manageDragAndDropHandler(scope, elm);
-				updateSelectedIndex(scope, ctrl, elm, scope.selectedIndex);
+				updateSelectedItem(elm, scope.selectedItem, scope.ngItems);
 			}
 		};
 		function manageDragAndDropHandler(scope, elm) {
@@ -240,7 +278,7 @@
 				elm.bind('dragover', window.dataTransfer, handleDragOverJQuery);
 				elm.bind('drop', window.dataTransfer, handleDropJQuery);
 				elm.bind('dropend', window.dataTransfer, handleDropendJQuery);
-				elm.bind('dropleave', window.dataTransfer, handleDropleaveJQuery);
+				elm.bind('mouseout', window.dataTransfer, handleMouseoutJQuery);
 			}
 			function handleDragStartJQuery(jqe) {
 				return handleDragStart(jqe.originalEvent, jqe.data);
@@ -254,8 +292,8 @@
 			function handleDropendJQuery(jqe) {
 				console.log('dropend');
 			}
-			function handleDropleaveJQuery(jqe) {
-				console.log('dropleave');
+			function handleMouseoutJQuery(jqe) {
+				console.log('mouseout');
 			}
 			function handleDragStart(e, data) {
 				var currentDrag = e.path.filter(function (e) {
@@ -278,13 +316,14 @@
 						var currentOver = e.path.filter(function (e) {
 							return e.nodeName === 'PDF-THUMBNAIL';
 						})[0];
-						moveOrCopyThumbnail(scope, data.item, scope.ngValues, currentOver, e.clientX);
+						moveOrCopyThumbnail(scope, data.item, scope.ngItems, currentOver, e.clientX);
 					}
 				}
 				return false;
 			}
 			function handleDrop(e, data) {
 				data.item.moving = false;
+				data.item.tmp = false;
 				scope.$apply();
 				data.item = null;
 				return false;
@@ -297,8 +336,10 @@
 			}
 			var currentIdx = getIndexOfItemInList(item, items);
 			if (currentOver) {
-				if (currentOver.item && currentOver.item !== item) { // on n'est pas dessus
-					items.splice(currentIdx, 1);
+				if (currentOver.item && !areItemsEqual(currentOver.item, item)) { // on n'est pas dessus
+					if (currentIdx !== -1) {
+						items.splice(currentIdx, 1);
+					}
 					var idx = getIndexOfItemInList(currentOver.item, items);
 					var median = getHMedian(currentOver.getClientRects()[0]);
 					if (clientX < median) {
@@ -317,10 +358,14 @@
 		}
 		function getItemInListOrClone(scope, item, items) {
 			if (item.items !== items) { // copy, on drag dans une autre liste de miniature.
-				item.moving = false; // end of move
+				if (item.tmp) {
+					item.items.splice(getIndexOfItemInList(item, item.items), 1);
+				} else {
+					item.moving = false; // end of move
+				}
 				var currentIdx = getIndexOfItemInList(item, items);
 				if (currentIdx === -1) { // n'existe ps, on clone
-					item = {document: item.document, pdfPage: item.pdfPage, pageIdx: item.pageIdx, rotate: item.rotate, items: items};
+					item = {document: item.document, pdfPage: item.pdfPage, pageIdx: item.pageIdx, rotate: item.rotate, items: items, tmp: true};
 				} else {
 					item = getItemInList(item, items);
 				}
@@ -330,21 +375,8 @@
 			}
 			return item;
 		}
-		function getHMedian(clientRect) {
-			return ((clientRect.right - clientRect.left) / 2) + clientRect.left;
-		}
-		function getIndexOfItemInList(item, items) {
-			return __.findIndex(items, function (it) {
-				return it.document === item.document && it.pageIdx === item.pageIdx;
-			});
-		}
-		function getItemInList(item, items) {
-			return __.find(items, function (it) {
-				return it.document === item.document && it.pageIdx === item.pageIdx;
-			});
-		}
 		/**
-		 * Gestion du resize s
+		 * Gestion du resize
 		 * @param {type} scope
 		 * @param {type} container
 		 */
@@ -389,38 +421,36 @@
 			}
 		}
 		/**
-		 * L'index de la selection et changé, on selectionne le bon item et on s'assure qu'il soit visible.
-		 * @param {type} scope
-		 * @param {type} ctrl
+		 * La selection et changé, on selectionne le bon item et on s'assure qu'il soit visible.
 		 * @param {type} elm
-		 * @param {type} selectedIndex
+		 * @param {type} selectedItem
+		 * @param {type} items
 		 * @returns {undefined}
 		 */
-		function updateSelectedIndex(scope, ctrl, elm, selectedIndex) {
-			ctrl.selectedItem = null;
-			if (!scope.ngValues)
+		function updateSelectedItem(elm, selectedItem, items) {
+			elm.removeClass('active');
+			if (!items)
 				return;
-			var item = scope.ngValues[selectedIndex || 0];
-			if (!item)
-				return;
-			ctrl.selectedItem = item;
-			var container = elm.get(0).firstChild;
-			var thumbnail = container.children[selectedIndex];
-			ensureIsHVisibleIn(thumbnail, container);
-			if (scope.onSelect) {
-				scope.onSelect({item: item});
+			var idx = getIndexOfItemInList(selectedItem, items);
+			if (idx !== -1) {
+				var container = elm.get(0).firstChild;
+				var thumbnail = container.children[idx];
+				ensureIsHVisibleIn(thumbnail, container);
+				if(selectedItem.items === items) {
+					elm.addClass('active');
+				}
 			}
 		}
-	}
-	function PdfThumbnailsCtrl($scope) {
-		var ctrl = this;
-		ctrl.selectedItem = null;
-		ctrl.selectByClick = selectByClick;
-		function selectByClick(item, index) {
-			$scope.selectedIndex = index;
-			ctrl.selectedItem = item;
-			if ($scope.onSelect) {
-				$scope.onSelect({item: item});
+		function PdfThumbnailsCtrl($scope) {
+			var ctrl = this;
+			ctrl.areItemsEqual = areItemsEqual;
+			ctrl.trackItem = trackItem;
+			function trackItem(item) {
+				return JSON.stringify(item.document) + item.pageIdx;
+			}
+			ctrl.selectByClick = selectByClick;
+			function selectByClick(item) {
+				$scope.selectedItem = item;
 			}
 		}
 	}
@@ -438,24 +468,23 @@
 			transclude: true,
 			scope: {
 				// nom interne : nom externe
-				'pdfPage': '<',
-				'rotate': '<',
+				'ngItem': '<',
 				'ngScale': '<'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				watcherClears.push(scope.$watchGroup(['pdfPage', 'rotate', 'ngScale'], function (vs1, vs2, s) {
-					if (!__.isEqual(vs1, vs2)) {
-						updateView(elm, vs1[0], vs1[1], vs1[2]);
-					}
+				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
+					updateView(elm, s.ngItem, vs1[3]);
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
-				updateView(elm, scope.pdfPage, scope.rotate, scope.ngScale);
+				updateView(elm, scope.ngItem, scope.ngScale);
 			}
 		};
-		function updateView(elm, pdfPage, rotate, scale) {
-			elm.addClass('notrendered');
-			drawPdfPageToView(elm, pdfPage, rotate, scale, true);
+		function updateView(elm, item, scale) {
+			if (item) {
+				elm.addClass('notrendered');
+				drawPdfPageToView(elm, item.pdfPage, item.rotate, scale, true);
+			}
 		}
 	}
 	/*
@@ -565,6 +594,37 @@
 			return thumbnail;
 		}
 		return null;
+	}
+	function getHMedian(clientRect) {
+		return ((clientRect.right - clientRect.left) / 2) + clientRect.left;
+	}
+	function getVMedian(clientRect) {
+		return ((clientRect.bottom - clientRect.top) / 2) + clientRect.top;
+	}
+	function getIndexOfItemInList(item, items) {
+		return __.findIndex(items, function (it) {
+			return areItemsEqual(it, item);
+		});
+	}
+	function getItemInList(item, items) {
+		return __.find(items, function (it) {
+			return areItemsEqual(it, item);
+		});
+	}
+	/**
+	 * Compare deux items pour determiner s'ils sont egaux
+	 * @param {type} item1
+	 * @param {type} item2
+	 * @returns {Boolean}
+	 */
+	function areItemsEqual(item1, item2) {
+		if (item1 === null && item2 === null) {
+			return true;
+		}
+		if (item1 === null || item2 === null) {
+			return false;
+		}
+		return (item1.document === item2.document) && (item1.pageIdx === item2.pageIdx);
 	}
 	/**
 	 * S'assure que le thumbnail est visible dans le container (horizontalement) et scroll si nécessaire

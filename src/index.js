@@ -21,14 +21,11 @@ require('./pdfjsbox.js');
 		ctrl.items = [];
 		ctrl.items2 = [];
 		ctrl.selectedItem;
-		ctrl.selectedIndex = 0;
 		ctrl.globalData = {test:5};
 		ctrl.urlSupplier = urlSupplier;
 		ctrl.labelSupplier = labelSupplier;
 		ctrl.selectDocument = selectDocument;
 		ctrl.onSave = onSave;
-		ctrl.onSelectItem = onSelectItem;
-		ctrl.onPdfinfo = onPdfinfo;
 		function selectDocument(doc) {
 			ctrl.selectedDocument = doc;
 			ctrl.selectedItem = null;
@@ -41,10 +38,6 @@ require('./pdfjsbox.js');
 		}
 		function onSave(pages) {
 			
-		}
-		function onPdfinfo(pdfinfo) {
-			ctrl.selectedIndex = 0;
-			ctrl.pdfInfo = pdfinfo;
 		}
 		function onSelectItem(item) {
 			ctrl.scale = 1;
