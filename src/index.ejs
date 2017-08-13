@@ -20,8 +20,7 @@
 			</div>
 			<pdf-document ng-document="ctrl.selectedDocument" ng-items="ctrl.items" 
 							  url-supplier="ctrl.urlSupplier({'document':doc, 'data':ctrl.globalData, 'index':$index})" 
-							  ng-data="ctrl.globalData"
-							  on-pdfinfo="ctrl.onPdfinfo(pdfinfo)"></pdf-document>
+							  ng-data="ctrl.globalData"></pdf-document>
 			<div class="row">
 				<div class="col-lg-12">
 					<pdf-thumbnails class="pdf-thumbnails-horizontal"
@@ -33,7 +32,7 @@
 					<pdf-thumbnails class="pdf-thumbnails-horizontal" 
 										 ng-height="100" 
 										 ng-items="ctrl.items"
-										 selectable="false" removable="true"
+										 selectable="false" removable="false"
 										 allow-drag="true" allow-drop="false"
 										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
 				</div>

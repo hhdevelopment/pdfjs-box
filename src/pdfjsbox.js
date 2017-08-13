@@ -272,13 +272,13 @@
 				window.dataTransfer = {};
 			}
 			if (scope.allowDrag) {
-				elm.bind('dragstart', window.dataTransfer, handleDragStartJQuery);
+				elm.on('dragstart', window.dataTransfer, handleDragStartJQuery);
 			}
 			if (scope.allowDrop) {
-				elm.bind('dragover', window.dataTransfer, handleDragOverJQuery);
-				elm.bind('drop', window.dataTransfer, handleDropJQuery);
-				elm.bind('dropend', window.dataTransfer, handleDropendJQuery);
-				elm.bind('mouseout', window.dataTransfer, handleMouseoutJQuery);
+				$(document).off('dragover', window.dataTransfer, handleDragOverJQuery);
+				$(document).on('dragover', window.dataTransfer, handleDragOverJQuery);
+				$(document).off('drop', window.dataTransfer, handleDropJQuery);
+				$(document).on('drop', window.dataTransfer, handleDropJQuery);
 			}
 			function handleDragStartJQuery(jqe) {
 				return handleDragStart(jqe.originalEvent, jqe.data);
@@ -288,12 +288,6 @@
 			}
 			function handleDropJQuery(jqe) {
 				return handleDrop(jqe.originalEvent, jqe.data);
-			}
-			function handleDropendJQuery(jqe) {
-				console.log('dropend');
-			}
-			function handleMouseoutJQuery(jqe) {
-				console.log('mouseout');
 			}
 			function handleDragStart(e, data) {
 				var currentDrag = e.path.filter(function (e) {
@@ -312,7 +306,7 @@
 					var pdfthumbnails = e.path.filter(function (e) {
 						return e.nodeName === 'PDF-THUMBNAILS';
 					})[0];
-					if (pdfthumbnails) {
+					if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
 						var currentOver = e.path.filter(function (e) {
 							return e.nodeName === 'PDF-THUMBNAIL';
 						})[0];
@@ -322,10 +316,36 @@
 				return false;
 			}
 			function handleDrop(e, data) {
-				data.item.moving = false;
-				data.item.tmp = false;
-				scope.$apply();
-				data.item = null;
+				if (data.item) {
+					var pdfthumbnails = e.path.filter(function (e) {
+						return e.nodeName === 'PDF-THUMBNAILS';
+					})[0];
+					data.item.moving = false;
+					if (!data.item.tmp) {
+						data.item.moving = false;
+						data.item = null;
+					} else {
+						if (pdfthumbnails) {
+							var div = pdfthumbnails.children[0];
+							var rightContainer = false; // TODO
+							for (var i = 0; !rightContainer && i < div.childElementCount; i++) {
+								var item = div.children[i].item;
+								rightContainer = item === data.item;
+							}
+							if (rightContainer) {
+								data.item.tmp = false;
+								data.item = null;
+							} else {
+								var idx = getIndexOfItemInList(data.item, data.item.items);
+								data.item.items.splice(idx, 1);
+							}
+						} else {
+							var idx = getIndexOfItemInList(data.item, data.item.items);
+							data.item.items.splice(idx, 1);
+						}
+					}
+					scope.$apply();
+				}
 				return false;
 			}
 		}
@@ -381,7 +401,7 @@
 		 * @param {type} container
 		 */
 		function manageResizeHandler(scope, container) {
-			ng.element($window).bind('resize', {promise: null, container: container, height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+			ng.element($window).on('resize', {promise: null, container: container, height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		/**
 		 * Gestion du scroll de la zone de miniature
@@ -389,7 +409,7 @@
 		 * @param {type} container
 		 */
 		function manageScrollHandler(scope, container) {
-			ng.element(container).bind('scroll', {promise: null, container: container, height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+			ng.element(container).on('scroll', {promise: null, container: container, height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		function manageDrawVisiblePfgThumbnailsHandler(evt) {
 			var data = evt.data;
@@ -436,7 +456,7 @@
 				var container = elm.get(0).firstChild;
 				var thumbnail = container.children[idx];
 				ensureIsHVisibleIn(thumbnail, container);
-				if(selectedItem.items === items) {
+				if (selectedItem.items === items) {
 					elm.addClass('active');
 				}
 			}
@@ -481,10 +501,8 @@
 			}
 		};
 		function updateView(elm, item, scale) {
-			if (item) {
-				elm.addClass('notrendered');
-				drawPdfPageToView(elm, item.pdfPage, item.rotate, scale, true);
-			}
+			elm.addClass('notrendered');
+			drawPdfPageToView(elm, item?item.pdfPage:null, item?item.rotate:null, scale, true);
 		}
 	}
 	/*
@@ -523,18 +541,18 @@
 		if (canvas) {
 			var ctx = canvas.getContext('2d');
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			var viewport = pdfPage?pdfPage.getViewport(scale, rotate || 0):{width:0, height:0};
+			canvas.width = viewport.width;
+			canvas.height = viewport.height;
+			if (page) {
+				page.style.width = viewport.width + 'px';
+				page.style.height = viewport.height + 'px';
+			}
+			if (wrapper) {
+				wrapper.style.width = viewport.width + 'px';
+				wrapper.style.height = viewport.height + 'px';
+			}
 			if (pdfPage) {
-				var viewport = pdfPage.getViewport(scale, rotate || 0);
-				canvas.width = viewport.width;
-				canvas.height = viewport.height;
-				if (page) {
-					page.style.width = viewport.width + 'px';
-					page.style.height = viewport.height + 'px';
-				}
-				if (wrapper) {
-					wrapper.style.width = viewport.width + 'px';
-					wrapper.style.height = viewport.height + 'px';
-				}
 				if (render) {
 					pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.then(function () {
 						elm.removeClass('notrendered');
