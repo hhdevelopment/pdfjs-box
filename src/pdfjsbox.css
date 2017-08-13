@@ -1,6 +1,3 @@
-pdf-thumbnails.active > div {
-	background-color: #afd9ee;
-}
 pdf-thumbnails div.x-scrollable {
 	overflow-x: auto;
 }
@@ -15,9 +12,14 @@ pdf-thumbnail {
 	padding: 10px 15px;
 	background-color: #eee;
 }
+pdf-thumbnails.active pdf-thumbnail {
+	background-color: #c7ddef;
+}
+pdf-thumbnails.active pdf-thumbnail:hover, 
 pdf-thumbnail:hover {
 	background-color: #ccc;
 }
+pdf-thumbnails.active pdf-thumbnail.active, 
 pdf-thumbnail.active {
 	z-index: 2;
 	background-color: #337ab7;
