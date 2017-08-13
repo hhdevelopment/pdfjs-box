@@ -27,13 +27,14 @@
 					<pdf-thumbnails class="pdf-thumbnails-horizontal"
 										 ng-height="100" 
 										 ng-items="ctrl.items2"
+										 removable="true"
 										 allow-drag="true" allow-drop="true"
 										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
 					<pdf-thumbnails class="pdf-thumbnails-horizontal" 
-										 selectable="false" removable="true"
 										 ng-height="100" 
 										 ng-items="ctrl.items"
-										 allow-drag="true" allow-drop="true"
+										 selectable="false" removable="true"
+										 allow-drag="true" allow-drop="false"
 										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
 				</div>
 			</div>
