@@ -203,17 +203,17 @@
 			}
 		};
 		function updateNgItem(scope, elm, item) {
-			if (item && item.pdfPage) {
-				var thumbnail = elm.get(0);
+			var thumbnail = elm.get(0);
+			thumbnail.item = item;
+			if (item.pdfPage) {
 				var render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
 				var pdfPage = item.pdfPage;
 				var view = pdfPage.view;
 				var scale = (scope.ngHeight || 100) / Math.max(view[2], view[3]);
-				var thumbnail = drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
-				thumbnail.item = item;
+				drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
 				item.selected = true;
 			} else {
-				drawPdfPageToThumbnail(elm, null, 0, scale, render);
+				drawPdfPageToThumbnail(elm, null, 0, scale, false);
 			}
 		}
 	}
@@ -585,7 +585,6 @@
 	 * @param {type} rotate
 	 * @param {type} scale
 	 * @param {type} render
-	 * @returns {thumbnail}
 	 */
 	function drawPdfPageToThumbnail(elm, pdfPage, rotate, scale, render) {
 		var canvas = elm.find('canvas').get(0);
@@ -608,10 +607,7 @@
 				canvas.height = 87;
 				elm.addClass('notrendered');
 			}
-			var thumbnail = elm.get(0);
-			return thumbnail;
 		}
-		return null;
 	}
 	function getHMedian(clientRect) {
 		return ((clientRect.right - clientRect.left) / 2) + clientRect.left;
