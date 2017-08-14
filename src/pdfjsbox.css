@@ -35,6 +35,10 @@ pdf-thumbnail:last-child {
 	border-top-right-radius:6px;
 	border-bottom-right-radius:6px;
 }
+pdf-view {
+	display: block;
+	height: 100%;
+}
 pdf-view pdf-commands {
 	position:absolute;
 	z-index: 3;
@@ -380,7 +384,7 @@ pdf-view .pdfViewer .page {
 }
 
 pdf-view .pdfViewer.removePageBorders .page {
-	margin: 0px auto 10px auto;
+	margin: auto auto;
 	border: none;
 }
 

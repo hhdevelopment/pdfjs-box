@@ -37,8 +37,8 @@
 										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
 				</div>
 			</div>
-			<div style="background-color: #ddd;padding:10px 0px;">
-				<pdf-view ng-item="ctrl.selectedItem" ng-scale="1">
+			<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
+				<pdf-view ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" default-scale="fitV">
 					<pdf-commands class="lg" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale"></pdf-commands>
 				</pdf-view>
 			</div>

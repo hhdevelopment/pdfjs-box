@@ -489,20 +489,40 @@
 			scope: {
 				// nom interne : nom externe
 				'ngItem': '<',
-				'ngScale': '<'
+				'ngScale': '=',
+				'defaultScale': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
-					updateView(elm, s.ngItem, vs1[3]);
+					updateView(s, elm, s.ngItem, vs1[3], scope.defaultScale);
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
-				updateView(elm, scope.ngItem, scope.ngScale);
+				updateView(scope, elm, scope.ngItem, scope.ngScale, scope.defaultScale);
 			}
 		};
-		function updateView(elm, item, scale) {
-			elm.addClass('notrendered');
-			drawPdfPageToView(elm, item?item.pdfPage:null, item?item.rotate:null, scale, true);
+		function updateView(scope, elm, item, scale, defaultScale) {
+			if(!scale && item && item.pdfPage) {
+				var view = item.pdfPage.view;
+				if(!defaultScale) {
+					scope.ngScale = 1;
+				} else if(defaultScale === 'fitV') {
+					var height = elm.height();
+					var pageHeight = view[3] - view[1];
+					scope.ngScale = (height || pageHeight) / pageHeight;
+				} else if(defaultScale === 'fitH') {
+					var width = elm.width();
+					var pageWidth = view[2] - view[0];
+					scope.ngScale = (width || pageWidth) / pageWidth;
+				} else if(!isNaN(defaultScale)) {
+					scope.ngScale = defaultScale;
+				} else {
+					scope.ngScale = 1;
+				}
+			} else {
+				elm.addClass('notrendered');
+				drawPdfPageToView(elm, item?item.pdfPage:null, item?item.rotate:null, scale, true);
+			}
 		}
 	}
 	/*
