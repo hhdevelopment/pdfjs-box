@@ -12,6 +12,9 @@ pdf-thumbnail {
 	padding: 10px 15px;
 	background-color: #eee;
 }
+pdf-thumbnails.active div {
+	background-color: #c7ddef;
+}
 pdf-thumbnails.active pdf-thumbnail {
 	background-color: #c7ddef;
 }
@@ -129,7 +132,7 @@ pdf-thumbnail span.glyphicon-remove {
 	top: 15px;
 	right:17px;
 }
-pdf-thumbnails[ng-draggable=true] pdf-thumbnail[draggable=true] {
+pdf-thumbnails[allow-drag=true] pdf-thumbnail[draggable=true] {
 	cursor: move;
 }
 pdf-thumbnail.moving {

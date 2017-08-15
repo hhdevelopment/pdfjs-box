@@ -5,4 +5,5 @@
 						ng-height="ngHeight" ng-item="item" 
 						draggable="true">
 	</pdf-thumbnail>
+	<h2 ng-if="!ngItems || !ngItems.length" ng-bind="placeholder"></h2>
 </div>

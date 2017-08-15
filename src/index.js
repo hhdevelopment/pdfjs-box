@@ -15,28 +15,23 @@ require('./pdfjsbox.js');
 	function AppCtrl() {
 		var ctrl = this;
 		ctrl.documents = [{label:'Conditions générales', url:'document.pdf'}, {label:'Contract', url:'document2.pdf'}, {label:'UnicodeStandard', url:'UnicodeStandard.pdf'}];
-		ctrl.selectedDocument;
-		ctrl.scale;
 		ctrl.items = [];
 		ctrl.items2 = [];
+		ctrl.selectedDocument;
+		ctrl.scale;
 		ctrl.selectedItem;
 		ctrl.globalData = {test:5};
 		ctrl.urlSupplier = urlSupplier;
 		ctrl.labelSupplier = labelSupplier;
-		ctrl.selectDocument = selectDocument;
-		ctrl.onSave = onSave;
-		function selectDocument(doc) {
-			ctrl.scale = null;
-			ctrl.selectedItem = null;
-			ctrl.selectedDocument = doc;
-			
-		}
 		function urlSupplier(document, data) {
 			return document.url;
 		}
 		function labelSupplier(document, data, index) {
 			return document.label + ' ('+index+')';
 		}
+
+		
+		ctrl.onSave = onSave;
 		function onSave(pages) {
 			
 		}

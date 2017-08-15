@@ -14,7 +14,7 @@
 					<div class="list-group">
 						<a ng-repeat="doc in ctrl.documents track by $index" href class="list-group-item" ng-class="{'active':ctrl.selectedDocument === doc}"
 							ng-bind="::ctrl.labelSupplier(doc, ctrl.globalData, $index) || doc.label || doc.name || ('Document PDF ' + $index)"
-							ng-click="ctrl.selectDocument(doc)"></a>
+							ng-click="ctrl.selectedDocument = doc;"></a>
 					</div>
 				</div>
 			</div>
@@ -28,16 +28,18 @@
 										 ng-items="ctrl.items2"
 										 removable="true"
 										 allow-drag="true" allow-drop="true"
-										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
+										 selected-item="ctrl.selectedItem"
+										 placeholder="Glissez, déposez puis ordonnez les pages du document"></pdf-thumbnails>
 					<pdf-thumbnails class="pdf-thumbnails-horizontal" 
 										 ng-height="100" 
 										 ng-items="ctrl.items"
 										 selectable="false" removable="false"
 										 allow-drag="true" allow-drop="false"
-										 selected-item="ctrl.selectedItem"></pdf-thumbnails>
+										 selected-item="ctrl.selectedItem"
+										 placeholder="Sélectionnez un document PDF"></pdf-thumbnails>
 				</div>
 			</div>
-			<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
+			<div style="background-color: #ddd;padding:10px 0px;height: 620px;">
 				<pdf-view ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" default-scale="fitV">
 					<pdf-commands class="lg" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale"></pdf-commands>
 				</pdf-view>

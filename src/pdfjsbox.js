@@ -252,12 +252,18 @@
 				'allowDrag': '<', // Les miniatures sont elles draggables
 				'allowDrop': '<', // Les miniatures sont elles droppables ici
 				'ngHeight': '<', // la hauteur désiré des miniatures
-				'selectedItem': '=' // l'item sélectionné
+				'selectedItem': '=', // l'item sélectionné
+				'placeholder': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['selectedItem', 'ngItems.length'], function (vs1, vs2, s) {
-					updateSelectedItem(elm, vs1[0], s.ngItems);
+					// permet de detecter si l'tem selectionné est toujours dans uns liste accessible
+					if(s.selectedItem && getIndexOfItemInList(s.selectedItem, s.selectedItem.items) === -1) {
+						s.selectedItem = null;
+					} else {
+						updateSelectedItem(elm, vs1[0], s.ngItems);
+					}
 				}, true));
 				cleanWatchersOnDestroy(scope, watcherClears);
 				var container = elm.get(0).firstChild;
@@ -426,7 +432,7 @@
 		 */
 		function drawVisiblePfgThumbnails(clientRect, height) {
 			var first = document.elementFromPoint(clientRect.left + 5, clientRect.top + 5);
-			if (first.nodeName === 'PDF-THUMBNAIL') {
+			if (first && first.nodeName === 'PDF-THUMBNAIL') {
 				var thumbnail = first;
 				while (thumbnail !== null && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0])) {
 					var parent = ng.element(thumbnail);
@@ -449,13 +455,14 @@
 		 */
 		function updateSelectedItem(elm, selectedItem, items) {
 			elm.removeClass('active');
-			if (!items)
+			if (!items || !selectedItem)
 				return;
 			var idx = getIndexOfItemInList(selectedItem, items);
 			if (idx !== -1) {
 				var container = elm.get(0).firstChild;
 				var thumbnail = container.children[idx];
 				ensureIsHVisibleIn(thumbnail, container);
+				console.log('selectedItem.items === items', selectedItem.items, items, selectedItem.items === items)
 				if (selectedItem.items === items) {
 					elm.addClass('active');
 				}
@@ -486,6 +493,8 @@
 			restrict: 'E',
 			templateUrl: 'pdfview.html',
 			transclude: true,
+			controller: PdfViewCtrl,
+			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
 				'ngItem': '<',
@@ -494,35 +503,53 @@
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
-					updateView(s, elm, s.ngItem, vs1[3], scope.defaultScale);
-				}, true));
+				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate'], function (vs1, vs2, s) {
+					if(ctrl.document !== vs1[0] && s.ngScale) {
+						ctrl.document = vs1[0];
+						s.ngScale = null;
+					} else {
+						updateView(s, s.ctrl, elm, s.ngItem, s.ngScale, s.defaultScale);
+					}
+				}), true);
+				watcherClears.push(scope.$watch('ngScale', function (v1, v2, s) {
+					updateView(s, s.ctrl, elm, s.ngItem, s.ngScale, s.defaultScale);
+				}), false);
 				cleanWatchersOnDestroy(scope, watcherClears);
-				updateView(scope, elm, scope.ngItem, scope.ngScale, scope.defaultScale);
+				updateView(scope, ctrl, elm, scope.ngItem, scope.ngScale, scope.defaultScale);
 			}
 		};
-		function updateView(scope, elm, item, scale, defaultScale) {
-			if(!scale && item && item.pdfPage) {
-				var view = item.pdfPage.view;
-				if(!defaultScale) {
-					scope.ngScale = 1;
-				} else if(defaultScale === 'fitV') {
-					var height = elm.height();
-					var pageHeight = view[3] - view[1];
-					scope.ngScale = (height || pageHeight) / pageHeight;
-				} else if(defaultScale === 'fitH') {
-					var width = elm.width();
-					var pageWidth = view[2] - view[0];
-					scope.ngScale = (width || pageWidth) / pageWidth;
-				} else if(!isNaN(defaultScale)) {
-					scope.ngScale = defaultScale;
+		function updateView(scope, ctrl, elm, item, scale, defaultScale) {
+			elm.addClass('notrendered');
+			if(item) {
+				ctrl.document = item.document;
+				if (!scale) {
+					scope.ngScale = getComputedScale(elm, item, defaultScale);
 				} else {
-					scope.ngScale = 1;
+					drawPdfPageToView(elm, item.pdfPage, item.rotate, scale, true);
 				}
 			} else {
-				elm.addClass('notrendered');
-				drawPdfPageToView(elm, item?item.pdfPage:null, item?item.rotate:null, scale, true);
+				drawPdfPageToView(elm, null, null, scale, false);
 			}
+		}
+		function getComputedScale(elm, item, defaultScale) {
+			var scale = 1;
+			var view = item.pdfPage.view;
+			if (view && defaultScale === 'fitV') {
+				var height = elm.height();
+				var pageHeight = view[3] - view[1];
+				scale = (height || pageHeight) / pageHeight;
+			} else if (view && defaultScale === 'fitH') {
+				var width = elm.width();
+				var pageWidth = view[2] - view[0];
+				scale = (width || pageWidth) / pageWidth;
+			} else if (!isNaN(defaultScale)) {
+				scale = defaultScale;
+			}
+			return scale;
+		}
+		function PdfViewCtrl() {
+			var ctrl = this;
+			ctrl.document = null;
 		}
 	}
 	/*
@@ -561,7 +588,7 @@
 		if (canvas) {
 			var ctx = canvas.getContext('2d');
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			var viewport = pdfPage?pdfPage.getViewport(scale, rotate || 0):{width:0, height:0};
+			var viewport = pdfPage ? pdfPage.getViewport(scale, rotate || 0) : {width: 0, height: 0};
 			canvas.width = viewport.width;
 			canvas.height = viewport.height;
 			if (page) {
@@ -652,10 +679,10 @@
 	 * @returns {Boolean}
 	 */
 	function areItemsEqual(item1, item2) {
-		if (item1 === null && item2 === null) {
+		if (!item1 && !item2) {
 			return true;
 		}
-		if (item1 === null || item2 === null) {
+		if (!item1 || !item2) {
 			return false;
 		}
 		return (item1.document === item2.document) && (item1.pageIdx === item2.pageIdx);
