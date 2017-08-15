@@ -20,7 +20,7 @@
 	 ******************************************************************/
 	pdfbox.directive('pdfDocument', pdfDocument);
 	/* @ngInject */
-	function pdfDocument(pdfjsConfig) {
+	function pdfDocument($q, pdfjsConfig) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -72,11 +72,15 @@
 		 * @param {type} t0
 		 */
 		function loadSinglePage(scope, document, pdfDocument, items, offset, idx, t0) {
-			var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: null, items: items};
+			var deferred = $q.defer();
+			var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: null, items: items, getPage: function () {
+					return deferred.promise;
+				}};
 			items.push(item);
 			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
 				item.pdfPage = pdfPage;
 				item.rotate = 0; // c'est ca qui lance le lancement du render
+				deferred.resolve(pdfPage);
 				if ((idx + 1) === pdfDocument.numPages) {
 					console.log('Preload sequence ' + (pdfDocument.numPages - offset) + ' pages in %sms', new Date().getTime() - t0);
 				}
@@ -95,7 +99,11 @@
 			if (idx < max && idx < pdfDocument.numPages) {
 				return pdfDocument.getPage(idx + 1).then(function (pdfPage) {
 					if (scope.ngDocument === document) { // on s'assure que l'on a pas changé de document
-						var item = {document: document, pdfPage: pdfPage, pageIdx: idx + 1, rotate: 0, items: items};
+						var item = {document: document, pdfPage: pdfPage, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+								var deferred = $q.defer();
+								deferred.resolve(this.pdfPage);
+								return deferred.promise;
+							}};
 						items.push(item);
 						scope.$apply();
 						return loadRecursivePage(scope, document, pdfDocument, items, idx + 1, max);
@@ -127,7 +135,7 @@
 				// nom interne : nom externe
 				'ngItem': '=',
 				'ngScale': '=',
-				allowPrint:'='
+				allowPrint: '='
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -176,7 +184,7 @@
 			}
 			function print() {
 				console.log('TODO print feature...');
-				
+
 			}
 		}
 	}
@@ -209,16 +217,7 @@
 		function updateNgItem(scope, elm, item) {
 			var thumbnail = elm.get(0);
 			thumbnail.item = item;
-			if (item.pdfPage) {
-				var render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
-				var pdfPage = item.pdfPage;
-				var view = pdfPage.view;
-				var scale = (scope.ngHeight || 100) / Math.max(view[2], view[3]);
-				drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
-				item.selected = true;
-			} else {
-				drawPdfPageToThumbnail(elm, null, 0, scale, false);
-			}
+			drawPageWhenAvailableIfVisible(scope.ngHeight, elm, thumbnail, item);
 		}
 	}
 	function PdfThumbnailCtrl($scope) {
@@ -244,7 +243,7 @@
 	 ******************************************************************/
 	pdfbox.directive('pdfThumbnails', pdfThumbnails);
 	/* @ngInject */
-	function pdfThumbnails($timeout, $window) {
+	function pdfThumbnails($q, $timeout, $window) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnails.html',
@@ -263,7 +262,7 @@
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['selectedItem', 'ngItems.length'], function (vs1, vs2, s) {
 					// permet de detecter si l'tem selectionné est toujours dans uns liste accessible
-					if(s.selectedItem && getIndexOfItemInList(s.selectedItem, s.selectedItem.items) === -1) {
+					if (s.selectedItem && getIndexOfItemInList(s.selectedItem, s.selectedItem.items) === -1) {
 						s.selectedItem = null;
 					} else {
 						updateSelectedItem(elm, vs1[0], s.ngItems);
@@ -395,7 +394,11 @@
 				}
 				var currentIdx = getIndexOfItemInList(item, items);
 				if (currentIdx === -1) { // n'existe ps, on clone
-					item = {document: item.document, pdfPage: item.pdfPage, pageIdx: item.pageIdx, rotate: item.rotate, items: items, tmp: true};
+					item = {document: item.document, pdfPage: item.pdfPage, pageIdx: item.pageIdx, rotate: item.rotate, items: items, tmp: true, getPage: function () {
+							var deferred = $q.defer();
+							deferred.resolve(this.pdfPage);
+							return deferred.promise;
+						}};
 				} else {
 					item = getItemInList(item, items);
 				}
@@ -441,10 +444,7 @@
 				while (thumbnail !== null && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0])) {
 					var parent = ng.element(thumbnail);
 					if (parent.hasClass('notrendered')) {
-						var item = thumbnail.item;
-						var view = item.pdfPage.view;
-						var scale = (height || 100) / Math.max(view[2], view[3]);
-						drawPdfPageToThumbnail(parent, item.pdfPage, item.rotate, scale, true);
+						drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item);
 					}
 					thumbnail = thumbnail.nextElementSibling;
 				}
@@ -507,7 +507,7 @@
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate'], function (vs1, vs2, s) {
-					if(ctrl.document !== vs1[0] && s.ngScale) {
+					if (ctrl.document !== vs1[0] && s.ngScale) {
 						ctrl.document = vs1[0];
 						s.ngScale = null;
 					} else {
@@ -523,32 +523,36 @@
 		};
 		function updateView(scope, ctrl, elm, item, scale, defaultScale) {
 			elm.addClass('notrendered');
-			if(item) {
+			if (item) {
 				ctrl.document = item.document;
 				if (!scale) {
-					scope.ngScale = getComputedScale(elm, item, defaultScale);
+					getComputedScale(scope, elm, item, defaultScale);
 				} else {
-					drawPdfPageToView(elm, item.pdfPage, item.rotate, scale, true);
+					item.getPage().then(function(pdfPage){
+						drawPdfPageToView(elm, pdfPage, item.rotate, scale, true);
+					});
 				}
 			} else {
 				drawPdfPageToView(elm, null, null, scale, false);
 			}
 		}
-		function getComputedScale(elm, item, defaultScale) {
-			var scale = 1;
-			var view = item.pdfPage.view;
-			if (view && defaultScale === 'fitV') {
-				var height = elm.height();
-				var pageHeight = view[3] - view[1];
-				scale = (height || pageHeight) / pageHeight;
-			} else if (view && defaultScale === 'fitH') {
-				var width = elm.width();
-				var pageWidth = view[2] - view[0];
-				scale = (width || pageWidth) / pageWidth;
-			} else if (!isNaN(defaultScale)) {
-				scale = defaultScale;
-			}
-			return scale;
+		function getComputedScale(scope, elm, item, defaultScale) {
+			item.getPage().then(function(pdfPage){
+				var scale = 1;
+				var view = pdfPage.view;
+				if (view && defaultScale === 'fitV') {
+					var height = elm.height();
+					var pageHeight = view[3] - view[1];
+					scale = (height || pageHeight) / pageHeight;
+				} else if (view && defaultScale === 'fitH') {
+					var width = elm.width();
+					var pageWidth = view[2] - view[0];
+					scale = (width || pageWidth) / pageWidth;
+				} else if (!isNaN(defaultScale)) {
+					scale = defaultScale;
+				}
+				scope.ngScale = scale;
+			});
 		}
 		function PdfViewCtrl() {
 			var ctrl = this;
@@ -628,6 +632,15 @@
 		}
 		return null;
 	}
+	function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item) {
+		item.getPage().then(function (pdfPage) {
+			var render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
+			var view = pdfPage.view;
+			var scale = (height || 100) / Math.max(view[2], view[3]);
+			drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
+			item.selected = true;
+		});
+	}
 	/**
 	 * Dessine la page du pdf dans elm, elm etant un pdf-thumbnail 
 	 * @param {type} elm
@@ -638,7 +651,7 @@
 	 */
 	function drawPdfPageToThumbnail(elm, pdfPage, rotate, scale, render) {
 		var canvas = elm.find('canvas').get(0);
-		if (canvas) {
+		if (elm.hasClass('notrendered') && canvas) {
 			var ctx = canvas.getContext('2d');
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			if (pdfPage) {
@@ -646,9 +659,8 @@
 				canvas.width = viewport.width;
 				canvas.height = viewport.height;
 				if (render) {
-					pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.then(function () {
-						elm.removeClass('notrendered');
-					});
+					elm.removeClass('notrendered');
+					pdfPage.render({canvasContext: ctx, viewport: viewport});
 				} else {
 					elm.addClass('notrendered');
 				}

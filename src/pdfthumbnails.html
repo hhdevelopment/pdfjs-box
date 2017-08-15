@@ -1,5 +1,5 @@
 <div class="x-scrollable" ng-style="{'min-height': ngHeight}">
-	<pdf-thumbnail ng-repeat="item in ngItems track by ctrl.trackItem(item)"
+	<pdf-thumbnail ng-repeat="item in ngItems track by ctrl.trackItem(item)" class="notrendered"
 						ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
 						ng-click="ctrl.selectByClick(item)" 
 						ng-height="ngHeight" ng-item="item" 
