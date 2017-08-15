@@ -462,7 +462,6 @@
 				var container = elm.get(0).firstChild;
 				var thumbnail = container.children[idx];
 				ensureIsHVisibleIn(thumbnail, container);
-				console.log('selectedItem.items === items', selectedItem.items, items, selectedItem.items === items)
 				if (selectedItem.items === items) {
 					elm.addClass('active');
 				}
