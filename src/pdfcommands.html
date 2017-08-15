@@ -27,12 +27,7 @@
 			</a>
 		</li>
 		<li>
-			<a href aria-label="Download"  ng-click="$event.stopPropagation()">
-				<span class="glyphicon glyphicon-save-file" aria-hidden="true"></span>
-			</a>
-		</li>
-		<li>
-			<a href aria-label="Print"  ng-click="$event.stopPropagation()">
+			<a href aria-label="Print" ng-click="$event.stopPropagation();ctrl.print()" ng-if="allowPrint">
 				<span class="glyphicon glyphicon-print" aria-hidden="true"></span>
 			</a>
 		</li>

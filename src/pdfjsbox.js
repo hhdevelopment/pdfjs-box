@@ -127,8 +127,7 @@
 				// nom interne : nom externe
 				'ngItem': '=',
 				'ngScale': '=',
-				'onPrint': '&',
-				'onDownload': '&'
+				allowPrint:'='
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -155,6 +154,7 @@
 			ctrl.previous = previous;
 			ctrl.next = next;
 			ctrl.rotate = rotate;
+			ctrl.print = print;
 			function previous(evt) {
 				evt.stopPropagation();
 				var idx = getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
@@ -173,6 +173,10 @@
 			function rotate(evt) {
 				evt.stopPropagation();
 				$scope.ngItem.rotate = ($scope.ngItem.rotate + 90) % 360;
+			}
+			function print() {
+				console.log('TODO print feature...');
+				
 			}
 		}
 	}
