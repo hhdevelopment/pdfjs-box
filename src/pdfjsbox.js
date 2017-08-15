@@ -444,7 +444,7 @@
 				while (thumbnail !== null && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0])) {
 					var parent = ng.element(thumbnail);
 					if (parent.hasClass('notrendered')) {
-						drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item);
+						drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item, true);
 					}
 					thumbnail = thumbnail.nextElementSibling;
 				}
@@ -632,9 +632,12 @@
 		}
 		return null;
 	}
-	function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item) {
+	function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item, visible) {
 		item.getPage().then(function (pdfPage) {
-			var render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
+			var render = visible;
+			if(visible === undefined) { // on sait pas
+				render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
+			}
 			var view = pdfPage.view;
 			var scale = (height || 100) / Math.max(view[2], view[3]);
 			drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
