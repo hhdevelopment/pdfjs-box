@@ -26,8 +26,8 @@
 				<span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
 			</a>
 		</li>
-		<li>
-			<a href aria-label="Print" ng-click="$event.stopPropagation();ctrl.print()" ng-if="allowPrint">
+		<li ng-if="allowPrint">
+			<a href aria-label="Print" ng-click="$event.stopPropagation();ctrl.print()">
 				<span class="glyphicon glyphicon-print" aria-hidden="true"></span>
 			</a>
 		</li>
