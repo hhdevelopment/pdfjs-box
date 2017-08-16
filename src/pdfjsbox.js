@@ -639,7 +639,7 @@
 				render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
 			}
 			var view = pdfPage.view;
-			var scale = (height || 100) / Math.max(view[2], view[3]);
+			var scale = (height || 100) / (view[3] - view[1]);
 			drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
 			item.selected = true;
 		});
