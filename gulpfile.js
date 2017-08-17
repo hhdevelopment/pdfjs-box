@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
 		  fs = require('fs'),
 		  del = require('del'),
+		  concat = require("gulp-concat"),
 		  replace = require('gulp-replace');
 
 gulp.task('default', ['clean', 'build']);
@@ -11,7 +12,8 @@ gulp.task('build', function () {
 	var pdfview = compact(fs.readFileSync('src/pdfview.html', 'utf8'));
 	var pdfcommands = compact(fs.readFileSync('src/pdfcommands.html', 'utf8'));
 	gulp.src('src/pdfjsbox.css').pipe(gulp.dest('dist'));
-	return gulp.src('src/pdfjsbox.js')
+	return gulp.src('src/pdfjsbox.*.js')
+			  .pipe(concat("pdfjsbox.js"))
 			  .pipe(replace("require('./pdfthumbnails.html')", "\"" + pdfthumbnails + "\""))
 			  .pipe(replace("require('./pdfthumbnail.html')", "\"" + pdfthumbnail + "\""))
 			  .pipe(replace("require('./pdfview.html')", "\"" + pdfview + "\""))

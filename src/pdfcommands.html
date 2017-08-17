@@ -21,6 +21,16 @@
 				<span class="glyphicon glyphicon-zoom-out" aria-hidden="true"></span>
 			</a>
 		</li>
+		<li ng-if="false">
+			<a href aria-label="fitV" ng-click="ctrl.fitV($event);">
+				<span class="glyphicon glyphicon-resize-vertical" aria-hidden="true"></span>
+			</a>
+		</li>
+		<li ng-if="false">
+			<a href aria-label="fitH" ng-click="ctrl.fitH($event);">
+				<span class="glyphicon glyphicon-resize-horizontal" aria-hidden="true"></span>
+			</a>
+		</li>
 		<li>
 			<a href aria-label="ZoomPlus"  ng-click="$event.stopPropagation();ngScale = ngScale / 0.9;">
 				<span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
@@ -33,3 +43,4 @@
 		</li>
 	</ul>
 </nav>
+<iframe style="display: none" src="about:blank"></iframe>

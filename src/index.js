@@ -5,7 +5,13 @@ import angular from 'angular';
 //var angular = require('angular');
 
 require('./pdfjsbox.css');
-require('./pdfjsbox.js');
+require('./pdfjsbox.config.js');
+require('./pdfjsbox.pdfcommands.js');
+require('./pdfjsbox.pdfdocument.js');
+require('./pdfjsbox.pdfthumbnail.js');
+require('./pdfjsbox.pdfthumbnails.js');
+require('./pdfjsbox.pdfview.js');
+require('./pdfjsbox.services.js');
 
 (function (ng, __) {
 	'use strict';
