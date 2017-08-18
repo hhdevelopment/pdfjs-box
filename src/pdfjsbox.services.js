@@ -97,14 +97,7 @@
 			cloneItem: cloneItem
 		};
 		function cloneItem(item, itemsTarget) {
-			var deferred = $q.defer();
-			var it = {document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, tmp: true, getPage: function () {
-					return deferred.promise;
-				}};
-			item.getPage().then(function (pdfPage) {
-				deferred.resolve(pdfPage);
-			});
-			return it;
+			return {document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, tmp: true, getPage: item.getPage};
 		}
 		function getIndexOfItemInList(item, items) {
 			return __.findIndex(items, function (it) {

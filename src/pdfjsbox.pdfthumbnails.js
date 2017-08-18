@@ -296,7 +296,7 @@
 		function isCompletlyVVisibleIn(clientRects1, clientRects2) {
 			return clientRects1.bottom <= clientRects2.bottom && clientRects1.top >= clientRects2.top;
 		}
-		function PdfThumbnailsCtrl($scope) {
+		function PdfThumbnailsCtrl($scope, pdfjsboxItemServices) {
 			var ctrl = this;
 			ctrl.areItemsEqual = pdfjsboxItemServices.areItemsEqual;
 			ctrl.selectByClick = selectByClick;
@@ -311,7 +311,7 @@
 			}
 			function copyByDblclick(item) {
 				if($scope.dblclickTarget) {
-					$scope.dblclickTarget.push(item);
+					$scope.dblclickTarget.push(pdfjsboxItemServices.cloneItem(item, $scope.dblclickTarget));
 				}
 			}
 		}
