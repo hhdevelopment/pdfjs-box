@@ -1,17 +1,6 @@
 pdf-thumbnails div.x-scrollable {
 	overflow-x: auto;
 }
-pdf-thumbnail canvas {
-	vertical-align: middle;
-}
-pdf-thumbnails.pdf-thumbnails-horizontal pdf-thumbnail {
-	display: table-cell;
-}
-pdf-thumbnail {
-	position: relative;
-	padding: 10px 15px;
-	background-color: #eee;
-}
 pdf-thumbnails.active div {
 	background-color: #c7ddef;
 }
@@ -27,6 +16,38 @@ pdf-thumbnail.active {
 	z-index: 2;
 	background-color: #337ab7;
 }
+pdf-thumbnails.pdf-thumbnails-horizontal pdf-thumbnail {
+	display: table-cell;
+}
+pdf-thumbnails {
+	border-top-left-radius:6px;
+	border-bottom-left-radius:6px;
+	border-top-right-radius:6px;
+	border-bottom-right-radius:6px;
+}
+pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove,
+pdf-thumbnails[selectable="true"] pdf-thumbnail input[type="checkbox"] {
+	display: initial;
+}
+pdf-thumbnails pdf-thumbnail span.glyphicon-remove,
+pdf-thumbnails pdf-thumbnail input[type="checkbox"] {
+	display:none;
+}
+pdf-thumbnails[allow-drag=true] pdf-thumbnail[draggable=true] {
+	cursor: move;
+}
+
+pdf-thumbnail canvas {
+	vertical-align: middle;
+}
+pdf-thumbnail {
+	position: relative;
+	padding: 10px 15px;
+	background-color: #eee;
+}
+pdf-thumbnail {
+	cursor:pointer;
+}
 pdf-thumbnail.notrendered a {
 	background:  url('data:image/gif;base64,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') center no-repeat;
 }
@@ -38,6 +59,29 @@ pdf-thumbnail:last-child {
 	border-top-right-radius:6px;
 	border-bottom-right-radius:6px;
 }
+pdf-thumbnail input[type="checkbox"]{
+	z-index: 5;
+	position:absolute;
+	top: 15px;
+	left:20px;
+	-webkit-transform: scale(1.5); /* Safari and Chrome */
+	-moz-transform: scale(1.5); /* FF */
+	-ms-transform: scale(1.5); /* IE */
+	-o-transform: scale(1.5); /* Opera */
+	margin: 0px;
+}
+pdf-thumbnail span.glyphicon-remove {
+	position:absolute;
+	top: 15px;
+	right:17px;
+}
+pdf-thumbnail.moving {
+	-webkit-transform: scale(0.8); /* Safari and Chrome */
+	-moz-transform: scale(0.8); /* FF */
+	-ms-transform: scale(0.8); /* IE */
+	-o-transform: scale(0.8); /* Opera */
+}
+
 pdf-view {
 	display: block;
 	height: 100%;
@@ -105,54 +149,6 @@ pdf-commands.sm .pager > li:last-child > a {
 	border-top-right-radius:4px;
 	border-bottom-right-radius:4px;
 }
-pdf-thumbnail {
-	cursor:pointer;
-}
-pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove,
-pdf-thumbnails[selectable="true"] pdf-thumbnail input[type="checkbox"] {
-	display: initial;
-}
-pdf-thumbnails pdf-thumbnail span.glyphicon-remove,
-pdf-thumbnails pdf-thumbnail input[type="checkbox"] {
-	display:none;
-}
-pdf-thumbnail input[type="checkbox"]{
-	z-index: 5;
-	position:absolute;
-	top: 15px;
-	left:20px;
-	-webkit-transform: scale(1.5); /* Safari and Chrome */
-	-moz-transform: scale(1.5); /* FF */
-	-ms-transform: scale(1.5); /* IE */
-	-o-transform: scale(1.5); /* Opera */
-	margin: 0px;
-}
-pdf-thumbnail span.glyphicon-remove {
-	position:absolute;
-	top: 15px;
-	right:17px;
-}
-pdf-thumbnails[allow-drag=true] pdf-thumbnail[draggable=true] {
-	cursor: move;
-}
-pdf-thumbnail.moving {
-	-webkit-transform: scale(0.8); /* Safari and Chrome */
-	-moz-transform: scale(0.8); /* FF */
-	-ms-transform: scale(0.8); /* IE */
-	-o-transform: scale(0.8); /* Opera */
-}
-[draggable] {
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	/* Required to make elements draggable in old WebKit */
-	-khtml-user-drag: element;
-	-webkit-user-drag: element;
-}
-
-
-
-
 /* Copyright 2014 Mozilla Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
