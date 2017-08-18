@@ -3,7 +3,7 @@
 	var pdfbox;
 	try {
 		pdfbox = ng.module('pdfjs-box');
-	} catch(e) {
+	} catch (e) {
 		pdfbox = ng.module('pdfjs-box', []);
 	}
 	pdfbox.directive('pdfCommands', pdfCommands);
@@ -18,14 +18,15 @@
 				// nom interne : nom externe
 				'ngItem': '=',
 				'ngScale': '=',
-				'documentScale':'<',
+				'docScale': '@',
+				'pdfViewer': '@',
 				'allowPrint': '='
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.items'], function (vs1, vs2, s) {
-					if(vs1[0] && s.ctrl.document !== vs1[0]) {
-						computeScale(s, elm, s.ngItem, s.documentScale);
+					if (vs1[0] && s.ctrl.document !== vs1[0]) {
+						computeScale(s, elm, s.ngItem, s.docScale, s.pdfViewer);
 					}
 					updateNgItem(s.ctrl, s.ngItem);
 				}, true));
@@ -50,22 +51,47 @@
 				ctrl.total = 0;
 			}
 		}
-		function computeScale(scope, elm, item, documentScale) {
+		function computeScale(scope, elm, item, docScale, pdfViewerSelector) {
+			if(!docScale) {
+				return;
+			}
 			item.getPage().then(function (pdfPage) {
-				var scale = 1;
-				var view = pdfPage.view;
-				if (view && documentScale === 'fitV') {
-					var height = elm.height();
-					var pageHeight = view[3] - view[1];
-					scale = (height || pageHeight) / pageHeight;
-				} else if (view && documentScale === 'fitH') {
-					var width = elm.width();
-					var pageWidth = view[2] - view[0];
-					scale = (width || pageWidth) / pageWidth;
-				} else if (!isNaN(documentScale)) {
-					scale = documentScale;
+				if (!isNaN(docScale)) {
+					scope.ngScale = docScale;
+				} else {
+					var view = pdfPage.view;
+					if(!view) {
+						scope.ngScale = 1;
+						return;
+					}
+					var container;
+					if (pdfViewerSelector) {
+						container = ng.element(pdfViewerSelector);
+						if (!container) {
+							scope.ngScale = 1;
+							console.log('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value or Transclude \'pdf-command\' in \'pdf-view\'', pdfViewerSelector);
+							return;
+						}
+					} else {
+						container = elm.parents('pdf-view');
+					}
+					if (!container) {
+						scope.ngScale = 1;
+						console.log('"docScale" feature : Transclude \'pdf-command\' in \'pdf-view\' or set \'pdf-viewer\' attribute on \'pdf-command\' with selector of \'pdf-view\' value');
+						return;
+					}
+					if (docScale === 'fitV') {
+						var height = container.height();
+						var pageHeight = view[3] - view[1];
+						scope.ngScale = (height || pageHeight) / pageHeight;
+					} else if (docScale === 'fitH') {
+						var width = container.width();
+						var pageWidth = view[2] - view[0];
+						scope.ngScale = (width || pageWidth) / pageWidth;
+					} else {
+						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fitH\' or \'fitV\' or float', docScale)
+					}
 				}
-				scope.ngScale = scale;
 			});
 		}
 		function PdfCommandsCtrl($scope) {

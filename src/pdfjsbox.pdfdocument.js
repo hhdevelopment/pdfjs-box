@@ -63,12 +63,11 @@
 		 */
 		function loadSinglePage(scope, document, pdfDocument, items, offset, idx, t0) {
 			var deferred = $q.defer();
-			var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+			var item = {document: document, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 					return deferred.promise;
 				}};
 			items.push(item);
 			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-				item.pdfPage = pdfPage;
 				deferred.resolve(pdfPage);
 				if ((idx + 1) === pdfDocument.numPages) {
 					console.log('Preload sequence ' + (pdfDocument.numPages - offset) + ' pages in %sms', new Date().getTime() - t0);
@@ -87,7 +86,7 @@
 		function loadRecursivePage(scope, document, pdfDocument, items, idx, max) {
 			if (idx < max && idx < pdfDocument.numPages) {
 				var deferred = $q.defer();
-				var item = {document: document, pdfPage: null, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+				var item = {document: document, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 						return deferred.promise;
 					}};
 				items.push(item);
