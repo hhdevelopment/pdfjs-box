@@ -50,30 +50,27 @@
 		 * return 
 		 */
 		function drawPdfPageToView(ctrl, elm, pdfPage, rotate, scale, render) {
-			var canvas = elm.find('canvas').get(0);
-			var textLayer = getAndclearTextLayer(elm);
-			if (canvas) {
-				var ctx = getAndclearCanvasContext(canvas);
+			clearTextLayer(elm);
+			var ctx = getAndclearCanvasContext(elm);
+			if (ctx) {
 				var viewport = getViewport(pdfPage, scale, rotate);
-				defineSizes(elm, canvas, viewport);
+				defineSizes(elm, viewport.width, viewport.height);
 				if (pdfPage) {
 					elm.addClass('notrendered');
 					if (render) {
 						ctrl.readyToRender().then(function () {
-							ctrl.setReadyToRender(false);
-							drawPageToCtx(ctrl, elm, pdfPage, textLayer, viewport, ctx);
+							drawPageToCtx(ctrl, elm, pdfPage, viewport, ctx);
 						});
 					}
 				}
 			}
 		}
-		function drawPageToCtx(ctrl, elm, pdfPage, textLayer, viewport, ctx) {
+		function drawPageToCtx(ctrl, elm, pdfPage, viewport, ctx) {
 			return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.then(function () {
 				elm.removeClass('notrendered');
-				ctrl.setReadyToRender(true);
+				ctrl.setReadyToRender();
+				var textLayer = elm.find('.textLayer').get(0);
 				if (textLayer) {
-					textLayer.style.width = viewport.width + 'px';
-					textLayer.style.height = viewport.height + 'px';
 					pdfPage.getTextContent().then(function (textContent) {
 						PDFJS.renderTextLayer({
 							textContent: textContent,
@@ -89,47 +86,38 @@
 		function getViewport(pdfPage, scale, rotate) {
 			return pdfPage ? pdfPage.getViewport(scale || 1, rotate || 0) : {width: 0, height: 0};
 		}
-		function defineSizes(elm, canvas, viewport) {
-			var page = elm.find('.page').get(0);
-			var wrapper = elm.find('.canvasWrapper').get(0);
-			canvas.width = viewport.width;
-			canvas.height = viewport.height;
-			if (page) {
-				page.style.width = viewport.width + 'px';
-				page.style.height = viewport.height + 'px';
-			}
-			if (wrapper) {
-				wrapper.style.width = viewport.width + 'px';
-				wrapper.style.height = viewport.height + 'px';
-			}
+		function defineSizes(elm, width, height) {
+			elm.find('canvas').attr('width', width).attr('height', height);
+			elm.find('.page,.canvasWrapper,.textLayer').css('width', width + 'px').css('height', height + 'px');
 		}
-		function getAndclearCanvasContext(canvas) {
-			var ctx = canvas.getContext('2d');
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			return ctx;
+		function getAndclearCanvasContext(elm) {
+			var canvas = elm.find('canvas').get(0);
+			if(canvas) {
+				var ctx = canvas.getContext('2d');
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				return ctx;
+			}
+			return null;
 		}
-		function getAndclearTextLayer(elm) {
+		function clearTextLayer(elm) {
 			var textLayer = elm.find('.textLayer').get(0);
 			if (textLayer) {
 				textLayer.innerHTML = "";
 			}
-			return textLayer;
 		}
 		function PdfViewCtrl($q) {
 			var ctrl = this;
 			ctrl.document = null;
 			ctrl.readyToRender = readyToRender;
 			ctrl.setReadyToRender = setReadyToRender;
-			var deferred = {defer:$q.defer()};
+			var deferred = {defer: $q.defer()};
 			function readyToRender() {
-				return deferred.defer.promise;
-			}
-			function setReadyToRender(ready) {
-				if(ready) {
-					deferred.defer.resolve();
-				} else {
+				return deferred.defer.promise.then(function() {
 					deferred.defer = $q.defer();
-				}
+				});
+			}
+			function setReadyToRender() {
+				deferred.defer.resolve();
 			}
 			deferred.defer.resolve();
 		}
