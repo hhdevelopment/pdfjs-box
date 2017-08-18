@@ -29,17 +29,18 @@ require('./pdfjsbox.services.js');
 		ctrl.globalData = {test:5};
 		ctrl.urlSupplier = urlSupplier;
 		ctrl.labelSupplier = labelSupplier;
+		ctrl.onSave = onSave;
+		
+		
 		function urlSupplier(document, data) {
 			return document.url;
 		}
 		function labelSupplier(document, data, index) {
 			return document.label + ' ('+index+')';
 		}
-
-		
-		ctrl.onSave = onSave;
-		function onSave(pages) {
-			
+		function onSave(items) {
+			alert('document PDF de '+items.length+' pages sauvegardé');
+			items.splice(0, items.length);
 		}
 	}
 })(angular, _);

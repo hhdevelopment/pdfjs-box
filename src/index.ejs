@@ -33,7 +33,9 @@
 					</pdf-thumbnails>
 				</div>
 				<div class="col-xs-1"  style="padding-left: 0px">
-					<button ng-disabled="!ctrl.items2.length" type="button" class="btn btn-primary save-btn" title="Sauvegarder comme nouveau PDF">
+					<button type="button" class="btn btn-primary save-btn" title="Sauvegarder comme nouveau PDF"
+							  ng-disabled="!ctrl.items2.length"
+							  ng-click="ctrl.onSave(ctrl.items2)">
 						<span class="glyphicon glyphicon-floppy-disk"></span>
 					</button>
 				</div>
@@ -53,7 +55,7 @@
 			</div>
 			<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
 				<pdf-view id="myPdfViewer" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
-					<pdf-commands class="lg" ng-item="ctrl.selectedItem" pdf-viewer="#myPdfViewer"
+					<pdf-commands class="xl" ng-item="ctrl.selectedItem" pdf-viewer="#myPdfViewer"
 									  doc-scale="fitV" ng-scale="ctrl.scale" 
 									  allow-print="false"></pdf-commands>
 				</pdf-view>
