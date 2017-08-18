@@ -71,7 +71,7 @@
 				ctrl.setReadyToRender();
 				var textLayer = elm.find('.textLayer').get(0);
 				if (textLayer) {
-					pdfPage.getTextContent().then(function (textContent) {
+					return pdfPage.getTextContent().then(function (textContent) {
 						PDFJS.renderTextLayer({
 							textContent: textContent,
 							container: textLayer,
@@ -108,9 +108,11 @@
 		function PdfViewCtrl($q) {
 			var ctrl = this;
 			ctrl.document = null;
+			var deferred = {defer: $q.defer()};
 			ctrl.readyToRender = readyToRender;
 			ctrl.setReadyToRender = setReadyToRender;
-			var deferred = {defer: $q.defer()};
+			deferred.defer.resolve();
+
 			function readyToRender() {
 				return deferred.defer.promise.then(function() {
 					deferred.defer = $q.defer();
@@ -119,7 +121,6 @@
 			function setReadyToRender() {
 				deferred.defer.resolve();
 			}
-			deferred.defer.resolve();
 		}
 	}
 })(angular, _, PDFJS, pdfjsLib);
