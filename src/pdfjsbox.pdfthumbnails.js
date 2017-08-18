@@ -21,7 +21,8 @@
 				'allowDrop': '<', // Les miniatures sont elles droppables ici
 				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedItem': '=', // l'item sélectionné
-				'placeholder': '@'
+				'placeholder': '@', // texte quand la ligne est vide
+				'dblclickTarget':'=' 
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -298,13 +299,20 @@
 		function PdfThumbnailsCtrl($scope) {
 			var ctrl = this;
 			ctrl.areItemsEqual = pdfjsboxItemServices.areItemsEqual;
+			ctrl.selectByClick = selectByClick;
+			ctrl.copyByDblclick = copyByDblclick;
 			ctrl.trackItem = trackItem;
+
 			function trackItem(item) {
 				return JSON.stringify(item.document) + item.pageIdx;
 			}
-			ctrl.selectByClick = selectByClick;
 			function selectByClick(item) {
 				$scope.selectedItem = item;
+			}
+			function copyByDblclick(item) {
+				if($scope.dblclickTarget) {
+					$scope.dblclickTarget.push(item);
+				}
 			}
 		}
 	}

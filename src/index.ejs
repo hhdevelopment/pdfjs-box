@@ -22,24 +22,36 @@
 							  url-supplier="ctrl.urlSupplier({'document':doc, 'data':ctrl.globalData, 'index':$index})" 
 							  ng-data="ctrl.globalData"></pdf-document>
 			<div class="row">
-				<div class="col-lg-12">
+				<div class="col-xs-11" style="padding-right: 0px">
 					<pdf-thumbnails class="pdf-thumbnails-horizontal"
 										 ng-height="100" 
 										 ng-items="ctrl.items2"
 										 removable="true"
 										 allow-drag="true" allow-drop="true"
 										 selected-item="ctrl.selectedItem"
-										 placeholder="Glissez, déposez puis ordonnez les pages du document"></pdf-thumbnails>
+										 placeholder="Glissez, déposez puis ordonnez les pages du document">
+					</pdf-thumbnails>
+				</div>
+				<div class="col-xs-1"  style="padding-left: 0px">
+					<button ng-disabled="!ctrl.items2.length" type="button" class="btn btn-primary save-btn" title="Sauvegarder comme nouveau PDF">
+						<span class="glyphicon glyphicon-floppy-disk"></span>
+					</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
 					<pdf-thumbnails class="pdf-thumbnails-horizontal" 
 										 ng-height="100" 
 										 ng-items="ctrl.items"
 										 selectable="false" removable="false"
 										 allow-drag="true" allow-drop="false"
 										 selected-item="ctrl.selectedItem"
-										 placeholder="Sélectionnez un document PDF"></pdf-thumbnails>
+										 dblclick-target="ctrl.items2"
+										 placeholder="Sélectionnez un document PDF">
+					</pdf-thumbnails>
 				</div>
 			</div>
-			<div style="background-color: #ddd;padding:10px 0px;height: 620px;">
+			<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
 				<pdf-view id="myPdfViewer" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
 					<pdf-commands class="lg" ng-item="ctrl.selectedItem" pdf-viewer="#myPdfViewer"
 									  doc-scale="fitV" ng-scale="ctrl.scale" 
@@ -48,4 +60,13 @@
 			</div>
 		</div>
 	</body>
+	<style>
+		.save-btn {
+			height: 120px;
+			width: 100%;
+			border-radius: 0px 10px 10px 0px;
+			font-size: 20px;
+			padding: 44px 10px;			
+		}
+	</style>
 </html>

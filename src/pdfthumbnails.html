@@ -2,6 +2,7 @@
 	<pdf-thumbnail ng-repeat="item in ngItems track by ctrl.trackItem(item)"
 						ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
 						ng-click="ctrl.selectByClick(item)" 
+						ng-dblclick="ctrl.copyByDblclick(item)"
 						ng-height="ngHeight" ng-item="item" 
 						draggable="true">
 	</pdf-thumbnail>
