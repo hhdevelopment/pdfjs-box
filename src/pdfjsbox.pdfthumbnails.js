@@ -64,36 +64,32 @@
 				return handleDrop(jqe.originalEvent, jqe.data);
 			}
 			function handleDragStart(e, data) {
-				var currentDrag = e.path.filter(function (e) {
-					return e.nodeName === 'PDF-THUMBNAIL';
-				})[0];
+				data = data || window.dataTransfer;
+				var currentDrag = getFirstParent(e.target, 'pdf-thumbnail');
 				data.item = currentDrag.item;
 				data.item.moving = true;
 				e.dataTransfer.effectAllowed = 'move';
+				e.dataTransfer.setData('text/html', "<div></div>"); // si on set pas de data le drag and drop ne marche pas dans Firefox
 			}
 			function handleDragOver(e, data) {
+				data = data || window.dataTransfer;
 				if (e.preventDefault) {
 					e.preventDefault(); // Necessary. Allows us to drop.
 				}
+				e.dataTransfer.dropEffect = 'move';
 				if (data.item) {
-					e.dataTransfer.dropEffect = 'move';
-					var pdfthumbnails = e.path.filter(function (e) {
-						return e.nodeName === 'PDF-THUMBNAILS';
-					})[0];
+					var pdfthumbnails = getFirstParent(e.target, 'pdf-thumbnails');
 					if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
-						var currentOver = e.path.filter(function (e) {
-							return e.nodeName === 'PDF-THUMBNAIL';
-						})[0];
+						var currentOver = getFirstParent(e.target, 'pdf-thumbnail');
 						moveOrCopyThumbnail(scope, data.item, scope.ngItems, currentOver, e.clientX);
 					}
 				}
 				return false;
 			}
 			function handleDrop(e, data) {
+				data = data || window.dataTransfer;
 				if (data.item) {
-					var pdfthumbnails = e.path.filter(function (e) {
-						return e.nodeName === 'PDF-THUMBNAILS';
-					})[0];
+					var pdfthumbnails = getFirstParent(e.target, 'pdf-thumbnails');
 					data.item.moving = false;
 					if (!data.item.tmp) {
 						data.item.moving = false;
@@ -101,7 +97,7 @@
 					} else {
 						if (pdfthumbnails) {
 							var div = pdfthumbnails.children[0];
-							var rightContainer = false; // TODO
+							var rightContainer = false;
 							for (var i = 0; !rightContainer && i < div.childElementCount; i++) {
 								var item = div.children[i].item;
 								rightContainer = item === data.item;
@@ -122,6 +118,9 @@
 				}
 				return false;
 			}
+		}
+		function getFirstParent(target, nodeName) {
+			return target.nodeName === nodeName.toUpperCase() ? target : ng.element(target).parents(nodeName.toLowerCase()).get(0);
 		}
 		function moveOrCopyThumbnail(scope, item, items, currentOver, clientX) {
 			item = getItemInListOrClone(scope, item, items);
