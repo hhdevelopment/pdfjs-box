@@ -157,9 +157,9 @@
 				} else {
 					item.moving = false; // end of move
 				}
-				var currentIdx = pdfjsboxItemServices.getIndexOfItemInList(item, items);
-				if (currentIdx === -1) { // n'existe ps, on clone
+				if (!pdfjsboxItemServices.isContainInList(item, items)) { // n'existe pas, on clone
 					item = pdfjsboxItemServices.cloneItem(item, items);
+					item.tmp = true;
 				} else {
 					item = pdfjsboxItemServices.getItemInList(item, items);
 				}
@@ -310,7 +310,7 @@
 				$scope.selectedItem = item;
 			}
 			function copyByDblclick(item) {
-				if($scope.dblclickTarget) {
+				if($scope.dblclickTarget && !pdfjsboxItemServices.isContainInList(item, $scope.dblclickTarget)) {
 					$scope.dblclickTarget.push(pdfjsboxItemServices.cloneItem(item, $scope.dblclickTarget));
 				}
 			}

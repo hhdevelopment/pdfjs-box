@@ -1,4 +1,4 @@
-(function (ng, __, PDFJS, pdfjsLib) {
+(function (ng, __) {
 	'use strict';
 	var pdfbox;
 	try {
@@ -92,22 +92,28 @@
 	function itemServices($q) {
 		return {
 			getIndexOfItemInList: getIndexOfItemInList,
+			isContainInList: isContainInList,
 			getItemInList: getItemInList,
 			areItemsEqual: areItemsEqual,
 			cloneItem: cloneItem
 		};
+		/**
+		 * Clone l'tem pour la liste en parametre
+		 * @param {Item} item
+		 * @param {Array} itemsTarget
+		 * @returns {Item}
+		 */
 		function cloneItem(item, itemsTarget) {
-			return {document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, tmp: true, getPage: item.getPage};
+			return {document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, getPage: item.getPage};
 		}
 		function getIndexOfItemInList(item, items) {
-			return __.findIndex(items, function (it) {
-				return areItemsEqual(it, item);
-			});
+			return item && __.findIndex(items, {'document': item.document, 'pageIdx':item.pageIdx});
+		}
+		function isContainInList(item, items) {
+			return __.some(items, {'document': item.document, 'pageIdx':item.pageIdx});
 		}
 		function getItemInList(item, items) {
-			return __.find(items, function (it) {
-				return areItemsEqual(it, item);
-			});
+			return item && __.find(items, {'document': item.document, 'pageIdx':item.pageIdx});
 		}
 		/**
 		 * Compare deux items pour determiner s'ils sont egaux
@@ -122,7 +128,8 @@
 			if (!item1 || !item2) {
 				return false;
 			}
-			return (item1.document === item2.document) && (item1.pageIdx === item2.pageIdx);
+			return __.isMatch(item1, {'document': item2.document, 'pageIdx':item2.pageIdx});
+//			return (item1.document === item2.document) && (item1.pageIdx === item2.pageIdx);
 		}
 	}
-})(angular, _, PDFJS, pdfjsLib);
+})(angular, _);
