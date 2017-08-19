@@ -16,19 +16,19 @@
 				'ngItem': '=',
 				'ngScale': '=',
 				'docScale': '=',
-				'pdfViewer': '@'
+				'pdfviewSelector': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'docScale'], function (vs1, vs2, s) {
 //					if (vs1[0] && s.ctrl.document !== vs1[0]) {
-						computeScale(s, elm, s.ngItem, s.docScale, s.pdfViewer);
+						computeScale(s, elm, s.ngItem, s.docScale, s.pdfviewSelector);
 //					}
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 			}
 		};
-		function computeScale(scope, elm, item, docScale, pdfViewerSelector) {
+		function computeScale(scope, elm, item, docScale, pdfviewSelector) {
 			if(!docScale || !item) {
 				return;
 			}
@@ -42,11 +42,11 @@
 						return;
 					}
 					var container;
-					if (pdfViewerSelector) {
-						container = ng.element(pdfViewerSelector);
+					if (pdfviewSelector) {
+						container = ng.element(pdfviewSelector);
 						if (!container) {
 							scope.ngScale = 1;
-							console.log('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value of attribute \'pdf-viewer\' or Transclude \'pdf-docscale\' in \'pdf-view\'', pdfViewerSelector);
+							console.log('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value of attribute \'pdfview-selector\' or Transclude \'pdf-docscale\' in \'pdf-view\'', pdfviewSelector);
 							return;
 						}
 					} else {
@@ -54,7 +54,7 @@
 					}
 					if (!container) {
 						scope.ngScale = 1;
-						console.log('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdf-viewer\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
+						console.log('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdfview-selector\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
 						return;
 					}
 					if (docScale === 'fitV') {
@@ -66,7 +66,7 @@
 						var pageWidth = view[2] - view[0];
 						scope.ngScale = (width || pageWidth) / pageWidth;
 					} else {
-						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fitH\' or \'fitV\' or float', docScale)
+						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fitH\' or \'fitV\' or float', docScale);
 					}
 				}
 			});

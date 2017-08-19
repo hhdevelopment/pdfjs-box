@@ -2,6 +2,7 @@
 <html >
 	<head>
 		<meta charset="UTF-8">
+		<link rel="icon" href="favicon.ico" type="image/x-icon"> 
 		<title>Demo pdfjs-box</title>
 	</head>
 	<body ng-app="app" ng-controller="AppCtrl as ctrl">
@@ -13,8 +14,9 @@
 				<div class="col-lg-12">
 					<div class="list-group">
 						<a ng-repeat="doc in ctrl.documents track by $index" href class="list-group-item" ng-class="{'active':ctrl.selectedDocument === doc}"
-							ng-bind="::ctrl.labelSupplier(doc, ctrl.globalData, $index) || doc.label || doc.name || ('Document PDF ' + $index)"
-							ng-click="ctrl.selectedDocument = doc;"></a>
+							ng-click="ctrl.selectedDocument = doc;">
+							<span class="glyphicon glyphicon-file"></span>
+							<span ng-bind="::ctrl.labelSupplier(doc, ctrl.globalData, $index) || doc.label || doc.name || ('Document PDF ' + $index)"></span></a>
 					</div>
 				</div>
 			</div>
@@ -55,7 +57,7 @@
 			</div>
 			<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
 				<pdf-view id="myPdfViewer" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
-					<pdf-docscale ng-item="ctrl.selectedItem" pdf-viewer="#myPdfViewer" doc-scale="ctrl.docscale" ng-scale="ctrl.scale"></pdf-docscale>
+					<pdf-docscale ng-item="ctrl.selectedItem" pdfview-selector="#myPdfViewer" doc-scale="ctrl.docscale" ng-scale="ctrl.scale"></pdf-docscale>
 					<pdf-commands class="xl" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" allow-print="false"></pdf-commands>
 				</pdf-view>
 			</div>
