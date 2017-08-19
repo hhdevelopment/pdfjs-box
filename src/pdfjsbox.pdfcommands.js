@@ -1,4 +1,4 @@
-(function (ng, __, PDFJS, pdfjsLib) {
+(function (ng, __) {
 	'use strict';
 	var pdfbox;
 	try {
@@ -33,23 +33,34 @@
 				updateNgItem(ctrl, scope.ngItem);
 			}
 		};
+		/**
+		 * Met à jour le nombre total de pages
+		 * @param {Angular Controller} ctrl
+		 * @param {Number} length
+		 */
 		function updateItemsLength(ctrl, length) {
 			ctrl.total = length;
 		}
+		/**
+		 * Met à jour l'index de la page, 
+		 * @param {Angular Controller} ctrl
+		 * @param {Item} item
+		 */
 		function updateNgItem(ctrl, item) {
 			if (item && item.items) {
-				ctrl.document = item.document;
 				ctrl.index = pdfjsboxItemServices.getIndexOfItemInList(item, item.items);
-				ctrl.total = item.items.length;
 			} else {
-				ctrl.document = null;
 				ctrl.index = 0;
 				ctrl.total = 0;
 			}
 		}
+		/**
+		 * Controller
+		 * @param {Angular Scope} $scope
+		 */
+		/* @ngInject */
 		function PdfCommandsCtrl($scope) {
 			var ctrl = this;
-			ctrl.document = null;
 			ctrl.index;
 			ctrl.total;
 			ctrl.previous = previous;
@@ -58,6 +69,10 @@
 			ctrl.print = print;
 			ctrl.fitH = fitH;
 			ctrl.fitV = fitV;
+			/**
+			 * set ngItem with previous item
+			 * @param {ClickEvent} evt
+			 */
 			function previous(evt) {
 				evt.stopPropagation();
 				var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
@@ -65,6 +80,10 @@
 					$scope.ngItem = $scope.ngItem.items[idx - 1];
 				}
 			}
+			/**
+			 * set ngItem with next item
+			 * @param {ClickEvent} evt
+			 */
 			function next(evt) {
 				evt.stopPropagation();
 				var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
@@ -73,24 +92,40 @@
 				}
 
 			}
+			/**
+			 * Add 90° to rotate
+			 * @param {ClickEvent} evt
+			 */
 			function rotate(evt) {
 				evt.stopPropagation();
 				$scope.ngItem.rotate = ($scope.ngItem.rotate + 90) % 360;
 			}
+			/**
+			 * Set fitH to docScale
+			 * @param {ClickEvent} evt
+			 */
 			function fitH(evt) {
 				evt.stopPropagation();
 				$scope.ngScale = null;
-				$scope.defaultScale = "fitH";
+				$scope.docScale = "fitH";
 			}
+			/**
+			 * Set fitV to docScale
+			 * @param {ClickEvent} evt
+			 */
 			function fitV(evt) {
 				evt.stopPropagation();
 				$scope.ngScale = null;
-				$scope.defaultScale = "fitV";
+				$scope.docScale = "fitV";
 			}
+			/**
+			 * Print current items link to ngItem
+			 * @param {ClickEvent} evt
+			 */
 			function print(evt) {
 				evt.stopPropagation();
 				console.log('TODO print feature...');
 			}
 		}
 	}
-})(angular, _, PDFJS, pdfjsLib);
+})(angular, _);
