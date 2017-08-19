@@ -1,4 +1,4 @@
-(function (ng, __, PDFJS, pdfjsLib) {
+(function (ng, __) {
 	'use strict';
 	var pdfbox;
 	try {
@@ -16,13 +16,13 @@
 			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
-				'ngItems': '=', // la liste de items represantant les pages du document
+				'ngItems': '=', // la liste de items representant les pages du document
 				'allowDrag': '<', // Les miniatures sont elles draggables
 				'allowDrop': '<', // Les miniatures sont elles droppables ici
 				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
-				'dblclickTarget':'=' 
+				'dblclickTarget':'=' // une liste d'items cible pour la copie via le doubleclick
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -35,9 +35,8 @@
 					}
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				var container = elm.get(0).firstChild;
-				manageScrollHandler(scope, container);
-				manageResizeHandler(scope, container);
+				manageScrollHandler(scope, elm.children());
+				manageResizeHandler(scope, elm.children());
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
 			}
@@ -159,8 +158,8 @@
 				}
 				if (!pdfjsboxItemServices.isContainInList(item, items)) { // n'existe pas, on clone
 					item = pdfjsboxItemServices.cloneItem(item, items);
-					item.tmp = true;
-				} else {
+					item.tmp = true; // on le met temporaire car non encore droppé
+				} else { // Sinon on le récupere pour éviter les doublons
 					item = pdfjsboxItemServices.getItemInList(item, items);
 				}
 				window.dataTransfer.item = item;
@@ -171,20 +170,24 @@
 		}
 		/**
 		 * Gestion du resize
-		 * @param {type} scope
-		 * @param {type} container
+		 * @param {angular Scope} scope
+		 * @param {jQueryElement} div
 		 */
-		function manageResizeHandler(scope, container) {
-			ng.element($window).on('resize', {promise: null, container: container, height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+		function manageResizeHandler(scope, div) {
+			ng.element($window).on('resize', {promise: null, container: div.get(0), height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		/**
 		 * Gestion du scroll de la zone de miniature
-		 * @param {type} scope
-		 * @param {type} container
+		 * @param {angular Scope} scope
+		 * @param {jQueryElement} div
 		 */
-		function manageScrollHandler(scope, container) {
-			ng.element(container).on('scroll', {promise: null, container: container, height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+		function manageScrollHandler(scope, div) {
+			div.on('scroll', {promise: null, container: div.get(0), height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
 		}
+		/**
+		 * Temporise la gestion de dessin des thumbnail qui apparaisent à l'ecran
+		 * @param {ScrollEvent|REsizeEvent} evt
+		 */
 		function manageDrawVisiblePfgThumbnailsHandler(evt) {
 			var data = evt.data;
 			if (data.promise) {
@@ -194,15 +197,14 @@
 		}
 		/**
 		 * Dessine tous les miniatures notrendered dans la zone visible dans le clientRect
-		 * @param {type} clientRect
-		 * @param {type} height : hauteur de la miniature
-		 * @returns {undefined}
+		 * @param {ClientRect} clientRect
+		 * @param {Number} height : hauteur de la miniature
 		 */
 		function drawVisiblePdfThumbnails(clientRect, height) {
 			var first = document.elementFromPoint(clientRect.left + 5, clientRect.top + 5);
 			if (first && first.nodeName === 'PDF-THUMBNAIL') {
 				var thumbnail = first;
-				while (thumbnail !== null && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0])) {
+				while (thumbnail !== null && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
 					var parent = ng.element(thumbnail);
 					if (parent.hasClass('notrendered')) {
 						pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item, true);
@@ -213,14 +215,13 @@
 		}
 		/**
 		 * La selection est changé, on selectionne le bon item et on s'assure qu'il soit visible.
-		 * @param {type} scope
-		 * @param {type} elm
-		 * @param {type} selectedItem
-		 * @param {type} items
-		 * @returns {undefined}
+		 * @param {angular scope} scope
+		 * @param {JQueryElement} pdfthumbnailsElm
+		 * @param {Item} selectedItem
+		 * @param {Array} items
 		 */
-		function updateSelectedItem(scope, elm, selectedItem, items) {
-			elm.removeClass('active');
+		function updateSelectedItem(scope, pdfthumbnailsElm, selectedItem, items) {
+			pdfthumbnailsElm.removeClass('active');
 			if (!items || !items.length) {
 				return;
 			}
@@ -230,42 +231,52 @@
 			}
 			var idx = pdfjsboxItemServices.getIndexOfItemInList(selectedItem, items);
 			if (idx !== -1) {
-				var container = elm.get(0).firstChild;
-				var thumbnail = container.children[idx];
-				ensureIsHVisibleIn(thumbnail, container);
+				var container = pdfthumbnailsElm.children();
+				var thumbnail = container.children().get(idx);
+				ensureIsHVisibleIn(thumbnail, container.get(0));
 				if (selectedItem.items === items) {
-					elm.addClass('active');
+					pdfthumbnailsElm.addClass('active');
 				}
 			}
 		}
+		/**
+		 * Retourne le millieu horizontal du rectanle
+		 * @param {ClientRect} clientRect
+		 * @returns {Number}
+		 */
 		function getHMedian(clientRect) {
 			return ((clientRect.right - clientRect.left) / 2) + clientRect.left;
 		}
+		/**
+		 * Retourne le millieu vertical du rectanle
+		 * @param {ClientRect} clientRect
+		 * @returns {Number}
+		 */
 		function getVMedian(clientRect) {
 			return ((clientRect.bottom - clientRect.top) / 2) + clientRect.top;
 		}
 		/**
 		 * S'assure que le thumbnail est visible dans le container (horizontalement) et scroll si nécessaire
-		 * @param {type} thumbnail
-		 * @param {type} container
+		 * @param {HTMLElement} thumbnail
+		 * @param {HTMLElement} div
 		 */
-		function ensureIsHVisibleIn(thumbnail, container) {
-			if (thumbnail && container) {
+		function ensureIsHVisibleIn(thumbnail, div) {
+			if (thumbnail && div) {
 				var clientRects1 = thumbnail.getClientRects()[0];
-				var clientRects2 = container.getClientRects()[0];
+				var clientRects2 = div.getClientRects()[0];
 				if (!isCompletlyHVisibleIn(clientRects1, clientRects2)) {
 					if (clientRects1.right > clientRects2.right) { // l'element dépasse à droite
-						container.scrollLeft += clientRects1.right - clientRects2.right;
+						div.scrollLeft += clientRects1.right - clientRects2.right;
 					} else { // l'element dépasse à gauche
-						container.scrollLeft -= clientRects2.left - clientRects1.left;
+						div.scrollLeft -= clientRects2.left - clientRects1.left;
 					}
 				}
 			}
 		}
 		/**
 		 * Détermine si le rectangle1 est visible entierement horizontalement dans le rectangle2
-		 * @param {type} clientRects1
-		 * @param {type} clientRects2
+		 * @param {ClientRect} clientRects1
+		 * @param {ClientRect} clientRects2
 		 * @returns {Boolean}
 		 */
 		function isCompletlyHVisibleIn(clientRects1, clientRects2) {
@@ -273,29 +284,34 @@
 		}
 		/**
 		 * S'assure que le thumbnail est visible dans le container (verticalement) et scroll si nécessaire
-		 * @param {type} thumbnail
-		 * @param {type} container
+		 * @param {HTMLElement} thumbnail
+		 * @param {HTMLElement} div
 		 */
-		function ensureIsVVisibleIn(thumbnail, container) {
+		function ensureIsVVisibleIn(thumbnail, div) {
 			var clientRects1 = thumbnail.getClientRects()[0];
-			var clientRects2 = container.getClientRects()[0];
+			var clientRects2 = div.getClientRects()[0];
 			if (!isCompletlyVVisibleIn(clientRects1, clientRects2)) {
 				if (clientRects1.bottom > clientRects2.bottom) { // l'element dépasse en bas
-					container.scrollTop += clientRects1.bottom - clientRects2.bottom;
+					div.scrollTop += clientRects1.bottom - clientRects2.bottom;
 				} else { // l'element dépasse en haut
-					container.scrollTop -= clientRects2.top - clientRects1.top;
+					div.scrollTop -= clientRects2.top - clientRects1.top;
 				}
 			}
 		}
 		/**
 		 * Détermine si le rectangle1 est visible entierement verticalement dans le rectangle2
-		 * @param {type} clientRects1
-		 * @param {type} clientRects2
+		 * @param {ClientRect} clientRects1
+		 * @param {ClientRect} clientRects2
 		 * @returns {Boolean}
 		 */
 		function isCompletlyVVisibleIn(clientRects1, clientRects2) {
 			return clientRects1.bottom <= clientRects2.bottom && clientRects1.top >= clientRects2.top;
 		}
+		/**
+		 * Angular PdfThumbnails Controller
+		 * @param {angular scope} $scope
+		 * @param {PdfjsboxItemServices} pdfjsboxItemServices
+		 */
 		function PdfThumbnailsCtrl($scope, pdfjsboxItemServices) {
 			var ctrl = this;
 			ctrl.areItemsEqual = pdfjsboxItemServices.areItemsEqual;
@@ -316,4 +332,4 @@
 			}
 		}
 	}
-})(angular, _, PDFJS, pdfjsLib);
+})(angular, _);
