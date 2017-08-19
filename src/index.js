@@ -6,6 +6,7 @@ import angular from 'angular';
 
 require('./pdfjsbox.css');
 require('./pdfjsbox.config.js');
+require('./pdfjsbox.pdfdocscale.js');
 require('./pdfjsbox.pdfcommands.js');
 require('./pdfjsbox.pdfdocument.js');
 require('./pdfjsbox.pdfthumbnail.js');
@@ -24,6 +25,7 @@ require('./pdfjsbox.services.js');
 		ctrl.items = [];
 		ctrl.items2 = [];
 		ctrl.selectedDocument;
+		ctrl.docscale = 'fitV';
 		ctrl.scale;
 		ctrl.selectedItem;
 		ctrl.globalData = {test:5};
