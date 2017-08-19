@@ -28,7 +28,15 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 			}
 		};
-		function computeScale(scope, elm, item, docScale, pdfviewSelector) {
+		/**
+		 * Calcul le scale en fonction du docScale
+		 * @param {Angular Scope} scope
+		 * @param {JQueryElement} pdfDocscale
+		 * @param {Item} item
+		 * @param {string|float} docScale
+		 * @param {string} pdfviewSelector
+		 */
+		function computeScale(scope, pdfDocscale, item, docScale, pdfviewSelector) {
 			if(!docScale || !item) {
 				return;
 			}
@@ -50,7 +58,7 @@
 							return;
 						}
 					} else {
-						container = elm.parents('pdf-view');
+						container = pdfDocscale.parents('pdf-view');
 					}
 					if (!container) {
 						scope.ngScale = 1;
