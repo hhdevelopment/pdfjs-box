@@ -1,4 +1,4 @@
-(function (ng, __, PDFJS, pdfjsLib) {
+(function (ng, __) {
 	'use strict';
 	var pdfbox;
 	try {
@@ -27,20 +27,38 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 			}
 		};
-		function updateNgItem(scope, elm, item) {
-			var thumbnail = elm.get(0);
+		/**
+		 * Mise à jour de l'item du thumbnail
+		 * @param {Angular scope} scope
+		 * @param {JQueryElement} pdfThumbnailElm
+		 * @param {Item} item
+		 */
+		function updateNgItem(scope, pdfThumbnailElm, item) {
+			var thumbnail = pdfThumbnailElm.get(0);
 			thumbnail.item = item;
-			pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, elm, thumbnail, item, false);
+			pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, pdfThumbnailElm, thumbnail, item, false);
 		}
+		/**
+		 * Angular Controller
+		 * @param {type} $scope
+		 * @returns {undefined}
+		 */
 		function PdfThumbnailCtrl($scope) {
 			var ctrl = this;
 			ctrl.switchThumbnailSelected = switchThumbnailSelected;
 			ctrl.removeThumbnail = removeThumbnail;
+			/**
+			 * handler de la checkbox, stop la propagation de l'event
+			 * @param {ClickEvent} evt
+			 */
 			function switchThumbnailSelected(evt) {
 				evt.stopPropagation();
 				evt.stopImmediatePropagation();
 			}
-
+			/**
+			 * Click sur la croix pour remove l'item
+			 * @param {ClickEvent} evt
+			 */
 			function removeThumbnail(evt) {
 				evt.stopPropagation();
 				evt.preventDefault();
@@ -49,4 +67,4 @@
 			}
 		}
 	}
-})(angular, _, PDFJS, pdfjsLib);
+})(angular, _);
