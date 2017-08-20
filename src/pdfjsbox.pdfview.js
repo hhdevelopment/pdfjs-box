@@ -45,8 +45,8 @@
 		 * @param {Angular Ctrl} ctrl
 		 * @param {JQueryElement} pdfView
 		 * @param {PDFPage} pdfPage
-		 * @param {int} rotate
-		 * @param {float} scale
+		 * @param {number} rotate
+		 * @param {number} scale
 		 * @param {boolean} render
 		 */
 		function drawPdfPageToView(ctrl, pdfView, pdfPage, rotate, scale, render) {
@@ -95,8 +95,8 @@
 		/**
 		 * 
 		 * @param {PDFPage} pdfPage
-		 * @param {float} scale
-		 * @param {float} rotate
+		 * @param {number} scale
+		 * @param {number} rotate
 		 * @returns {ViewPort or Object support width and height}
 		 */
 		function getViewport(pdfPage, scale, rotate) {
@@ -105,8 +105,8 @@
 		/**
 		 * Definit la taille des different conteneurs : canvas, .page, .canvasWrapper, .textLayer
 		 * @param {JQueryElement} pdfView
-		 * @param {float} width
-		 * @param {float} height
+		 * @param {number} width
+		 * @param {number} height
 		 */
 		function defineSizes(pdfView, width, height) {
 			pdfView.find('canvas').attr('width', width).attr('height', height);
