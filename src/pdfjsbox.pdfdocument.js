@@ -29,8 +29,8 @@
 		};
 		/**
 		 * Changement de document
-		 * @param {type} scope
-		 * @param {type} ngDocument
+		 * @param {Angular scope} scope
+		 * @param {Document} ngDocument
 		 */
 		function updateNgDocument(scope, ngDocument) {
 			var items = scope.ngItems || [];
@@ -52,16 +52,15 @@
 			return null;
 		}
 		/**
-		 * Charge une page, utilisé dans le mode séquenciel
-		 * @param {type} scope
-		 * @param {type} document
-		 * @param {type} pdfDocument
-		 * @param {type} items
-		 * @param {type} offset
-		 * @param {type} idx
-		 * @param {type} t0
+		 * Pré-Charge une page, utilisé dans le mode séquenciel
+		 * @param {Document} document : document fournit par l'application
+		 * @param {PdfDocument} pdfDocument : le docuzment pdf fournit par le framework pdfjs
+		 * @param {Array<Item>} items : chaque item represente une page du pdf : {document: document, pageIdx: idx, rotate: 0}
+		 * @param {Number} idx : index de la page à charger
+		 * @param {Number} skiped : nombre d'element sauté avant de commencer l'iteration, sert pour le log
+		 * @param {Number} t0 : pour le timing
 		 */
-		function loadSinglePage(scope, document, pdfDocument, items, offset, idx, t0) {
+		function loadSinglePage(document, pdfDocument, items, idx, skiped, t0) {
 			var deferred = $q.defer();
 			var item = {document: document, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 					return deferred.promise;
@@ -70,18 +69,18 @@
 			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
 				deferred.resolve(pdfPage);
 				if ((idx + 1) === pdfDocument.numPages) {
-					console.log('Preload sequence ' + (pdfDocument.numPages - offset) + ' pages in %sms', new Date().getTime() - t0);
+					console.log('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
 				}
 			});
 		}
 		/**
 		 * Charge les pages de facon récursive ou mix si max est inferieur à numPages 
-		 * @param {type} scope
-		 * @param {type} document
-		 * @param {type} pdfDocument
-		 * @param {type} items
-		 * @param {type} idx
-		 * @param {type} max
+		 * @param {Angular Scope} scope
+		 * @param {Document} document : document fournit par l'application
+		 * @param {PdfDocument} pdfDocument : le docuzment pdf fournit par le framework pdfjs
+		 * @param {Array<Item>} items : chaque item represente une page du pdf : {document: document, pageIdx: idx, rotate: 0}
+		 * @param {Number} idx : index de la page à charger
+		 * @param {Number} max : nombre de page à charger en mode récursive avant de passer au mode séquentiel
 		 */
 		function loadRecursivePage(scope, document, pdfDocument, items, idx, max) {
 			if (idx < max && idx < pdfDocument.numPages) {
@@ -101,7 +100,7 @@
 				});
 			} else {
 				for (var i = idx; i < pdfDocument.numPages; i++) {
-					loadSinglePage(scope, document, pdfDocument, items, idx, i, new Date().getTime());
+					loadSinglePage(document, pdfDocument, items, i, idx, new Date().getTime());
 				}
 				scope.$apply();
 			}

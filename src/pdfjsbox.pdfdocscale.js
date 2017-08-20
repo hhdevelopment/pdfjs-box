@@ -33,7 +33,7 @@
 		 * @param {Angular Scope} scope
 		 * @param {JQueryElement} pdfDocscaleElm
 		 * @param {Item} item
-		 * @param {string|float} docScale
+		 * @param {string|number} docScale
 		 * @param {string} pdfviewSelector
 		 */
 		function computeScale(scope, pdfDocscaleElm, item, docScale, pdfviewSelector) {
@@ -64,7 +64,7 @@
 						var pageWidth = view[2] - view[0];
 						scope.ngScale = (width || pageWidth) / pageWidth;
 					} else {
-						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fitH\' or \'fitV\' or float', docScale);
+						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fitH\' or \'fitV\' or number', docScale);
 					}
 				}
 			});
