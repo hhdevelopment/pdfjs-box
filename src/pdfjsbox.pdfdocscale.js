@@ -22,7 +22,7 @@
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'docScale'], function (vs1, vs2, s) {
 //					if (vs1[0] && s.ctrl.document !== vs1[0]) {
-						computeScale(s, elm, s.ngItem, s.docScale, s.pdfviewSelector);
+					computeScale(s, elm, s.ngItem, s.docScale, s.pdfviewSelector);
 //					}
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
@@ -31,13 +31,13 @@
 		/**
 		 * Calcul le scale en fonction du docScale
 		 * @param {Angular Scope} scope
-		 * @param {JQueryElement} pdfDocscale
+		 * @param {JQueryElement} pdfDocscaleElm
 		 * @param {Item} item
 		 * @param {string|float} docScale
 		 * @param {string} pdfviewSelector
 		 */
-		function computeScale(scope, pdfDocscale, item, docScale, pdfviewSelector) {
-			if(!docScale || !item) {
+		function computeScale(scope, pdfDocscaleElm, item, docScale, pdfviewSelector) {
+			if (!docScale || !item) {
 				return;
 			}
 			item.getPage().then(function (pdfPage) {
@@ -45,21 +45,11 @@
 					scope.ngScale = docScale;
 				} else {
 					var view = pdfPage.view;
-					if(!view) {
+					if (!view) { // normalement pas possible
 						scope.ngScale = 1;
 						return;
 					}
-					var container;
-					if (pdfviewSelector) {
-						container = ng.element(pdfviewSelector);
-						if (!container) {
-							scope.ngScale = 1;
-							console.log('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value of attribute \'pdfview-selector\' or Transclude \'pdf-docscale\' in \'pdf-view\'', pdfviewSelector);
-							return;
-						}
-					} else {
-						container = pdfDocscale.parents('pdf-view');
-					}
+					var container = getPdfViewHTMLElement(pdfDocscaleElm, pdfviewSelector);
 					if (!container) {
 						scope.ngScale = 1;
 						console.log('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdfview-selector\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
@@ -78,6 +68,25 @@
 					}
 				}
 			});
+		}
+		/**
+		 * Retourne le noaud HTML du pdfView permettant de récuperer les dimensions de celui ci.
+		 * ou l'attribut 'pdfview-selector' est définit et permet de le récuperer via jquery, ou l'element pdf-docscale est un enfant du pdf-view
+		 * @param {HTMLElement} pdfDocscaleElm
+		 * @param {string} pdfviewSelector
+		 * @returns {HTMLElement}
+		 */
+		function getPdfViewHTMLElement(pdfDocscaleElm, pdfviewSelector) {
+			var container = null;;
+			if (pdfviewSelector) {
+				container = ng.element(pdfviewSelector);
+				if (!container) {
+					console.log('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value of attribute \'pdfview-selector\' or Transclude \'pdf-docscale\' in \'pdf-view\'', pdfviewSelector);
+				}
+			} else {
+				container = pdfDocscaleElm.parents('pdf-view');
+			}
+			return container;
 		}
 	}
 })(angular, _);
