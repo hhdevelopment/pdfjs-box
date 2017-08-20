@@ -65,7 +65,7 @@
 			}
 			function handleDragStart(e, data) {
 				data = data || window.dataTransfer;
-				var currentDrag = getFirstParent(e.target, 'pdf-thumbnail');
+				var currentDrag = getFirstParentNamed(e.target, 'pdf-thumbnail');
 				data.item = currentDrag.item;
 				data.item.moving = true;
 				e.dataTransfer.effectAllowed = 'move';
@@ -78,9 +78,9 @@
 				}
 				e.dataTransfer.dropEffect = 'move';
 				if (data.item) {
-					var pdfthumbnails = getFirstParent(e.target, 'pdf-thumbnails');
+					var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
 					if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
-						var currentOver = getFirstParent(e.target, 'pdf-thumbnail');
+						var currentOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
 						moveOrCopyThumbnail(scope, data.item, scope.ngItems, currentOver, e.clientX);
 					}
 				}
@@ -89,7 +89,7 @@
 			function handleDrop(e, data) {
 				data = data || window.dataTransfer;
 				if (data.item) {
-					var pdfthumbnails = getFirstParent(e.target, 'pdf-thumbnails');
+					var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
 					data.item.moving = false;
 					if (!data.item.tmp) {
 						data.item.moving = false;
@@ -119,7 +119,13 @@
 				return false;
 			}
 		}
-		function getFirstParent(target, nodeName) {
+		/**
+		 * Retourne le noeud lui meme ou son ancetre le plus proche etant de type nodename 
+		 * @param {HTMLElement} target
+		 * @param {string} nodeName
+		 * @returns {HTMLElement}
+		 */
+		function getFirstParentNamed(target, nodeName) {
 			return target.nodeName === nodeName.toUpperCase() ? target : ng.element(target).parents(nodeName.toLowerCase()).get(0);
 		}
 		function moveOrCopyThumbnail(scope, item, items, currentOver, clientX) {
@@ -149,6 +155,13 @@
 				}
 			}
 		}
+		/**
+		 * 
+		 * @param {Angular scope} scope
+		 * @param {Item} item
+		 * @param {Array<Item>} items
+		 * @returns {Item}
+		 */
 		function getItemInListOrClone(scope, item, items) {
 			if (item.items !== items) { // copy, on drag dans une autre liste de miniature.
 				if (item.tmp) {
