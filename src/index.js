@@ -41,7 +41,7 @@ require('./pdfjsbox.services.js');
 			return document.label + ' ('+index+')';
 		}
 		function onSave(items) {
-			alert('document PDF de '+items.length+' pages sauvegardé');
+			alert('document PDF de '+items.length+' pages sauvegardées');
 			items.splice(0, items.length);
 		}
 	}
