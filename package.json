@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "angular-templatecache-loader": "^0.2.0",
-    "clean-webpack-plugin": "^0.1.16",
     "css-loader": "^0.28.2",
     "del": "~1.2.0",
     "extract-text-webpack-plugin": "^2.1.0",
