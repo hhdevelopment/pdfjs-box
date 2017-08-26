@@ -62,7 +62,7 @@
 		 * @param {Services} pdfjsboxDrawServices
 		 */
 		/* @ngInject */
-		function PdfCommandsCtrl($scope, $q, $document, pdfjsboxDrawServices) {
+		function PdfCommandsCtrl($scope, $q, pdfjsboxDrawServices) {
 			var ctrl = this;
 			ctrl.index;
 			ctrl.total;
