@@ -91,7 +91,7 @@
 		}
 	}
 	pdfbox.factory('pdfjsboxItemServices', itemServices);
-	function itemServices($q) {
+	function itemServices() {
 		return {
 			getIndexOfItemInList: getIndexOfItemInList,
 			isContainInList: isContainInList,
