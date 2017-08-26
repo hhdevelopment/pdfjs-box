@@ -21,7 +21,10 @@ require('./pdfjsbox.services.js');
 			  .controller('AppCtrl', AppCtrl);
 	function AppCtrl() {
 		var ctrl = this;
-		ctrl.documents = [{label:'Conditions générales', url:'document.pdf'}, {label:'Contract', url:'document2.pdf'}, {label:'UnicodeStandard', url:'UnicodeStandard.pdf'}];
+		ctrl.documents = [{label:'Conditions générales', url:'document.pdf'}, 
+			{label:'Contract', url:'document2.pdf'}, 
+			{label:'Red_page', url:'redpage.pdf'}, 
+			{label:'UnicodeStandard', url:'UnicodeStandard.pdf'}];
 		ctrl.items = [];
 		ctrl.items2 = [];
 		ctrl.selectedDocument;

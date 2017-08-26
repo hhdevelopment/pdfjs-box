@@ -37,10 +37,10 @@
 			</a>
 		</li>
 		<li ng-if="allowPrint">
-			<a href aria-label="Print" ng-click="$event.stopPropagation();ctrl.print()">
+			<a href aria-label="Print" ng-click="ctrl.print($event)">
 				<span class="glyphicon glyphicon-print" aria-hidden="true"></span>
 			</a>
 		</li>
 	</ul>
 </nav>
-<iframe style="display: none" src="about:blank"></iframe>
+<iframe style="visibility: hidden;" src="about:blank"></iframe>

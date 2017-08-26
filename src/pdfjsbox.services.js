@@ -29,6 +29,7 @@
 	function drawServices() {
 		return {
 			drawPageWhenAvailableIfVisible: drawPageWhenAvailableIfVisible,
+			drawPdfPageToCanvas: drawPdfPageToCanvas,
 			isHVisibleIn: isHVisibleIn,
 			isVVisibleIn: isVVisibleIn
 		};
@@ -40,34 +41,35 @@
 				}
 				var view = pdfPage.view;
 				var scale = (height || 100) / (view[3] - view[1]);
-				drawPdfPageToThumbnail(elm, pdfPage, item.rotate, scale, render);
+				elm.addClass('notrendered');
+				if (render) {
+					var canvas = elm.find('canvas').get(0);
+					drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
+						elm.removeClass('notrendered');
+					});
+				}
 				item.selected = true;
 			});
 		}
 		/**
-		 * Dessine la page du pdf dans elm, elm etant un pdf-thumbnail 
-		 * @param {type} elm
+		 * Dessine la page du pdf dans le canvas, utilisé pour les pdf-thumbnal ou les pages à print
+		 * @param {type} canvas
 		 * @param {type} pdfPage
 		 * @param {type} rotate
 		 * @param {type} scale
-		 * @param {type} render
 		 */
-		function drawPdfPageToThumbnail(elm, pdfPage, rotate, scale, render) {
-			var canvas = elm.find('canvas').get(0);
+		function drawPdfPageToCanvas(canvas, pdfPage, rotate, scale) {
 			if (canvas) {
-				if (render) {
-					var ctx = canvas.getContext('2d');
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					var viewport = pdfPage.getViewport(scale, rotate || 0);
-					canvas.width = viewport.width;
-					canvas.height = viewport.height;
-					pdfPage.render({canvasContext: ctx, viewport: viewport}).then(function () {
-						elm.removeClass('notrendered');
-					});
-				} else {
-					elm.addClass('notrendered');
-				}
+				var ctx = canvas.getContext('2d');
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				var viewport = pdfPage.getViewport(scale, rotate || 0);
+				canvas.width = viewport.width;
+				canvas.height = viewport.height;
+				return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.catch(function (error) {
+					console.log(error);
+				});
 			}
+			return null;
 		}
 		/**
 		 * Détermine si le rectangle1 est visible entierement ou en partie horizontalement dans le rectangle2
@@ -107,13 +109,13 @@
 			return {document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, getPage: item.getPage};
 		}
 		function getIndexOfItemInList(item, items) {
-			return item && __.findIndex(items, {'document': item.document, 'pageIdx':item.pageIdx});
+			return item && __.findIndex(items, {'document': item.document, 'pageIdx': item.pageIdx});
 		}
 		function isContainInList(item, items) {
-			return __.some(items, {'document': item.document, 'pageIdx':item.pageIdx});
+			return __.some(items, {'document': item.document, 'pageIdx': item.pageIdx});
 		}
 		function getItemInList(item, items) {
-			return item && __.find(items, {'document': item.document, 'pageIdx':item.pageIdx});
+			return item && __.find(items, {'document': item.document, 'pageIdx': item.pageIdx});
 		}
 		/**
 		 * Compare deux items pour determiner s'ils sont egaux
@@ -128,7 +130,7 @@
 			if (!item1 || !item2) {
 				return false;
 			}
-			return __.isMatch(item1, {'document': item2.document, 'pageIdx':item2.pageIdx});
+			return __.isMatch(item1, {'document': item2.document, 'pageIdx': item2.pageIdx});
 //			return (item1.document === item2.document) && (item1.pageIdx === item2.pageIdx);
 		}
 	}

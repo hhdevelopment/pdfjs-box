@@ -31,6 +31,7 @@
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateNgItem(ctrl, scope.ngItem);
+				ctrl.jqPrintIframe = elm.find('iframe');
 			}
 		};
 		/**
@@ -57,9 +58,11 @@
 		/**
 		 * Controller
 		 * @param {Angular Scope} $scope
+		 * @param {Angular PromiseAPI} $q
+		 * @param {Services} pdfjsboxDrawServices
 		 */
 		/* @ngInject */
-		function PdfCommandsCtrl($scope) {
+		function PdfCommandsCtrl($scope, $q, $document, pdfjsboxDrawServices) {
 			var ctrl = this;
 			ctrl.index;
 			ctrl.total;
@@ -124,7 +127,37 @@
 			 */
 			function print(evt) {
 				evt.stopPropagation();
-				console.log('TODO print feature...');
+				var jqSpanIcon = ng.element(evt.currentTarget).find('span');
+				jqSpanIcon.addClass('compute');
+				var jqBody = ctrl.jqPrintIframe.contents().find('body'); // ng.element(destDocument.body);
+				jqBody.empty(); // on supprime le document precedent
+				var promises = $scope.ngItem.items.map(function (item, idx, arr) { // transforme les items en promesses
+					return drawItemToCanvas(item, ng.element("<canvas style='page-break-after:always'></canvas>").appendTo(jqBody).get(0));
+				});
+				$q.all(promises).then(function () {
+					jqSpanIcon.removeClass('compute');
+					printIframe(ctrl.jqPrintIframe.get(0));
+					return;
+				});
+			}
+			function printIframe(printFrame) {
+				try {
+					if (printFrame.contentWindow.document.queryCommandSupported("print")) {
+						printFrame.contentWindow.document.execCommand('print', false, null);
+					} else {
+						printFrame.contentWindow.focus();
+						printFrame.contentWindow.print();
+					}
+				} catch (error) {
+					console.log(error.message);
+				}
+			}
+			function drawItemToCanvas(item, canvas) {
+				return item.getPage().then(function (pdfPage) {
+					var viewport = pdfPage.getViewport(1, 0);
+					var scale = 1080 / Math.min(viewport.width, viewport.height);
+					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, scale);
+				});
 			}
 		}
 	}
