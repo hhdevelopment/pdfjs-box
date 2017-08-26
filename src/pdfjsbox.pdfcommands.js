@@ -155,8 +155,9 @@
 			function drawItemToCanvas(item, canvas) {
 				return item.getPage().then(function (pdfPage) {
 					var viewport = pdfPage.getViewport(1, 0);
-					var scale = 1080 / Math.min(viewport.width, viewport.height);
-					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, scale);
+					var scale1 = 1080 / Math.min(viewport.width, viewport.height);
+					var scale2 = 1920 / Math.max(viewport.width, viewport.height);
+					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, Math.min(scale1, scale2));
 				});
 			}
 		}
