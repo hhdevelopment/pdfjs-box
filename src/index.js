@@ -4,6 +4,10 @@ import 'bootstrap/dist/js/bootstrap.js';
 import angular from 'angular';
 //var angular = require('angular');
 
+require('./pdfs/conditions.pdf');
+require('./pdfs/guide.pdf');
+require('./pdfs/UnicodeStandard.pdf');
+require('./favicon.ico');
 require('./pdfjsbox.css');
 require('./pdfjsbox.config.js');
 require('./pdfjsbox.pdfdocscale.js');
@@ -21,9 +25,8 @@ require('./pdfjsbox.services.js');
 			  .controller('AppCtrl', AppCtrl);
 	function AppCtrl() {
 		var ctrl = this;
-		ctrl.documents = [{label:'Conditions générales', url:'document.pdf'}, 
-			{label:'Contract', url:'document2.pdf'}, 
-			{label:'Red_page', url:'redpage.pdf'}, 
+		ctrl.documents = [{label:'Conditions générales', url:'conditions.pdf'}, 
+			{label:'guide renovation 2016', url:'guide.pdf'}, 
 			{label:'UnicodeStandard', url:'UnicodeStandard.pdf'}];
 		ctrl.items = [];
 		ctrl.items2 = [];
