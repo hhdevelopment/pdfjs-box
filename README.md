@@ -57,7 +57,7 @@ require('pdfjs-box/dist/pdfjsbox.css');
 
 If you use scoped bundle as webback, you have to expose PDFJS Api to your application   
 For that use ProvidePlugin.   
-In this following example I expose lodash, jquery and pdfjsLib.   
+In this following example I expose lodash, jquery and PDFJS.   
 
 ~~~~   
 ...  
@@ -68,7 +68,7 @@ In this following example I expose lodash, jquery and pdfjsLib.
 			'window.jQuery': 'jquery',
 			'jQuery': 'jquery',
 			'$': 'jquery',
-			'pdfjsLib': 'pdfjs-dist'
+			'PDFJS': 'pdfjs-dist'
 		}),   
 ...  
 ~~~~    

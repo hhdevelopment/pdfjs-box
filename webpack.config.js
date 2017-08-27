@@ -40,7 +40,7 @@ module.exports = function (env) {
 				'window.jQuery': 'jquery',
 				'jQuery': 'jquery',
 				'$': 'jquery',
-				'pdfjsLib': 'pdfjs-dist'
+				'PDFJS': 'pdfjs-dist'
 			}),
 			new ExtractTextPlugin('[name].css'),
 			new webpack.optimize.CommonsChunkPlugin({
