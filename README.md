@@ -80,7 +80,9 @@ So if you use webpack or other bundler, you have to add pdfjs worker bundle in t
 
 This is my solution for webpack.
 
-`return [{
+
+~~~~
+return [{
 		context: __dirname,
 		entry: {
 			'pdf.worker.bundle.js': 'pdfjs-dist/build/pdf.worker.entry'
@@ -90,8 +92,8 @@ This is my solution for webpack.
 			path: path.resolve(__dirname, 'public_html')
 		},
 		plugins: [new webpack.optimize.UglifyJsPlugin({compressor: {screw_ie8: true, warnings: false}})]
-	}, `
-
+	},
+~~~~
 Now you can add it with constant 'pdfjsConfig'
 
 `angular.module("YourApp", [..., 'pdfjs-box', ...]).  
