@@ -4,11 +4,13 @@ pdfjs-box is a collection of angular directives for include easily pdfjs in angu
 
 ### Directives ###
 
-`<pdf-document ng-document ng-items url-supplier ng-data></pdf-document>`  
-`<pdf-thumbnails ng-height ng-items removable allow-drag allow-drop selected-item placeholder></pdf-thumbnails>`  
-`<pdf-view ng-item ng-scale></pdf-view>`  
-`<pdf-docscale ng-item ng-scale allow-print></pdf-docscale>`  
-`<pdf-commands ng-item pdfview-selector doc-scale ng-scale></pdf-commands>`  
+~~~~    
+<pdf-document ng-document ng-items url-supplier ng-data></pdf-document>
+<pdf-thumbnails ng-height ng-items removable allow-drag allow-drop selected-item placeholder></pdf-thumbnails>
+<pdf-view ng-item ng-scale></pdf-view>
+<pdf-docscale ng-item ng-scale allow-print></pdf-docscale>
+<pdf-commands ng-item pdfview-selector doc-scale ng-scale></pdf-commands>
+~~~~    
 
   - pdf-document : from your document object implementation, computes the url to get pdf and supplies the items collections for other components   
 	 items collection describe each page of document.
@@ -25,7 +27,9 @@ pdfjs-box is a collection of angular directives for include easily pdfjs in angu
 
 * Installation
 
-`npm install pdfjs-box -save`
+~~~~    
+npm install pdfjs-box -save
+~~~~    
 
 * Dependencies
 
@@ -36,13 +40,17 @@ pdfjs-box is a collection of angular directives for include easily pdfjs in angu
 
 * Add files to your build (webpack, gulp...)
 
-`node_modules/pdfjs-box/dist/pdfjsbox.js`   
-`node_modules/pdfjs-box/dist/pdfjsbox.css`   
+~~~~    
+node_modules/pdfjs-box/dist/pdfjsbox.js
+node_modules/pdfjs-box/dist/pdfjsbox.css   
+~~~~    
 
 With require : in your main module : 
 
-`require('pdfjs-box/dist/pdfjsbox.js');`
-`require('pdfjs-box/dist/pdfjsbox.css');`
+~~~~    
+require('pdfjs-box/dist/pdfjsbox.js');
+require('pdfjs-box/dist/pdfjsbox.css');
+~~~~    
 
 
 * webpack.
@@ -51,25 +59,27 @@ If you use scoped bundle as webback, you have to expose PDFJS Api to your applic
 For that use ProvidePlugin.   
 In this following example I expose lodash, jquery and pdfjsLib.   
 
-`...`   
-`},`   
-`plugins: [`   
-`new webpack.ProvidePlugin({`   
-`	_: 'lodash',`   
-`	'window.jQuery': 'jquery',`   
-`	'jQuery': 'jquery',`   
-`	'$': 'jquery',`   
-`	'pdfjsLib': 'pdfjs-dist'`   
-`}),`   
-`...`      
+~~~~   
+...  
+	},
+	plugins: [
+		new webpack.ProvidePlugin({
+			_: 'lodash',
+			'window.jQuery': 'jquery',
+			'jQuery': 'jquery',
+			'$': 'jquery',
+			'pdfjsLib': 'pdfjs-dist'
+		}),   
+...  
+~~~~    
 
 * Configuration
 
 1. Add module to your angular application
 
-```javascript
+~~~~
   angular.module("YourApp", [..., 'pdfjs-box', ...]);
-```
+~~~~
 
 2. Configure pdfjs and pdfjsbox
 
@@ -96,8 +106,10 @@ return [{
 ~~~~
 Now you can add it with constant 'pdfjsConfig'
 
-`angular.module("YourApp", [..., 'pdfjs-box', ...]).  
-    constant('pdfjsConfig', { workerSrc: './pdf.worker.bundle.js', preloadRecursivePages:7 } )`
+~~~~
+angular.module("YourApp", [..., 'pdfjs-box', ...]).  
+    constant('pdfjsConfig', { workerSrc: './pdf.worker.bundle.js', preloadRecursivePages:7 } )
+~~~~
 
 workerSrc : path for worker.
 preloadRecursivePages : configure balance between preload recursive or sequency. Set value with number of thumbnails visible by default.
