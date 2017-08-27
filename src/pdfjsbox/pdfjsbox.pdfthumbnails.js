@@ -22,7 +22,8 @@
 				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
-				'dblclickTarget':'=' // une liste d'items cible pour la copie via le doubleclick
+				'dblclickTarget':'=', // une liste d'items cible pour la copie via le doubleclick
+				'style':'@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];

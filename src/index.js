@@ -8,15 +8,15 @@ require('./pdfs/conditions.pdf');
 require('./pdfs/guide.pdf');
 require('./pdfs/UnicodeStandard.pdf');
 require('./favicon.ico');
-require('./pdfjsbox.css');
-require('./pdfjsbox.config.js');
-require('./pdfjsbox.pdfdocscale.js');
-require('./pdfjsbox.pdfcommands.js');
-require('./pdfjsbox.pdfdocument.js');
-require('./pdfjsbox.pdfthumbnail.js');
-require('./pdfjsbox.pdfthumbnails.js');
-require('./pdfjsbox.pdfview.js');
-require('./pdfjsbox.services.js');
+require('./pdfjsbox/pdfjsbox.css');
+require('./pdfjsbox/pdfjsbox.config.js');
+require('./pdfjsbox/pdfjsbox.pdfdocscale.js');
+require('./pdfjsbox/pdfjsbox.pdfcommands.js');
+require('./pdfjsbox/pdfjsbox.pdfdocument.js');
+require('./pdfjsbox/pdfjsbox.pdfthumbnail.js');
+require('./pdfjsbox/pdfjsbox.pdfthumbnails.js');
+require('./pdfjsbox/pdfjsbox.pdfview.js');
+require('./pdfjsbox/pdfjsbox.services.js');
 
 (function (ng, __) {
 	'use strict';

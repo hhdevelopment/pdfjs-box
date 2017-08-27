@@ -1,4 +1,4 @@
-<div class="x-scrollable" ng-style="{'min-height': ngHeight}">
+<div class="scrollable" ng-style="{'min-height': ngHeight}" style="style">
 	<pdf-thumbnail ng-repeat="item in ngItems track by ctrl.trackItem(item)"
 						ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
 						ng-click="ctrl.selectByClick(item)" 
