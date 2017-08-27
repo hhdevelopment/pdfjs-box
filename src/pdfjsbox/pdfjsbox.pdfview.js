@@ -1,4 +1,4 @@
-(function (ng, __, PDFJS, pdfjsLib) {
+(function (ng, __, PDFJS) {
 	'use strict';
 	var pdfbox;
 	try {
@@ -157,4 +157,4 @@
 			}
 		}
 	}
-})(angular, _, PDFJS, pdfjsLib);
+})(angular, _, PDFJS);

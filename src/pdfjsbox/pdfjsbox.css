@@ -1,5 +1,8 @@
-pdf-thumbnails div.x-scrollable {
+pdf-thumbnails.pdf-thumbnails-horizontal div.scrollable {
 	overflow-x: auto;
+}
+pdf-thumbnails div.scrollable {
+	overflow-y: auto;
 }
 pdf-thumbnails.active div {
 	background-color: #c7ddef;
@@ -18,6 +21,9 @@ pdf-thumbnail.active {
 }
 pdf-thumbnails.pdf-thumbnails-horizontal pdf-thumbnail {
 	display: table-cell;
+}
+pdf-thumbnails pdf-thumbnail {
+	display: block;
 }
 pdf-thumbnails {
 	border-top-left-radius:6px;
