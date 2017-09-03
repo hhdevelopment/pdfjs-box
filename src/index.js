@@ -35,14 +35,10 @@ require('./pdfjsbox/pdfjsbox.services.js');
 		ctrl.scale;
 		ctrl.selectedItem;
 		ctrl.globalData = {test:5};
-		ctrl.urlSupplier = urlSupplier;
 		ctrl.labelSupplier = labelSupplier;
 		ctrl.onSave = onSave;
 		
 		
-		function urlSupplier(document, data) {
-			return document.url;
-		}
 		function labelSupplier(document, data, index) {
 			return document.label + ' ('+index+')';
 		}
