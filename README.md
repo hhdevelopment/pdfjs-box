@@ -2,6 +2,8 @@
 
 pdfjs-box is a collection of angular directives for include easily pdfjs in angular 1.x application.
 
+[Demo](//jsfiddle.net/hhfrancois/chy4eesp/embedded/ "Demo on jsfiddle")
+
 ### Directives ###
 
 ~~~~    
