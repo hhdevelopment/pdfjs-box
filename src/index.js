@@ -34,14 +34,9 @@ require('./pdfjsbox/pdfjsbox.services.js');
 		ctrl.docscale = 'fitV';
 		ctrl.scale;
 		ctrl.selectedItem;
-		ctrl.globalData = {test:5};
-		ctrl.labelSupplier = labelSupplier;
 		ctrl.onSave = onSave;
 		
 		
-		function labelSupplier(document, data, index) {
-			return document.label + ' ('+index+')';
-		}
 		function onSave(items) {
 			alert('document PDF de '+items.length+' pages sauvegardées');
 			items.splice(0, items.length);
