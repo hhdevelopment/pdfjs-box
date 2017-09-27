@@ -34,22 +34,22 @@
 			isVVisibleIn: isVVisibleIn
 		};
 		function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item, forceRender) {
-			item.getPage().then(function (pdfPage) {
-				var render = forceRender;
-				if (!forceRender && thumbnail.parentElement) {
-					render = isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]);
-				}
-				var view = pdfPage.view;
-				var scale = (height || 100) / (view[3] - view[1]);
-				elm.addClass('notrendered');
-				if (render) {
-					var canvas = elm.find('canvas').get(0);
-					drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
-						elm.removeClass('notrendered');
-					});
-				}
-				item.selected = true;
-			});
+			if (elm.hasClass('notrendered')) {
+				item.getPage().then(function (pdfPage) {
+					var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
+					var view = pdfPage.view;
+					var scale = (height || 100) / (view[3] - view[1]);
+					if (render) {
+						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * 0.7) + "'></canvas>");
+						elm.find('canvas').replaceWith(jcanvas);
+						var canvas = jcanvas.get(0);
+						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
+							elm.removeClass('notrendered');
+						});
+					}
+					item.selected = true;
+				});
+			}
 		}
 		/**
 		 * Dessine la page du pdf dans le canvas, utilisé pour les pdf-thumbnal ou les pages à print
