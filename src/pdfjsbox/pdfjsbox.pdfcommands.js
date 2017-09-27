@@ -32,8 +32,25 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateNgItem(ctrl, scope.ngItem);
 				ctrl.jqPrintIframe = elm.find('iframe');
+				manageWheelHandler(ctrl, scope, elm.parents('pdf-view'));
 			}
 		};
+		/**
+		 * Gestion du mousewheel de la zone
+		 * @param {Angular Controller} ctrl
+		 * @param {Angular Scope} scope
+		 * @param {jQueryElement} jpdfView
+		 */
+		function manageWheelHandler(ctrl, scope, jpdfView) {
+			jpdfView.on('mousewheel', {ctrl: ctrl}, function (event) {
+				if (event.originalEvent.deltaY < 0) {
+					event.data.ctrl.previous(event.originalEvent);
+				} else {
+					event.data.ctrl.next(event.originalEvent);
+				}
+				scope.$apply();
+			});
+		}
 		/**
 		 * Met à jour le nombre total de pages
 		 * @param {Angular Controller} ctrl
@@ -78,9 +95,11 @@
 			 */
 			function previous(evt) {
 				evt.stopPropagation();
-				var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
-				if (idx > 0) {
-					$scope.ngItem = $scope.ngItem.items[idx - 1];
+				if($scope.ngItem) {
+					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
+					if (idx > 0) {
+						$scope.ngItem = $scope.ngItem.items[idx - 1];
+					}
 				}
 			}
 			/**
@@ -89,11 +108,12 @@
 			 */
 			function next(evt) {
 				evt.stopPropagation();
-				var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
-				if (idx < $scope.ngItem.items.length - 1) {
-					$scope.ngItem = $scope.ngItem.items[idx + 1];
+				if($scope.ngItem) {
+					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
+					if (idx < $scope.ngItem.items.length - 1) {
+						$scope.ngItem = $scope.ngItem.items[idx + 1];
+					}
 				}
-
 			}
 			/**
 			 * Add 90° to rotate

@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-box",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "Achache françois",
   "license": "ISC",
   "main": "dist/pdfjsbox.js",

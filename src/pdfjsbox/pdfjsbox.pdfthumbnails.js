@@ -220,9 +220,7 @@
 				var thumbnail = first;
 				while (thumbnail !== null && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
 					var parent = ng.element(thumbnail);
-					if (parent.hasClass('notrendered')) {
-						pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item, true);
-					}
+					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item, true);
 					thumbnail = thumbnail.nextElementSibling;
 				}
 			}
@@ -248,6 +246,7 @@
 				var container = pdfthumbnailsElm.children();
 				var thumbnail = container.children().get(idx);
 				ensureIsHVisibleIn(thumbnail, container.get(0));
+				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, ng.element(thumbnail), thumbnail, selectedItem, true);
 				if (selectedItem.items === items) {
 					pdfthumbnailsElm.addClass('active');
 				}
