@@ -42,7 +42,7 @@
 		 * @param {jQueryElement} jpdfView
 		 */
 		function manageWheelHandler(ctrl, scope, jpdfView) {
-			jpdfView.on('mousewheel', {ctrl: ctrl}, function (event) {
+			jpdfView.on('wheel', {ctrl: ctrl}, function (event) {
 				if (event.originalEvent.deltaY < 0) {
 					event.data.ctrl.previous(event.originalEvent);
 				} else {
