@@ -61,8 +61,9 @@
 		function drawPdfPageToCanvas(canvas, pdfPage, rotate, scale) {
 			if (canvas) {
 				var ctx = canvas.getContext('2d');
+				var rot = pdfPage.pageInfo.rotate + (rotate || 0);
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				var viewport = pdfPage.getViewport(scale, rotate || 0);
+				var viewport = pdfPage.getViewport(scale, rot);
 				canvas.width = viewport.width;
 				canvas.height = viewport.height;
 				return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.catch(function (error) {
