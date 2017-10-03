@@ -100,7 +100,8 @@
 		 * @returns {ViewPort or Object support width and height}
 		 */
 		function getViewport(pdfPage, scale, rotate) {
-			return pdfPage ? pdfPage.getViewport(scale || 1, rotate || 0) : {width: 0, height: 0};
+			var rot = pdfPage.pageInfo.rotate + (rotate || 0);
+			return pdfPage ? pdfPage.getViewport(scale || 1, rot) : {width: 0, height: 0};
 		}
 		/**
 		 * Definit la taille des different conteneurs : canvas, .page, .canvasWrapper, .textLayer
