@@ -1,5 +1,5 @@
 <a href draggable="true">
 	<input type="checkbox" ng-model="ngItem.selected" ng-click="ctrl.switchThumbnailSelected($event)">
 	<span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="ctrl.removeThumbnail($event)"></span>
-	<canvas draggable="true" height="{{ngHeight || 100}}" width="{{(ngHeight || 100) * 0.7}}"></canvas>
+	<canvas draggable="true" height="{{::ngHeight || 100}}"></canvas>
 </a>

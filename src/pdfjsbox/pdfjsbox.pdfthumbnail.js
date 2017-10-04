@@ -20,12 +20,12 @@
 				'ngHeight': '<' // la hauteur desirée de la page
 			},
 			link: function (scope, elm, attrs, ctrl) {
-				elm.addClass('notrendered');
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.rotate'], function (vs1, vs2, s) {
 					updateNgItem(s, elm, s.ngItem);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				elm.css('height', scope.ngHeight || 100);
 			}
 		};
 		/**
@@ -35,9 +35,12 @@
 		 * @param {Item} item
 		 */
 		function updateNgItem(scope, pdfThumbnailElm, item) {
-			var thumbnail = pdfThumbnailElm.get(0);
-			thumbnail.item = item;
-			pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, pdfThumbnailElm, thumbnail, item, item.selected);
+			pdfThumbnailElm.addClass('notrendered');
+			if(item) {
+				var thumbnail = pdfThumbnailElm.get(0);
+				thumbnail.item = item;
+				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, pdfThumbnailElm, thumbnail, item, item.selected);
+			}
 		}
 		/**
 		 * Angular Controller

@@ -38,9 +38,10 @@
 				item.getPage().then(function (pdfPage) {
 					var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 					var view = pdfPage.view;
+					var h = height || 100;
 					var scale = (height || 100) / (view[3] - view[1]);
 					if (render) {
-						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * 0.7) + "'></canvas>");
+						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "'></canvas>");
 						elm.find('canvas').replaceWith(jcanvas);
 						var canvas = jcanvas.get(0);
 						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
