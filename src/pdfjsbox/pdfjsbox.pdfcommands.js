@@ -32,7 +32,7 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateNgItem(ctrl, scope.ngItem);
 				ctrl.jqPrintIframe = elm.find('iframe');
-				manageWheelHandler(ctrl, scope, elm.parents('pdf-view'));
+//				manageWheelHandler(ctrl, scope, elm.parents('pdf-view'));
 			}
 		};
 		/**
