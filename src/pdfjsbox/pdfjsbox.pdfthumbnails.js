@@ -22,8 +22,8 @@
 				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
-				'dblclickTarget':'=', // une liste d'items cible pour la copie via le doubleclick
-				'style':'@'
+				'dblclickTarget': '=', // une liste d'items cible pour la copie via le doubleclick
+				'style': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -40,8 +40,28 @@
 				manageResizeHandler(scope, elm.children());
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
+				manageWheelHandler(ctrl, scope, elm, pdfjsboxItemServices);
 			}
 		};
+		/**
+		 * Gestion du mousewheel de la zone
+		 * @param {Angular Controller} ctrl
+		 * @param {Angular Scope} scope
+		 * @param {jQueryElement} jthumbnails
+		 * @param {PdfjsboxItemServices} pdfjsboxItemServices
+		 */
+		function manageWheelHandler(ctrl, scope, jthumbnails, pdfjsboxItemServices) {
+			jthumbnails.on('wheel', {ctrl: ctrl}, function (event) {
+				var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
+				if (event.originalEvent.deltaY < 0) {
+					idx = Math.max(idx - 1, 0);
+				} else {
+					idx = Math.min(idx + 1, scope.ngItems.length - 1);
+				}
+				scope.selectedItem = scope.ngItems[idx];
+				scope.$apply();
+			});
+		}
 		function manageDragAndDropHandler(scope, elm) {
 			if (!window.dataTransfer) {
 				window.dataTransfer = {};
@@ -339,7 +359,7 @@
 				$scope.selectedItem = item;
 			}
 			function copyByDblclick(item) {
-				if($scope.dblclickTarget && !pdfjsboxItemServices.isContainInList(item, $scope.dblclickTarget)) {
+				if ($scope.dblclickTarget && !pdfjsboxItemServices.isContainInList(item, $scope.dblclickTarget)) {
 					$scope.dblclickTarget.push(pdfjsboxItemServices.cloneItem(item, $scope.dblclickTarget));
 				}
 			}
