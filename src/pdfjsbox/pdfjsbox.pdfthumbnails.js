@@ -23,6 +23,7 @@
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
 				'dblclickTarget': '=', // une liste d'items cible pour la copie via le doubleclick
+				'reverseScroll': '@',
 				'style': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
@@ -40,26 +41,30 @@
 				manageResizeHandler(scope, elm.children());
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
-				manageWheelHandler(ctrl, scope, elm, pdfjsboxItemServices);
+				manageWheelHandler(scope, elm, pdfjsboxItemServices);
 			}
 		};
 		/**
 		 * Gestion du mousewheel de la zone
-		 * @param {Angular Controller} ctrl
 		 * @param {Angular Scope} scope
 		 * @param {jQueryElement} jthumbnails
 		 * @param {PdfjsboxItemServices} pdfjsboxItemServices
 		 */
-		function manageWheelHandler(ctrl, scope, jthumbnails, pdfjsboxItemServices) {
-			jthumbnails.on('wheel', {ctrl: ctrl}, function (event) {
-				var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
-				if (event.originalEvent.deltaY < 0) {
-					idx = Math.max(idx - 1, 0);
-				} else {
-					idx = Math.min(idx + 1, scope.ngItems.length - 1);
+		function manageWheelHandler(scope, jthumbnails, pdfjsboxItemServices) {
+			jthumbnails.on('wheel', {scope: scope, target: jthumbnails.get(0)}, function (event) {
+				if (event.data.target === event.currentTarget) {
+					var scope = event.data.scope;
+					if (scope.selectedItem && scope.ngItems.length) {
+						var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
+						if (event.originalEvent.deltaY < 0) {
+							idx = scope.reverseScroll ? Math.min(idx + 1, scope.ngItems.length - 1) : Math.max(idx - 1, 0);
+						} else {
+							idx = scope.reverseScroll ? Math.max(idx - 1, 0) : Math.min(idx + 1, scope.ngItems.length - 1);
+						}
+						scope.selectedItem = scope.ngItems[idx];
+						scope.$apply();
+					}
 				}
-				scope.selectedItem = scope.ngItems[idx];
-				scope.$apply();
 			});
 		}
 		function manageDragAndDropHandler(scope, elm) {
