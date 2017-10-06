@@ -35,21 +35,21 @@
 		};
 		function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item, forceRender) {
 			if (elm.hasClass('notrendered')) {
-				item.getPage().then(function (pdfPage) {
-					var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
-					var view = pdfPage.view;
-					var h = height || 100;
-					var scale = (height || 100) / (view[3] - view[1]);
-					if (render) {
+				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
+				if (render) {
+					item.getPage().then(function (pdfPage) {
+						var view = pdfPage.view;
+						var h = height || 100;
+						var scale = (height || 100) / (view[3] - view[1]);
 						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "'></canvas>");
 						elm.find('canvas').replaceWith(jcanvas);
 						var canvas = jcanvas.get(0);
 						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
 							elm.removeClass('notrendered');
 						});
-					}
-					item.selected = true;
-				});
+						item.selected = true;
+					});
+				}
 			}
 		}
 		/**
@@ -133,7 +133,6 @@
 				return false;
 			}
 			return __.isMatch(item1, {'document': item2.document, 'pageIdx': item2.pageIdx});
-//			return (item1.document === item2.document) && (item1.pageIdx === item2.pageIdx);
 		}
 	}
 })(angular, _);

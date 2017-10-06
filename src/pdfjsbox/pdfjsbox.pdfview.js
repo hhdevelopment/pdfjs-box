@@ -122,11 +122,11 @@
 		 * @returns {CanvasContext}
 		 */
 		function getAndClearCanvasContext(pdfView) {
-			var canvas = pdfView.find('canvas').get(0);
+			var jcanvas = ng.element("<canvas></canvas>");
+			pdfView.find('canvas').replaceWith(jcanvas);
+			var canvas = jcanvas.get(0);
 			if(canvas) {
-				var ctx = canvas.getContext('2d');
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				return ctx;
+				return canvas.getContext('2d');
 			}
 			return null;
 		}

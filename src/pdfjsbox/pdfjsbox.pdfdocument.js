@@ -49,28 +49,6 @@
 			return null;
 		}
 		/**
-		 * Pré-Charge une page, utilisé dans le mode séquenciel
-		 * @param {Document} pdf : document fournit par l'application
-		 * @param {PdfDocument} pdfDocument : le docuzment pdf fournit par le framework pdfjs
-		 * @param {Array<Item>} items : chaque item represente une page du pdf : {document: document, pageIdx: idx, rotate: 0}
-		 * @param {Number} idx : index de la page à charger
-		 * @param {Number} skiped : nombre d'element sauté avant de commencer l'iteration, sert pour le log
-		 * @param {Number} t0 : pour le timing
-		 */
-		function loadSinglePage(pdf, pdfDocument, items, idx, skiped, t0) {
-			var deferred = $q.defer();
-			var item = {document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
-					return deferred.promise;
-				}};
-			items.push(item);
-			pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-				deferred.resolve(pdfPage);
-				if ((idx + 1) === pdfDocument.numPages) {
-					console.log('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
-				}
-			});
-		}
-		/**
 		 * Charge les pages de facon récursive ou mix si max est inferieur à numPages 
 		 * @param {Angular Scope} scope
 		 * @param {Document} pdf : document fournit par l'application
@@ -102,6 +80,24 @@
 				scope.$apply();
 			}
 			return null;
+		}
+		/**
+		 * Pré-Charge une page, utilisé dans le mode séquenciel
+		 * @param {Document} pdf : document fournit par l'application
+		 * @param {PdfDocument} pdfDocument : le docuzment pdf fournit par le framework pdfjs
+		 * @param {Array<Item>} items : chaque item represente une page du pdf : {document: document, pageIdx: idx, rotate: 0}
+		 * @param {Number} idx : index de la page à charger
+		 * @param {Number} skiped : nombre d'element sauté avant de commencer l'iteration, sert pour le log
+		 * @param {Number} t0 : pour le timing
+		 */
+		function loadSinglePage(pdf, pdfDocument, items, idx, skiped, t0) {
+			var item = {document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+					return pdfDocument.getPage(this.pageIdx);
+				}};
+			items.push(item);
+			if ((idx + 1) === pdfDocument.numPages) {
+				console.log('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
+			}
 		}
 	}
 })(angular, _, PDFJS);
