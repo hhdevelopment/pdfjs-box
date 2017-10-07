@@ -112,8 +112,15 @@
 				if (data.item) {
 					var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
 					if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
-						var currentOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
-						moveOrCopyThumbnail(scope, data.item, scope.ngItems, currentOver, e.clientX);
+						var item = getItemInListOrClone(scope, data.item, scope.ngItems);
+						if (item) {
+							var thumbnailOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
+							if (thumbnailOver) { // on survole un autre thumbnail
+								addThumbnailAroundOver(scope, item, thumbnailOver, e.clientX);
+							} else {
+								addThumbnailAtEnd(scope, item);
+							}
+						}
 					}
 				}
 				return false;
@@ -160,31 +167,46 @@
 		function getFirstParentNamed(target, nodeName) {
 			return target.nodeName === nodeName.toUpperCase() ? target : ng.element(target).parents(nodeName.toLowerCase()).get(0);
 		}
-		function moveOrCopyThumbnail(scope, item, items, currentOver, clientX) {
-			item = getItemInListOrClone(scope, item, items);
-			if (!item) {
-				return;
+		/**
+		 * Si l'item est déjà dans la liste survolée on le supprime pour pouvoir le remettre à sa nouvelle position
+		 * @param {Angular scope} scope : Scope du thumbnails survolé
+		 * @param {Item} item : Item d'origine
+		 */
+		function removeOldPosition(scope, item) {
+			var currentIdx = pdfjsboxItemServices.getIndexOfItemInList(item, scope.ngItems);
+			if (currentIdx !== -1) { // s'il est déjà present on le supprime
+				scope.ngItems.splice(currentIdx, 1);
 			}
-			var currentIdx = pdfjsboxItemServices.getIndexOfItemInList(item, items);
-			if (currentOver) {
-				if (currentOver.item && !pdfjsboxItemServices.areItemsEqual(currentOver.item, item)) { // on n'est pas dessus
-					if (currentIdx !== -1) {
-						items.splice(currentIdx, 1);
-					}
-					var idx = pdfjsboxItemServices.getIndexOfItemInList(currentOver.item, items);
-					var median = getHMedian(currentOver.getClientRects()[0]);
-					if (clientX < median) {
-						items.splice(idx, 0, item);
-					} else {
-						items.splice(idx + 1, 0, item);
-					}
-					scope.$apply();
+		}
+		/**
+		 * Ajoute un thumbnail à la fin de la liste
+		 * @param {Angular scope} scope : Scope du thumbnails survolé
+		 * @param {Item} item
+		 */
+		function addThumbnailAtEnd(scope, item) {
+			removeOldPosition(scope, item);
+			scope.ngItems.push(item);
+			scope.$apply();
+		}
+		/**
+		 * Ajoute un thumbnail pour l'item avant ou apres le thumbnail survolé
+		 * @param {Angular scope} scope : Scope du thumbnails survolé
+		 * @param {Item} item
+		 * @param {HTMLElement} thumbnailOver : Thumbnail survolé éventuellement
+		 * @param {Number} clientX : x de la souris
+		 */
+		function addThumbnailAroundOver(scope, item, thumbnailOver, clientX) {
+			var items = scope.ngItems;
+			if (thumbnailOver.item && !pdfjsboxItemServices.areItemsEqual(thumbnailOver.item, item)) { // on n'est pas dessus
+				removeOldPosition(scope, item);
+				var idx = pdfjsboxItemServices.getIndexOfItemInList(thumbnailOver.item, items);
+				var median = getHMedian(thumbnailOver.getClientRects()[0]);
+				if (clientX < median) {
+					items.splice(idx, 0, item);
+				} else {
+					items.splice(idx + 1, 0, item);
 				}
-			} else {
-				if (currentIdx === -1) {
-					items.push(item);
-					scope.$apply();
-				}
+				scope.$apply();
 			}
 		}
 		/**
