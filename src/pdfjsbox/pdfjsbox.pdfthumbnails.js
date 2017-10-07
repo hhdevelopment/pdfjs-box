@@ -61,8 +61,13 @@
 						} else {
 							idx = scope.reverseScroll ? Math.max(idx - 1, 0) : Math.min(idx + 1, scope.ngItems.length - 1);
 						}
-						scope.selectedItem = scope.ngItems[idx];
-						scope.$apply();
+						var newItem = scope.ngItems[idx];
+						if(newItem !== scope.selectedItem) {
+							event.originalEvent.stopPropagation();
+							event.originalEvent.preventDefault();
+							scope.selectedItem = scope.ngItems[idx];
+							scope.$apply();
+						}
 					}
 				}
 			});
