@@ -47,7 +47,6 @@
 						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
 							elm.removeClass('notrendered');
 						});
-						item.selected = true;
 					});
 				}
 			}
