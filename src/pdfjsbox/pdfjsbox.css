@@ -31,12 +31,10 @@ pdf-thumbnails {
 	border-top-right-radius:6px;
 	border-bottom-right-radius:6px;
 }
-pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove,
-pdf-thumbnails[selectable="true"] pdf-thumbnail input[type="checkbox"] {
+pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove {
 	display: initial;
 }
-pdf-thumbnails pdf-thumbnail span.glyphicon-remove,
-pdf-thumbnails pdf-thumbnail input[type="checkbox"] {
+pdf-thumbnails pdf-thumbnail span.glyphicon-remove {
 	display:none;
 }
 pdf-thumbnails[allow-drag=true] pdf-thumbnail[draggable=true] {
@@ -68,17 +66,6 @@ pdf-thumbnail:first-child {
 pdf-thumbnail:last-child {
 	border-top-right-radius:6px;
 	border-bottom-right-radius:6px;
-}
-pdf-thumbnail input[type="checkbox"]{
-	z-index: 5;
-	position:absolute;
-	top: 15px;
-	left:20px;
-	-webkit-transform: scale(1.5); /* Safari and Chrome */
-	-moz-transform: scale(1.5); /* FF */
-	-ms-transform: scale(1.5); /* IE */
-	-o-transform: scale(1.5); /* Opera */
-	margin: 0px;
 }
 pdf-thumbnail span.glyphicon-remove {
 	position:absolute;
