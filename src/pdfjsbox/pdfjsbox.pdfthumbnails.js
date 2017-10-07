@@ -23,7 +23,7 @@
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
 				'dblclickTarget': '=', // une liste d'items cible pour la copie via le doubleclick
-				'reverseScroll': '@',
+				'reverseScroll': '<',
 				'style': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
@@ -41,28 +41,29 @@
 				manageResizeHandler(scope, elm.children());
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
-				manageWheelHandler(scope, elm, pdfjsboxItemServices);
+				manageWheelHandler(scope, elm);
 			}
 		};
 		/**
 		 * Gestion du mousewheel de la zone
 		 * @param {Angular Scope} scope
 		 * @param {jQueryElement} jthumbnails
-		 * @param {PdfjsboxItemServices} pdfjsboxItemServices
 		 */
-		function manageWheelHandler(scope, jthumbnails, pdfjsboxItemServices) {
-			jthumbnails.on('wheel', {scope: scope, target: jthumbnails.get(0)}, function (event) {
+		function manageWheelHandler(scope, jthumbnails) {
+			var coeff = scope.reverseScroll ? -1 : 1;
+			jthumbnails.on('wheel', {scope: scope, target: jthumbnails.get(0), coeff: coeff}, function (event) {
 				if (event.data.target === event.currentTarget) {
 					var scope = event.data.scope;
+					var coeff = event.data.coeff;
 					if (scope.selectedItem && scope.ngItems.length) {
 						var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
-						if (event.originalEvent.deltaY < 0) {
-							idx = scope.reverseScroll ? Math.min(idx + 1, scope.ngItems.length - 1) : Math.max(idx - 1, 0);
+						if ((coeff * event.originalEvent.deltaY) < 0) {
+							idx = Math.max(idx - 1, 0);
 						} else {
-							idx = scope.reverseScroll ? Math.max(idx - 1, 0) : Math.min(idx + 1, scope.ngItems.length - 1);
+							idx = Math.min(idx + 1, scope.ngItems.length - 1);
 						}
 						var newItem = scope.ngItems[idx];
-						if(newItem !== scope.selectedItem) {
+						if (newItem !== scope.selectedItem) {
 							event.originalEvent.stopPropagation();
 							event.originalEvent.preventDefault();
 							scope.selectedItem = scope.ngItems[idx];
