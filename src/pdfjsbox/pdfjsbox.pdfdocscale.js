@@ -8,7 +8,7 @@
 	}
 	pdfbox.directive('pdfDocscale', pdfDocscale);
 	/* @ngInject */
-	function pdfDocscale(pdfjsboxWatcherServices) {
+	function pdfDocscale(pdfjsboxWatcherServices, pdfjsboxScaleServices) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -55,16 +55,17 @@
 						console.log('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdfview-selector\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
 						return;
 					}
-					if (docScale === 'fitV') {
-						var height = container.height();
-						var pageHeight = view[3] - view[1];
-						scope.ngScale = (height || pageHeight) / pageHeight;
+					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
+					var scaleFitV = (container.height() || rectangle.height) / rectangle.height;
+					var scaleFitH = (container.width() || rectangle.width) / rectangle.width;
+					if (docScale === 'fit') {
+						scope.ngScale = Math.min(scaleFitV, scaleFitH);
+					} else if (docScale === 'fitV') {
+						scope.ngScale = scaleFitV;
 					} else if (docScale === 'fitH') {
-						var width = container.width();
-						var pageWidth = view[2] - view[0];
-						scope.ngScale = (width || pageWidth) / pageWidth;
+						scope.ngScale = scaleFitH;
 					} else {
-						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fitH\' or \'fitV\' or number', docScale);
+						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fit\', \'fitH\' or \'fitV\' or number', docScale);
 					}
 				}
 			});

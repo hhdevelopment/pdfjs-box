@@ -6,6 +6,34 @@
 	} catch (e) {
 		pdfbox = ng.module('pdfjs-box', []);
 	}
+	pdfbox.factory('pdfjsboxScaleServices', scaleServices);
+	function scaleServices() {
+		return {
+			getRectangle: getRectangle
+		};
+		/*
+		 * clean les watchers sur le scope
+		 * @param {type} scope
+		 * @param {type} watcherClears
+		 */
+		function getRectangle(pdfPage, rotate) {
+			if(pdfPage && pdfPage.view) {
+				var view = pdfPage.view;
+				var vHeight;
+				var vWidth;
+				var rotation = pdfPage.pageInfo.rotate + (rotate || 0);
+				if ((rotation / 90) % 2) {
+					vWidth = (view[3] - view[1]);
+					vHeight = (view[2] - view[0]);
+				} else {
+					vHeight = (view[3] - view[1]);
+					vWidth = (view[2] - view[0]);
+				}
+				return {width:vWidth, height:vHeight};
+			}
+			return {width:0, height:0};
+		}
+	}
 	pdfbox.factory('pdfjsboxWatcherServices', watcherServices);
 	function watcherServices() {
 		return {

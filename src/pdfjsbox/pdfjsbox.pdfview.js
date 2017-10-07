@@ -8,7 +8,7 @@
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
-	function pdfView(pdfjsboxWatcherServices) {
+	function pdfView(pdfjsboxWatcherServices, pdfjsboxScaleServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfview.html',
@@ -24,36 +24,37 @@
 				var watcherClears = [];
 				// Don't survey ngItem because, ngItem.items cause infinitive loop
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
-					updateView(s.ctrl, elm, s.ngItem, s.ngScale);
+					updateView(s, elm, s.ngItem);
 				}), true);
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				updateView(ctrl, elm, scope.ngItem, scope.ngScale);
+				updateView(scope, elm, scope.ngItem);
 			}
 		};
-		function updateView(ctrl, elm, item, scale) {
+		function updateView(scope, elm, item) {
 			if (item) {
 				elm.addClass('notrendered');
 				item.getPage().then(function (pdfPage) {
-					drawPdfPageToView(ctrl, elm, pdfPage, item.rotate, scale, true && scale);
+					drawPdfPageToView(scope, elm, pdfPage, item.rotate, true && scope.ngScale);
 				});
 			} else {
-				drawPdfPageToView(ctrl, elm, null, null, scale, false);
+				drawPdfPageToView(scope, elm, null, null, false);
 			}
 		}
 		/**
 		 * Dessine la page du pdf dans elm, elm etant un pdf-view 
-		 * @param {Angular Ctrl} ctrl
+		 * @param {Angular Scope} scope
 		 * @param {JQueryElement} pdfView
 		 * @param {PDFPage} pdfPage
 		 * @param {number} rotate
-		 * @param {number} scale
 		 * @param {boolean} render
 		 */
-		function drawPdfPageToView(ctrl, pdfView, pdfPage, rotate, scale, render) {
+		function drawPdfPageToView(scope, pdfView, pdfPage, rotate, render) {
+			var ctrl = scope.ctrl;
 			clearTextLayer(pdfView);
 			var ctx = getAndClearCanvasContext(pdfView);
 			if (ctx) {
-				var viewport = getViewport(pdfPage, scale, rotate);
+				scope.ngScale = fixScale(pdfPage, scope.ngScale, rotate, pdfView.height(), pdfView.width());
+				var viewport = getViewport(pdfPage, scope.ngScale, rotate);
 				defineSizes(pdfView, viewport.width, viewport.height);
 				if (pdfPage) {
 					pdfView.addClass('notrendered');
@@ -64,6 +65,33 @@
 					}
 				}
 			}
+		}
+		
+		/**
+		 * fix l'echelle pour que la page ne soit pas plus petite que la zone
+		 * @param {PDFPage} pdfPage
+		 * @param {Number} scale
+		 * @param {Number} rotate
+		 * @param {Number} height
+		 * @param {Number} width
+		 * @returns {Number}
+		 */
+		function fixScale(pdfPage, scale, rotate, height, width) {
+			var scale = scale || 1;
+			if(pdfPage && pdfPage.view) {
+				var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, rotate);
+				var pageHeight = rectangle.height * scale;
+				var pageWidth = rectangle.width * scale;
+				if(pageHeight < height && pageWidth < width) { // la page est trop petite
+					var s =  scale / 0.9; // on agrandi la page
+					var pageHeight = rectangle.height * s;
+					var pageWidth = rectangle.width * s;
+					if(pageHeight <= height && pageWidth <= width) {
+						return s;
+					}
+				}
+			}
+			return scale;
 		}
 		/**
 		 * Dessine la page dans le context du canvas
