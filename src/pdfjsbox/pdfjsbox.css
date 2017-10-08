@@ -1,10 +1,13 @@
-pdf-thumbnails.pdf-thumbnails-horizontal div.scrollable {
-	overflow-x: auto;
+pdf-thumbnails {
+	display: block;
+	overflow-y: scroll;
+	overflow-x: hidden;
 }
-pdf-thumbnails div.scrollable {
-	overflow-y: auto;
+pdf-thumbnails.pdf-thumbnails-horizontal {
+	overflow-x: scroll;
+	overflow-y: hidden;
 }
-pdf-thumbnails.active div {
+pdf-thumbnails.active {
 	background-color: #c7ddef;
 }
 pdf-thumbnails.active pdf-thumbnail {
@@ -25,12 +28,6 @@ pdf-thumbnails.pdf-thumbnails-horizontal pdf-thumbnail {
 pdf-thumbnails pdf-thumbnail {
 	display: block;
 }
-pdf-thumbnails {
-	border-top-left-radius:6px;
-	border-bottom-left-radius:6px;
-	border-top-right-radius:6px;
-	border-bottom-right-radius:6px;
-}
 pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove {
 	display: initial;
 }
@@ -46,8 +43,10 @@ pdf-thumbnail canvas {
 }
 pdf-thumbnail {
 	position: relative;
-	padding: 10px 15px;
 	background-color: #eee;
+}
+pdf-thumbnail > a > * {
+	padding: 10px 15px;
 }
 pdf-thumbnail {
 	cursor:pointer;
@@ -60,12 +59,12 @@ pdf-thumbnail.notrendered a {
 	color:transparent;
 }
 pdf-thumbnail:first-child {
-	border-top-left-radius:6px;
-	border-bottom-left-radius:6px;
+/*	border-top-left-radius:6px;
+	border-bottom-left-radius:6px;*/
 }
 pdf-thumbnail:last-child {
-	border-top-right-radius:6px;
-	border-bottom-right-radius:6px;
+/*	border-top-right-radius:6px;
+	border-bottom-right-radius:6px;*/
 }
 pdf-thumbnail span.glyphicon-remove {
 	position:absolute;

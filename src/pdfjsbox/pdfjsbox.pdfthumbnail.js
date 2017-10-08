@@ -39,7 +39,7 @@
 			if(item) {
 				var thumbnail = pdfThumbnailElm.get(0);
 				thumbnail.item = item;
-				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, pdfThumbnailElm, thumbnail, item, false);
+				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, thumbnail, item, false);
 			}
 		}
 		/**

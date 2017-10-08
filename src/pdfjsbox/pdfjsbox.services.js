@@ -61,15 +61,16 @@
 			isHVisibleIn: isHVisibleIn,
 			isVVisibleIn: isVVisibleIn
 		};
-		function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item, forceRender) {
+		function drawPageWhenAvailableIfVisible(height, thumbnail, item, forceRender) {
+			var elm = ng.element(thumbnail);
 			if (elm.hasClass('notrendered')) {
 				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 				if (render) {
 					item.getPage().then(function (pdfPage) {
 						var view = pdfPage.view;
-						var h = height || 100;
-						var scale = (height || 100) / (view[3] - view[1]);
-						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "'></canvas>");
+						var h = (height || 100);
+						var scale = h / (view[3] - view[1]);
+						var jcanvas = ng.element("<canvas draggable='true' height='" + h + "'></canvas>");
 						elm.find('canvas').replaceWith(jcanvas);
 						var canvas = jcanvas.get(0);
 						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
