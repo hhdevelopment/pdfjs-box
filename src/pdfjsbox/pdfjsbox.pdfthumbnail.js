@@ -16,8 +16,7 @@
 			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
-				'ngItem': '<', // un item portant le pdfDocument, l'index de la page, l'angle de rotation
-				'ngHeight': '<' // la hauteur desirée de la page
+				'ngItem': '<' // un item portant le pdfDocument, l'index de la page, l'angle de rotation
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -25,7 +24,6 @@
 					updateNgItem(s, elm, s.ngItem);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				elm.css('height', scope.ngHeight || 100);
 			}
 		};
 		/**
@@ -39,7 +37,7 @@
 			if(item) {
 				var thumbnail = pdfThumbnailElm.get(0);
 				thumbnail.item = item;
-				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, pdfThumbnailElm, thumbnail, item, false);
+				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, item, false);
 			}
 		}
 		/**

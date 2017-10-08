@@ -8,7 +8,7 @@
 	}
 	pdfbox.directive('pdfThumbnails', pdfThumbnails);
 	/* @ngInject */
-	function pdfThumbnails($q, $timeout, $window, pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxItemServices) {
+	function pdfThumbnails($timeout, $window, pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxItemServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnails.html',
@@ -19,7 +19,6 @@
 				'ngItems': '=', // la liste de items representant les pages du document
 				'allowDrag': '<', // Les miniatures sont elles draggables
 				'allowDrop': '<', // Les miniatures sont elles droppables ici
-				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
 				'dblclickTarget': '=', // une liste d'items cible pour la copie via le doubleclick
@@ -37,30 +36,31 @@
 					}
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				manageScrollHandler(scope, elm.children());
-				manageResizeHandler(scope, elm.children());
+				manageScrollHandler(scope, elm);
+				manageResizeHandler(scope, elm);
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
 				manageWheelHandler(scope, elm);
+				elm.addClass('scrollable');
 			}
 		};
 		/**
 		 * Gestion du mousewheel de la zone
 		 * @param {Angular Scope} scope
-		 * @param {jQueryElement} jthumbnails
+		 * @param {jQueryElement} jqThumbnails
 		 */
-		function manageWheelHandler(scope, jthumbnails) {
+		function manageWheelHandler(scope, jqThumbnails) {
 			var coeff = scope.reverseScroll ? -1 : 1;
-			jthumbnails.on('wheel', {scope: scope, target: jthumbnails.get(0), coeff: coeff}, function (event) {
+			jqThumbnails.on('wheel', {scope: scope, target: jqThumbnails.get(0), coeff: coeff}, function (event) {
 				if (event.data.target === event.currentTarget) {
 					var scope = event.data.scope;
 					var coeff = event.data.coeff;
 					if (scope.selectedItem && scope.ngItems.length) {
 						var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
 						if ((coeff * event.originalEvent.deltaY) < 0) {
-							idx = Math.max(idx - 1, 0);
-						} else {
 							idx = Math.min(idx + 1, scope.ngItems.length - 1);
+						} else {
+							idx = Math.max(idx - 1, 0);
 						}
 						var newItem = scope.ngItems[idx];
 						if (newItem !== scope.selectedItem) {
@@ -135,10 +135,9 @@
 						data.item = null;
 					} else {
 						if (pdfthumbnails) {
-							var div = pdfthumbnails.children[0];
 							var rightContainer = false;
-							for (var i = 0; !rightContainer && i < div.childElementCount; i++) {
-								var item = div.children[i].item;
+							for (var i = 0; !rightContainer && i < pdfthumbnails.childElementCount; i++) {
+								var item = pdfthumbnails.children[i].item;
 								rightContainer = item === data.item;
 							}
 							if (rightContainer) {
@@ -238,18 +237,18 @@
 		/**
 		 * Gestion du resize
 		 * @param {angular Scope} scope
-		 * @param {jQueryElement} div
+		 * @param {jQueryElement} jqThumbnails
 		 */
-		function manageResizeHandler(scope, div) {
-			ng.element($window).on('resize', {promise: null, container: div.get(0), height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+		function manageResizeHandler(scope, jqThumbnails) {
+			ng.element($window).on('resize', {promise: null, container: jqThumbnails.get(0)}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		/**
 		 * Gestion du scroll de la zone de miniature
 		 * @param {angular Scope} scope
-		 * @param {jQueryElement} div
+		 * @param {jQueryElement} jqThumbnails
 		 */
-		function manageScrollHandler(scope, div) {
-			div.on('scroll', {promise: null, container: div.get(0), height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+		function manageScrollHandler(scope, jqThumbnails) {
+			jqThumbnails.on('scroll', {promise: null, container: jqThumbnails.get(0)}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		/**
 		 * Temporise la gestion de dessin des thumbnail qui apparaisent à l'ecran
@@ -260,20 +259,18 @@
 			if (data.promise) {
 				$timeout.cancel(data.promise);
 			}
-			data.promise = $timeout(drawVisiblePdfThumbnails, 500, false, data.container.getClientRects()[0], data.height);
+			data.promise = $timeout(drawVisiblePdfThumbnails, 500, false, data.container.getClientRects()[0]);
 		}
 		/**
 		 * Dessine tous les miniatures notrendered dans la zone visible dans le clientRect
 		 * @param {ClientRect} clientRect
-		 * @param {Number} height : hauteur de la miniature
 		 */
-		function drawVisiblePdfThumbnails(clientRect, height) {
-			var first = document.elementFromPoint(clientRect.left + 5, clientRect.top + 5);
-			if (first && first.nodeName === 'PDF-THUMBNAIL') {
-				var thumbnail = first;
-				while (thumbnail !== null && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
-					var parent = ng.element(thumbnail);
-					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(height, parent, thumbnail, thumbnail.item, true);
+		function drawVisiblePdfThumbnails(clientRect) {
+			var elm = document.elementFromPoint(clientRect.left, clientRect.top);
+			if (elm && elm.nodeName === 'CANVAS') {
+				var thumbnail = elm.parentElement;
+				while (thumbnail && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
+					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, thumbnail.item, true);
 					thumbnail = thumbnail.nextElementSibling;
 				}
 			}
@@ -296,10 +293,9 @@
 			}
 			var idx = pdfjsboxItemServices.getIndexOfItemInList(selectedItem, items);
 			if (idx !== -1) {
-				var container = pdfthumbnailsElm.children();
-				var thumbnail = container.children().get(idx);
-				ensureIsHVisibleIn(thumbnail, container.get(0));
-				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, ng.element(thumbnail), thumbnail, selectedItem, true);
+				var thumbnail = pdfthumbnailsElm.children().get(idx);
+				ensureIsHVisibleIn(thumbnail, pdfthumbnailsElm.get(0));
+				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, selectedItem, true);
 				if (selectedItem.items === items) {
 					pdfthumbnailsElm.addClass('active');
 				}
@@ -324,17 +320,17 @@
 		/**
 		 * S'assure que le thumbnail est visible dans le container (horizontalement) et scroll si nécessaire
 		 * @param {HTMLElement} thumbnail
-		 * @param {HTMLElement} div
+		 * @param {HTMLElement} thumbnails
 		 */
-		function ensureIsHVisibleIn(thumbnail, div) {
-			if (thumbnail && div) {
+		function ensureIsHVisibleIn(thumbnail, thumbnails) {
+			if (thumbnail && thumbnails) {
 				var clientRects1 = thumbnail.getClientRects()[0];
-				var clientRects2 = div.getClientRects()[0];
+				var clientRects2 = thumbnails.getClientRects()[0];
 				if (!isCompletlyHVisibleIn(clientRects1, clientRects2)) {
 					if (clientRects1.right > clientRects2.right) { // l'element dépasse à droite
-						div.scrollLeft += clientRects1.right - clientRects2.right;
+						thumbnails.scrollLeft += clientRects1.right - clientRects2.right;
 					} else { // l'element dépasse à gauche
-						div.scrollLeft -= clientRects2.left - clientRects1.left;
+						thumbnails.scrollLeft -= clientRects2.left - clientRects1.left;
 					}
 				}
 			}
@@ -351,16 +347,16 @@
 		/**
 		 * S'assure que le thumbnail est visible dans le container (verticalement) et scroll si nécessaire
 		 * @param {HTMLElement} thumbnail
-		 * @param {HTMLElement} div
+		 * @param {HTMLElement} jqThumbnails
 		 */
-		function ensureIsVVisibleIn(thumbnail, div) {
+		function ensureIsVVisibleIn(thumbnail, jqThumbnails) {
 			var clientRects1 = thumbnail.getClientRects()[0];
-			var clientRects2 = div.getClientRects()[0];
+			var clientRects2 = jqThumbnails.getClientRects()[0];
 			if (!isCompletlyVVisibleIn(clientRects1, clientRects2)) {
 				if (clientRects1.bottom > clientRects2.bottom) { // l'element dépasse en bas
-					div.scrollTop += clientRects1.bottom - clientRects2.bottom;
+					jqThumbnails.scrollTop += clientRects1.bottom - clientRects2.bottom;
 				} else { // l'element dépasse en haut
-					div.scrollTop -= clientRects2.top - clientRects1.top;
+					jqThumbnails.scrollTop -= clientRects2.top - clientRects1.top;
 				}
 			}
 		}

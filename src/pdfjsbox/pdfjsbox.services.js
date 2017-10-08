@@ -12,12 +12,12 @@
 			getRectangle: getRectangle
 		};
 		/*
-		 * clean les watchers sur le scope
+		 * Retourne le rectangle que va occupé la page en tenant compte de la rotation (multiple de 90)
 		 * @param {type} scope
 		 * @param {type} watcherClears
 		 */
 		function getRectangle(pdfPage, rotate) {
-			if(pdfPage && pdfPage.view) {
+			if (pdfPage && pdfPage.view) {
 				var view = pdfPage.view;
 				var vHeight;
 				var vWidth;
@@ -29,9 +29,9 @@
 					vHeight = (view[3] - view[1]);
 					vWidth = (view[2] - view[0]);
 				}
-				return {width:vWidth, height:vHeight};
+				return {width: vWidth, height: vHeight};
 			}
-			return {width:0, height:0};
+			return {width: 0, height: 0};
 		}
 	}
 	pdfbox.factory('pdfjsboxWatcherServices', watcherServices);
@@ -61,15 +61,16 @@
 			isHVisibleIn: isHVisibleIn,
 			isVVisibleIn: isVVisibleIn
 		};
-		function drawPageWhenAvailableIfVisible(height, elm, thumbnail, item, forceRender) {
+		function drawPageWhenAvailableIfVisible(thumbnail, item, forceRender) {
+			var elm = ng.element(thumbnail);
+			var height = (elm.parent().height() - 20 - getHeightScrollbar()) || 100; // 20px en moins pour le padding 10 en top et bottom
 			if (elm.hasClass('notrendered')) {
 				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 				if (render) {
 					item.getPage().then(function (pdfPage) {
 						var view = pdfPage.view;
-						var h = height || 100;
-						var scale = (height || 100) / (view[3] - view[1]);
-						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "'></canvas>");
+						var scale = height/ (view[3] - view[1]);
+						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height*0.7) + "'></canvas>");
 						elm.find('canvas').replaceWith(jcanvas);
 						var canvas = jcanvas.get(0);
 						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
@@ -78,6 +79,9 @@
 					});
 				}
 			}
+		}
+		function getHeightScrollbar() {
+			return 16;
 		}
 		/**
 		 * Dessine la page du pdf dans le canvas, utilisé pour les pdf-thumbnal ou les pages à print

@@ -32,7 +32,7 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateNgItem(ctrl, scope.ngItem);
 				ctrl.jqPrintIframe = elm.find('iframe');
-//				manageWheelHandler(ctrl, scope, elm.parents('pdf-view'));
+				manageWheelHandler(ctrl, scope, elm.parents('pdf-view'));
 			}
 		};
 		/**
@@ -44,9 +44,15 @@
 		function manageWheelHandler(ctrl, scope, jpdfView) {
 			jpdfView.on('wheel', {ctrl: ctrl}, function (event) {
 				if (event.originalEvent.deltaY < 0) {
-					event.data.ctrl.previous(event.originalEvent);
+					if(event.ctrlKey) {
+						ctrl.zoomPlus(event);
+					}
+//					event.data.ctrl.previous(event.originalEvent);
 				} else {
-					event.data.ctrl.next(event.originalEvent);
+					if(event.ctrlKey) {
+						ctrl.zoomMoins(event);
+					}
+//					event.data.ctrl.next(event.originalEvent);
 				}
 				scope.$apply();
 			});
@@ -85,16 +91,35 @@
 			ctrl.total;
 			ctrl.previous = previous;
 			ctrl.next = next;
+			ctrl.zoomMoins = zoomMoins;
+			ctrl.zoomPlus = zoomPlus;
 			ctrl.rotate = rotate;
 			ctrl.print = print;
+			ctrl.fit = fit;
 			ctrl.fitH = fitH;
 			ctrl.fitV = fitV;
+			/**
+			 * Dézoom
+			 * @param {jEvent} evt
+			 */
+			function zoomMoins(evt) {
+				stopEvent(evt);
+				$scope.ngScale = $scope.ngScale * 0.9;
+			}
+			/**
+			 * Zoom
+			 * @param {jEvent} evt
+			 */
+			function zoomPlus(evt) {
+				stopEvent(evt);
+				$scope.ngScale = $scope.ngScale / 0.9;
+			}
 			/**
 			 * set ngItem with previous item
 			 * @param {ClickEvent} evt
 			 */
 			function previous(evt) {
-				evt.stopPropagation();
+				stopEvent(evt);
 				if($scope.ngItem) {
 					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
 					if (idx > 0) {
@@ -107,7 +132,7 @@
 			 * @param {ClickEvent} evt
 			 */
 			function next(evt) {
-				evt.stopPropagation();
+				stopEvent(evt);
 				if($scope.ngItem) {
 					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
 					if (idx < $scope.ngItem.items.length - 1) {
@@ -120,15 +145,24 @@
 			 * @param {ClickEvent} evt
 			 */
 			function rotate(evt) {
-				evt.stopPropagation();
+				stopEvent(evt);
 				$scope.ngItem.rotate = ($scope.ngItem.rotate + 90) % 360;
+			}
+			/**
+			 * Set fitV to docScale
+			 * @param {ClickEvent} evt
+			 */
+			function fit(evt) {
+				stopEvent(evt);
+				$scope.ngScale = null;
+				$scope.docScale = "fit";
 			}
 			/**
 			 * Set fitH to docScale
 			 * @param {ClickEvent} evt
 			 */
 			function fitH(evt) {
-				evt.stopPropagation();
+				stopEvent(evt);
 				$scope.ngScale = null;
 				$scope.docScale = "fitH";
 			}
@@ -137,7 +171,7 @@
 			 * @param {ClickEvent} evt
 			 */
 			function fitV(evt) {
-				evt.stopPropagation();
+				stopEvent(evt);
 				$scope.ngScale = null;
 				$scope.docScale = "fitV";
 			}
@@ -146,7 +180,7 @@
 			 * @param {ClickEvent} evt
 			 */
 			function print(evt) {
-				evt.stopPropagation();
+				stopEvent(evt);
 				var jqSpanIcon = ng.element(evt.currentTarget).find('span');
 				jqSpanIcon.addClass('compute');
 				var jqBody = ctrl.jqPrintIframe.contents().find('body'); // ng.element(destDocument.body);
@@ -180,6 +214,10 @@
 					var scale2 = 1920 / Math.max(viewport.width, viewport.height);
 					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, Math.min(scale1, scale2));
 				});
+			}
+			function stopEvent(evt) {
+				evt.preventDefault();
+				evt.stopPropagation();
 			}
 		}
 	}

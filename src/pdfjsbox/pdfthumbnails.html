@@ -1,10 +1,7 @@
-<div class="scrollable" ng-style="{'min-height': ngHeight}" style="style">
-	<pdf-thumbnail ng-repeat="item in ngItems track by ctrl.trackItem(item)"
-						ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
-						ng-click="ctrl.selectByClick(item)" 
-						ng-dblclick="ctrl.copyByDblclick(item)"
-						ng-height="ngHeight" ng-item="item" 
-						draggable="true">
-	</pdf-thumbnail>
-	<h2 ng-if="!ngItems || !ngItems.length" ng-bind="placeholder"></h2>
-</div>
+<pdf-thumbnail ng-repeat="item in ngItems track by ctrl.trackItem(item)"
+					ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
+					ng-click="ctrl.selectByClick(item)" 
+					ng-dblclick="ctrl.copyByDblclick(item)"
+					ng-item="item">
+</pdf-thumbnail>
+<h2 ng-if="!ngItems || !ngItems.length" ng-bind="placeholder"></h2>
