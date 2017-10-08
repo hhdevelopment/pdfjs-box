@@ -46,7 +46,7 @@ pdf-thumbnail {
 	background-color: #eee;
 }
 pdf-thumbnail > a > * {
-	padding: 10px 15px;
+	padding: 10px 10px;
 }
 pdf-thumbnail {
 	cursor:pointer;
@@ -58,18 +58,10 @@ pdf-thumbnail.notrendered a {
 .glyphicon-print.compute {
 	color:transparent;
 }
-pdf-thumbnail:first-child {
-/*	border-top-left-radius:6px;
-	border-bottom-left-radius:6px;*/
-}
-pdf-thumbnail:last-child {
-/*	border-top-right-radius:6px;
-	border-bottom-right-radius:6px;*/
-}
 pdf-thumbnail span.glyphicon-remove {
 	position:absolute;
-	top: 15px;
-	right:17px;
+	top: 2px;
+	right:2px;
 }
 pdf-thumbnail.moving {
 	-webkit-transform: scale(0.8); /* Safari and Chrome */
