@@ -58,7 +58,7 @@
 			<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
 				<pdf-view id="myPdfViewer" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
 					<pdf-docscale ng-item="ctrl.selectedItem" pdfview-selector="#myPdfViewer" doc-scale="ctrl.docscale" ng-scale="ctrl.scale"></pdf-docscale>
-					<pdf-commands class="xl" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" allow-print="true"></pdf-commands>
+					<pdf-commands class="xl" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" doc-scale="ctrl.docscale" allow-print="true"></pdf-commands>
 				</pdf-view>
 			</div>
 		</div>

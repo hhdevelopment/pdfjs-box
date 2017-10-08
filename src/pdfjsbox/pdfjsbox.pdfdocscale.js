@@ -56,8 +56,8 @@
 						return;
 					}
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
-					var scaleFitV = (container.height() || rectangle.height) / rectangle.height;
-					var scaleFitH = (container.width() || rectangle.width) / rectangle.width;
+					var scaleFitV = ((container.height() || rectangle.height) - 25) / rectangle.height;
+					var scaleFitH = ((container.width() || rectangle.width) - 25) / rectangle.width;
 					if (docScale === 'fit') {
 						scope.ngScale = Math.min(scaleFitV, scaleFitH);
 					} else if (docScale === 'fitV') {
@@ -78,7 +78,8 @@
 		 * @returns {HTMLElement}
 		 */
 		function getPdfViewHTMLElement(pdfDocscaleElm, pdfviewSelector) {
-			var container = null;;
+			var container = null;
+			;
 			if (pdfviewSelector) {
 				container = ng.element(pdfviewSelector);
 				if (!container) {

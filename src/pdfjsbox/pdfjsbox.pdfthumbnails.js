@@ -58,9 +58,9 @@
 					if (scope.selectedItem && scope.ngItems.length) {
 						var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
 						if ((coeff * event.originalEvent.deltaY) < 0) {
-							idx = Math.max(idx - 1, 0);
-						} else {
 							idx = Math.min(idx + 1, scope.ngItems.length - 1);
+						} else {
+							idx = Math.max(idx - 1, 0);
 						}
 						var newItem = scope.ngItems[idx];
 						if (newItem !== scope.selectedItem) {

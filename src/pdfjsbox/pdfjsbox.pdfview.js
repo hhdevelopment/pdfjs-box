@@ -77,13 +77,13 @@
 		 * @returns {Number}
 		 */
 		function fixScale(pdfPage, scale, rotate, height, width) {
-			var scale = scale || 1;
+			var scaleRetains = scale || 1;
 			if(pdfPage && pdfPage.view) {
 				var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, rotate);
-				var pageHeight = rectangle.height * scale;
-				var pageWidth = rectangle.width * scale;
+				var pageHeight = rectangle.height * scaleRetains;
+				var pageWidth = rectangle.width * scaleRetains;
 				if(pageHeight < height && pageWidth < width) { // la page est trop petite
-					var s =  scale / 0.9; // on agrandi la page
+					var s =  scaleRetains / 0.9; // on agrandi la page
 					var pageHeight = rectangle.height * s;
 					var pageWidth = rectangle.width * s;
 					if(pageHeight <= height && pageWidth <= width) {
@@ -91,7 +91,7 @@
 					}
 				}
 			}
-			return scale;
+			return scaleRetains;
 		}
 		/**
 		 * Dessine la page dans le context du canvas
