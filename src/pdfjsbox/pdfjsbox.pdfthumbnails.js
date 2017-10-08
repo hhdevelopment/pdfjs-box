@@ -271,10 +271,10 @@
 		 * @param {Number} height : hauteur de la miniature
 		 */
 		function drawVisiblePdfThumbnails(clientRect, height) {
-			var first = document.elementFromPoint(clientRect.left + 5, clientRect.top + 5);
-			if (first && first.nodeName === 'PDF-THUMBNAIL') {
-				var thumbnail = first;
-				while (thumbnail !== null && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
+			var elm = document.elementFromPoint(clientRect.left, clientRect.top);
+			if (elm && elm.nodeName === 'CANVAS') {
+				var thumbnail = elm.parentElement;
+				while (thumbnail && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
 					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(height, thumbnail, thumbnail.item, true);
 					thumbnail = thumbnail.nextElementSibling;
 				}
