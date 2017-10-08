@@ -19,7 +19,6 @@
 				'ngItems': '=', // la liste de items representant les pages du document
 				'allowDrag': '<', // Les miniatures sont elles draggables
 				'allowDrop': '<', // Les miniatures sont elles droppables ici
-				'ngHeight': '<', // la hauteur désiré des miniatures
 				'selectedItem': '=', // l'item sélectionné
 				'placeholder': '@', // texte quand la ligne est vide
 				'dblclickTarget': '=', // une liste d'items cible pour la copie via le doubleclick
@@ -42,9 +41,6 @@
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
 				manageWheelHandler(scope, elm);
-				if(scope.ngHeight) {
-					elm.css('min-height', scope.ngHeight);
-				}
 				elm.addClass('scrollable');
 			}
 		};
@@ -244,7 +240,7 @@
 		 * @param {jQueryElement} jqThumbnails
 		 */
 		function manageResizeHandler(scope, jqThumbnails) {
-			ng.element($window).on('resize', {promise: null, container: jqThumbnails.get(0), height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+			ng.element($window).on('resize', {promise: null, container: jqThumbnails.get(0)}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		/**
 		 * Gestion du scroll de la zone de miniature
@@ -252,7 +248,7 @@
 		 * @param {jQueryElement} jqThumbnails
 		 */
 		function manageScrollHandler(scope, jqThumbnails) {
-			jqThumbnails.on('scroll', {promise: null, container: jqThumbnails.get(0), height: scope.ngHeight}, manageDrawVisiblePfgThumbnailsHandler);
+			jqThumbnails.on('scroll', {promise: null, container: jqThumbnails.get(0)}, manageDrawVisiblePfgThumbnailsHandler);
 		}
 		/**
 		 * Temporise la gestion de dessin des thumbnail qui apparaisent à l'ecran
@@ -263,19 +259,18 @@
 			if (data.promise) {
 				$timeout.cancel(data.promise);
 			}
-			data.promise = $timeout(drawVisiblePdfThumbnails, 500, false, data.container.getClientRects()[0], data.height);
+			data.promise = $timeout(drawVisiblePdfThumbnails, 500, false, data.container.getClientRects()[0]);
 		}
 		/**
 		 * Dessine tous les miniatures notrendered dans la zone visible dans le clientRect
 		 * @param {ClientRect} clientRect
-		 * @param {Number} height : hauteur de la miniature
 		 */
-		function drawVisiblePdfThumbnails(clientRect, height) {
+		function drawVisiblePdfThumbnails(clientRect) {
 			var elm = document.elementFromPoint(clientRect.left, clientRect.top);
 			if (elm && elm.nodeName === 'CANVAS') {
 				var thumbnail = elm.parentElement;
 				while (thumbnail && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
-					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(height, thumbnail, thumbnail.item, true);
+					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, thumbnail.item, true);
 					thumbnail = thumbnail.nextElementSibling;
 				}
 			}
@@ -300,7 +295,7 @@
 			if (idx !== -1) {
 				var thumbnail = pdfthumbnailsElm.children().get(idx);
 				ensureIsHVisibleIn(thumbnail, pdfthumbnailsElm.get(0));
-				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(scope.ngHeight, thumbnail, selectedItem, true);
+				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, selectedItem, true);
 				if (selectedItem.items === items) {
 					pdfthumbnailsElm.addClass('active');
 				}

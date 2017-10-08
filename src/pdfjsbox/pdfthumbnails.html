@@ -2,6 +2,6 @@
 					ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
 					ng-click="ctrl.selectByClick(item)" 
 					ng-dblclick="ctrl.copyByDblclick(item)"
-					ng-height="ngHeight" ng-item="item">
+					ng-item="item">
 </pdf-thumbnail>
 <h2 ng-if="!ngItems || !ngItems.length" ng-bind="placeholder"></h2>
