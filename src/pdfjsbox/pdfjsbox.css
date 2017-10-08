@@ -69,6 +69,7 @@ pdf-thumbnail.moving {
 	-moz-transform: scale(0.8); /* FF */
 	-ms-transform: scale(0.8); /* IE */
 	-o-transform: scale(0.8); /* Opera */
+	border: #333 dashed 1px ;
 }
 
 pdf-view {
