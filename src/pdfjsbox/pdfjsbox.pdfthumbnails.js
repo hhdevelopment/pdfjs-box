@@ -131,7 +131,6 @@
 					var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
 					data.item.moving = false;
 					if (!data.item.tmp) {
-						data.item.moving = false;
 						data.item = null;
 					} else {
 						if (pdfthumbnails) {

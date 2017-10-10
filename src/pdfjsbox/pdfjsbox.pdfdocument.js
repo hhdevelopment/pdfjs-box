@@ -77,7 +77,7 @@
 				for (var i = idx; i < pdfDocument.numPages; i++) {
 					loadSinglePage(pdf, pdfDocument, items, i, idx, new Date().getTime());
 				}
-				scope.$apply();
+//				scope.$apply();
 			}
 			return null;
 		}

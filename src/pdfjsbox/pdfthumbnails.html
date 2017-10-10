@@ -4,4 +4,4 @@
 					ng-dblclick="ctrl.copyByDblclick(item)"
 					ng-item="item">
 </pdf-thumbnail>
-<h2 ng-if="!ngItems || !ngItems.length" ng-bind="placeholder"></h2>
+<h2 ng-if="!ngItems || !ngItems.length" ng-bind="::placeholder"></h2>
