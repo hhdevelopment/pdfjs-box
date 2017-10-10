@@ -8,7 +8,7 @@
 	}
 	pdfbox.directive('pdfDocument', pdfDocument);
 	/* @ngInject */
-	function pdfDocument($q, pdfjsConfig, pdfjsboxWatcherServices, pdfjsboxItemServices) {
+	function pdfDocument($q, pdfjsConfig, pdfjsboxWatcherServices) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -74,10 +74,11 @@
 					}
 				});
 			} else {
+				var t0 = new Date().getTime();
 				for (var i = idx; i < pdfDocument.numPages; i++) {
-					loadSinglePage(pdf, pdfDocument, items, i, idx, new Date().getTime());
+					loadSinglePage(pdf, pdfDocument, items, i, idx, t0);
 				}
-				scope.$apply();
+//				scope.$apply();
 			}
 			return null;
 		}
