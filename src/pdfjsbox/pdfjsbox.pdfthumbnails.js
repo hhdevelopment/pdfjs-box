@@ -258,7 +258,7 @@
 			if (data.promise) {
 				$timeout.cancel(data.promise);
 			}
-			data.promise = $timeout(drawVisiblePdfThumbnails, 500, false, data.container.getClientRects()[0]);
+			data.promise = $timeout(drawVisiblePdfThumbnails, 500, true, data.container.getClientRects()[0]);
 		}
 		/**
 		 * Dessine tous les miniatures notrendered dans la zone visible dans le clientRect
@@ -266,8 +266,13 @@
 		 */
 		function drawVisiblePdfThumbnails(clientRect) {
 			var elm = document.elementFromPoint(clientRect.left, clientRect.top);
-			if (elm && elm.nodeName === 'CANVAS') {
-				var thumbnail = elm.parentElement;
+			if (elm) {
+				var thumbnail;
+				if(elm.nodeName === 'CANVAS') {
+					thumbnail = elm.parentElement;
+				} else if(elm.nodeName === 'PDF-THUMBNAIL') {
+					thumbnail = elm;
+				}
 				while (thumbnail && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
 					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, thumbnail.item, true);
 					thumbnail = thumbnail.nextElementSibling;
