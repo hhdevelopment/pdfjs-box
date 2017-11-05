@@ -21,7 +21,7 @@ require('./pdfjsbox/pdfjsbox.services.js');
 (function (ng, __) {
 	'use strict';
 	ng.module('app', ['pdfjs-box'])
-			  .constant('pdfjsConfig', { workerSrc: './pdf.worker.bundle.js', preloadRecursivePages:7 } )
+			  .constant('pdfjsConfig', { workerSrc: './pdf.worker.bundle.js', cMapUrl:'cmaps/', cMapPacked:true, preloadRecursivePages:7 } )
 			  .controller('AppCtrl', AppCtrl);
 	function AppCtrl() {
 		var ctrl = this;
