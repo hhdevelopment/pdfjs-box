@@ -59,18 +59,22 @@
 			drawPageWhenAvailableIfVisible: drawPageWhenAvailableIfVisible,
 			drawPdfPageToCanvas: drawPdfPageToCanvas,
 			isHVisibleIn: isHVisibleIn,
-			isVVisibleIn: isVVisibleIn
+			isVVisibleIn: isVVisibleIn,
+			getScrollbarHeight: getScrollbarHeight,
+			getScrollbarWidth: getScrollbarWidth
 		};
+		var scrollbarHeight;
+		var scrollbarWidth;
 		function drawPageWhenAvailableIfVisible(thumbnail, item, forceRender) {
 			var elm = ng.element(thumbnail);
-			var height = (elm.parent().height() - 20 - getHeightScrollbar()) || 100; // 20px en moins pour le padding 10 en top et bottom
+			var height = (elm.parent().innerHeight() - 20 - getScrollbarHeight()) || 100; // 20px en moins pour le padding 10 en top et bottom
 			if (elm.hasClass('notrendered')) {
 				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 				if (render) {
 					item.getPage().then(function (pdfPage) {
 						var view = pdfPage.view;
-						var scale = height/ (view[3] - view[1]);
-						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height*0.7) + "'></canvas>");
+						var scale = height / (view[3] - view[1]);
+						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * 0.7) + "'></canvas>");
 						elm.find('canvas').replaceWith(jcanvas);
 						var canvas = jcanvas.get(0);
 						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
@@ -80,8 +84,36 @@
 				}
 			}
 		}
-		function getHeightScrollbar() {
-			return 16;
+		/**
+		 * retourne la hauteur des scrollbars
+		 * @returns {Number}
+		 */
+		function getScrollbarHeight() {
+			if (scrollbarHeight === undefined) {
+				computeScrollbarMeasure();
+			}
+			return scrollbarHeight;
+		}
+		/**
+		 * retourne la largeur des scrollbars
+		 * @returns {Number}
+		 */
+		function getScrollbarWidth() {
+			if (scrollbarWidth === undefined) {
+				computeScrollbarMeasure();
+			}
+			return scrollbarWidth;
+		}
+		/**
+		 * Calcul les dimensions des scrollbars
+		 */
+		function computeScrollbarMeasure() {
+			var scrollDiv = document.createElement("div");
+			scrollDiv.className = "all-scrollbars";
+			document.body.appendChild(scrollDiv);
+			scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+			scrollbarHeight = scrollDiv.offsetHeight - scrollDiv.clientHeight;
+			document.body.removeChild(scrollDiv);
 		}
 		/**
 		 * Dessine la page du pdf dans le canvas, utilisé pour les pdf-thumbnal ou les pages à print

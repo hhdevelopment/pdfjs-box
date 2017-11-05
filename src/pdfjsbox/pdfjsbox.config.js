@@ -15,6 +15,8 @@
 		} else {
 			pdfapi.disableWorker = true;
 		}
+		pdfapi.cMapUrl = pdfjsConfig.cMapUrl || 'cmaps/';
+		pdfapi.cMapPacked = pdfjsConfig.cMapPacked === true;
 		$templateCache.put('pdfthumbnails.html', require('./pdfthumbnails.html'));
 		$templateCache.put('pdfthumbnail.html', require('./pdfthumbnail.html'));
 		$templateCache.put('pdfview.html', require('./pdfview.html'));

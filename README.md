@@ -92,7 +92,6 @@ So if you use webpack or other bundler, you have to add pdfjs worker bundle in t
 
 This is my solution for webpack.
 
-
 ~~~~
 return [{
 		context: __dirname,
@@ -116,5 +115,40 @@ angular.module("YourApp", [..., 'pdfjs-box', ...]).
 workerSrc : path for worker.
 preloadRecursivePages : configure balance between preload recursive or sequency. Set value with number of thumbnails visible by default.
 
-3. Add directive to your html
+3. Add fontmaps : cmap
+
+Some pdf use specifics fonts. For it, PDFJS needs cmap.
+These cmap are include in pdfjs src : './node_modules/pdfjs-dist/cmaps/*'
+Include them in your build
+
+With webpack 2+
+
+~~~~
+const cmapPath = './node_modules/pdfjs-dist/cmaps';
+...
+	return [{
+		entry: () => new Promise((resolve) => fs.readdir(cmapPath, function(e, files) {
+			resolve(files.map(function(file) {return cmapPath+'/'+file;}));
+		})),
+		output: {
+			filename: '[name]',
+			path: path.resolve(__dirname, 'public_html')
+		},
+		module: {
+			rules: [{test: /\.(bcmap)$/, use: [{loader: 'file-loader', options: {name: 'cmaps/[name].[ext]'}}]}]
+		}
+	}, {
+
+~~~~
+Now you can add it with constant 'pdfjsConfig'
+
+~~~~
+angular.module("YourApp", [..., 'pdfjs-box', ...]).  
+    constant('pdfjsConfig', { cMapUrl:'cmaps/', cMapPacked:true } )
+~~~~
+
+cMapUrl : the relative url in your site.
+cMapPacked : Set true if you use bcmap include in pdfjs
+
+4. Add directives to your html
 
