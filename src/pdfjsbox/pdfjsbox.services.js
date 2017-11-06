@@ -67,7 +67,7 @@
 		var scrollbarWidth;
 		function drawPageWhenAvailableIfVisible(thumbnail, item, forceRender) {
 			var elm = ng.element(thumbnail);
-			var height = (elm.parent().innerHeight() - 20 - getScrollbarHeight()) || 100; // 20px en moins pour le padding 10 en top et bottom
+			var height = (thumbnail.parentElement.offsetHeight - 20 - getScrollbarHeight()) || 100; // 20px en moins pour le padding 10 en top et bottom
 			if (elm.hasClass('notrendered')) {
 				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 				if (render) {
