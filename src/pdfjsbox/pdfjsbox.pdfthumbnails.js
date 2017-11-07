@@ -50,11 +50,10 @@
 		 * @param {jQueryElement} jqThumbnails
 		 */
 		function manageWheelHandler(scope, jqThumbnails) {
-			var coeff = scope.reverseScroll ? -1 : 1;
-			jqThumbnails.on('wheel', {scope: scope, target: jqThumbnails.get(0), coeff: coeff}, function (event) {
+			jqThumbnails.on('wheel', {scope: scope, target: jqThumbnails.get(0)}, function (event) {
 				if (event.data.target === event.currentTarget) {
 					var scope = event.data.scope;
-					var coeff = event.data.coeff;
+					var coeff = scope.reverseScroll ? -1 : 1;
 					if (scope.selectedItem && scope.ngItems.length) {
 						var idx = pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems);
 						if ((coeff * event.originalEvent.deltaY) < 0) {
