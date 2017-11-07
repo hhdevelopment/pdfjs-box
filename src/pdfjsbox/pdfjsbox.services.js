@@ -61,7 +61,9 @@
 			isHVisibleIn: isHVisibleIn,
 			isVVisibleIn: isVVisibleIn,
 			getScrollbarHeight: getScrollbarHeight,
-			getScrollbarWidth: getScrollbarWidth
+			getScrollbarWidth: getScrollbarWidth,
+			isVerticalScrollbarPresent:isVerticalScrollbarPresent,
+			isHorizontalScrollbarPresent:isHorizontalScrollbarPresent
 		};
 		var scrollbarHeight;
 		var scrollbarWidth;
@@ -83,6 +85,14 @@
 					});
 				}
 			}
+		}
+		function isVerticalScrollbarPresent(jqElt) {
+			var elt = jqElt.get(0);
+			return elt.offsetWidth !== elt.clientWidth;
+		}
+		function isHorizontalScrollbarPresent(jqElt) {
+			var elt = jqElt.get(0);
+			return elt.offsetHeight !== elt.clientHeight;
 		}
 		/**
 		 * retourne la hauteur des scrollbars

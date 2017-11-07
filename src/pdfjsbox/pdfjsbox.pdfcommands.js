@@ -8,7 +8,7 @@
 	}
 	pdfbox.directive('pdfCommands', pdfCommands);
 	/* @ngInject */
-	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices) {
+	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDrawServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfcommands.html',
@@ -42,17 +42,19 @@
 		 * @param {jQueryElement} jpdfView
 		 */
 		function manageWheelHandler(ctrl, scope, jpdfView) {
-			jpdfView.on('wheel', {ctrl: ctrl}, function (event) {
+			jpdfView.on('wheel', null, {ctrl: ctrl}, function (event) {
 				if (event.originalEvent.deltaY < 0) {
 					if(event.ctrlKey) {
 						ctrl.zoomPlus(event);
+					} else if(!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+						event.data.ctrl.previous(event.originalEvent);
 					}
-//					event.data.ctrl.previous(event.originalEvent);
 				} else {
 					if(event.ctrlKey) {
 						ctrl.zoomMoins(event);
+					} else if(!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+						event.data.ctrl.next(event.originalEvent);
 					}
-//					event.data.ctrl.next(event.originalEvent);
 				}
 				scope.$apply();
 			});
