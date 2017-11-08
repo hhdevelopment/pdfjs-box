@@ -1,3 +1,4 @@
+/* global _ */
 (function (ng, __) {
 	'use strict';
 	var pdfbox;
@@ -115,9 +116,9 @@
 						if (item) {
 							var thumbnailOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
 							if (thumbnailOver) { // on survole un autre thumbnail
-								addThumbnailAroundOver(scope, item, thumbnailOver, e.clientX);
+								addThumbnailAroundOver(scope, item, thumbnailOver, pdfthumbnails, e.clientX);
 							} else {
-								addThumbnailAtEnd(scope, item);
+								addThumbnailAtEnd(scope, item, pdfthumbnails);
 							}
 						}
 					}
@@ -179,20 +180,23 @@
 		 * Ajoute un thumbnail à la fin de la liste
 		 * @param {Angular scope} scope : Scope du thumbnails survolé
 		 * @param {Item} item
+		 * @param {HTMLElement} pdfthumbnails : Thumbnails survolé
 		 */
-		function addThumbnailAtEnd(scope, item) {
+		function addThumbnailAtEnd(scope, item, pdfthumbnails) {
 			removeOldPosition(scope, item);
 			scope.ngItems.push(item);
 			scope.$apply();
+			$timeout(drawVisiblePdfThumbnails, 50, true, pdfthumbnails.getClientRects()[0]);
 		}
 		/**
 		 * Ajoute un thumbnail pour l'item avant ou apres le thumbnail survolé
 		 * @param {Angular scope} scope : Scope du thumbnails survolé
 		 * @param {Item} item
 		 * @param {HTMLElement} thumbnailOver : Thumbnail survolé éventuellement
+		 * @param {HTMLElement} pdfthumbnails : Thumbnails survolé
 		 * @param {Number} clientX : x de la souris
 		 */
-		function addThumbnailAroundOver(scope, item, thumbnailOver, clientX) {
+		function addThumbnailAroundOver(scope, item, thumbnailOver, pdfthumbnails, clientX) {
 			var items = scope.ngItems;
 			if (thumbnailOver.item && !pdfjsboxItemServices.areItemsEqual(thumbnailOver.item, item)) { // on n'est pas dessus
 				removeOldPosition(scope, item);
@@ -204,6 +208,7 @@
 					items.splice(idx + 1, 0, item);
 				}
 				scope.$apply();
+				$timeout(drawVisiblePdfThumbnails, 50, true, pdfthumbnails.getClientRects()[0]);
 			}
 		}
 		/**
@@ -385,7 +390,7 @@
 			ctrl.trackItem = trackItem;
 
 			function trackItem(item) {
-				return JSON.stringify(item.document) + item.pageIdx;
+				return item.pageIdx + '_' + item.$$pdfid;
 			}
 			function selectByClick(item) {
 				$scope.selectedItem = item;
