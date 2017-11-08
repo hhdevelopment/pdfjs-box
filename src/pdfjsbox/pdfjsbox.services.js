@@ -1,3 +1,4 @@
+/* global _ */
 (function (ng, __) {
 	'use strict';
 	var pdfbox;
@@ -62,8 +63,8 @@
 			isVVisibleIn: isVVisibleIn,
 			getScrollbarHeight: getScrollbarHeight,
 			getScrollbarWidth: getScrollbarWidth,
-			isVerticalScrollbarPresent:isVerticalScrollbarPresent,
-			isHorizontalScrollbarPresent:isHorizontalScrollbarPresent
+			isVerticalScrollbarPresent: isVerticalScrollbarPresent,
+			isHorizontalScrollbarPresent: isHorizontalScrollbarPresent
 		};
 		var scrollbarHeight;
 		var scrollbarWidth;
@@ -172,7 +173,8 @@
 			isContainInList: isContainInList,
 			getItemInList: getItemInList,
 			areItemsEqual: areItemsEqual,
-			cloneItem: cloneItem
+			cloneItem: cloneItem,
+			id: id
 		};
 		/**
 		 * Clone l'tem pour la liste en parametre
@@ -181,16 +183,16 @@
 		 * @returns {Item}
 		 */
 		function cloneItem(item, itemsTarget) {
-			return {document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, getPage: item.getPage};
+			return {$$pdfid:item.$$pdfid, document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, getPage: item.getPage};
 		}
 		function getIndexOfItemInList(item, items) {
-			return item && __.findIndex(items, {'document': item.document, 'pageIdx': item.pageIdx});
+			return item && __.findIndex(items, {$$pdfid:item.$$pdfid, pageIdx: item.pageIdx});
 		}
 		function isContainInList(item, items) {
-			return __.some(items, {'document': item.document, 'pageIdx': item.pageIdx});
+			return __.some(items, {$$pdfid:item.$$pdfid, pageIdx: item.pageIdx});
 		}
 		function getItemInList(item, items) {
-			return item && __.find(items, {'document': item.document, 'pageIdx': item.pageIdx});
+			return item && __.find(items, {$$pdfid:item.$$pdfid, pageIdx: item.pageIdx});
 		}
 		/**
 		 * Compare deux items pour determiner s'ils sont egaux
@@ -205,7 +207,52 @@
 			if (!item1 || !item2) {
 				return false;
 			}
-			return __.isMatch(item1, {'document': item2.document, 'pageIdx': item2.pageIdx});
+			return __.isMatch(item1, {$$pdfid:item2.$$pdfid, pageIdx: item2.pageIdx});
+		}
+		/**
+		 * Genere l'id du pdf pour l'item 
+		 * @param {Object} pdf
+		 * @returns {String}
+		 */
+		function id(pdf) {
+			var pdfid = pdf.id || pdf.url;
+			if(!pdfid) {
+				pdfid = !pdf.data?hash(pdf):uuid();
+			}
+			return pdfid;
+		}
+		/**
+		 * Genere un hash de l'objet pdf pour l'item 
+		 * @param {Object} pdf
+		 * @returns {String}
+		 */
+		function hash(pdf) {
+			return JSON.stringify(pdf);
+		}
+		/**
+		 * Genere un uuid
+		 * @returns {String}
+		 */
+		function uuid() {
+			var buf = new Uint32Array(4);
+			getCryptoObj().getRandomValues(buf);
+			var idx = -1;
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+				idx++;
+				var r = (buf[idx >> 3] >> ((idx % 8) * 4)) & 15;
+				var v = c === 'x' ? r : (r & 0x3 | 0x8);
+				return v.toString(16);
+			});
+		}
+		function getCryptoObj() {
+			return window.crypto || window.msCrypto || {
+				getRandomValues: function (buf) {
+					for (var i = 0, l = buf.length; i < l; i++) {
+						buf[i] = Math.floor(Math.random() * 256);
+					}
+					return buf;
+				}
+			};
 		}
 	}
 })(angular, _);

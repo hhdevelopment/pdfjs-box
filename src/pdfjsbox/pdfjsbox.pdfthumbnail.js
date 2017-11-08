@@ -1,3 +1,4 @@
+/* global _ */
 (function (ng, __) {
 	'use strict';
 	var pdfbox;

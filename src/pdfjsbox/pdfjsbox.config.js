@@ -1,3 +1,5 @@
+/* global _ */
+/* global PDFJS */
 (function (ng, __, PDFJS) {
 	'use strict';
 	var pdfbox;
