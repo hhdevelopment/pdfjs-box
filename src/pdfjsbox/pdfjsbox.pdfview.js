@@ -1,3 +1,4 @@
+/* global _ */
 (function (ng, __, PDFJS) {
 	'use strict';
 	var pdfbox;
@@ -23,7 +24,7 @@
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				// Don't survey ngItem because, ngItem.items cause infinitive loop
-				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
+				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
 					updateView(s, elm, s.ngItem);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
