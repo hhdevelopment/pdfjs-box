@@ -70,19 +70,20 @@
 		var scrollbarWidth;
 		function drawPageWhenAvailableIfVisible(thumbnail, item, forceRender) {
 			var elm = ng.element(thumbnail);
-			var height = (thumbnail.parentElement.offsetHeight - 20 - getScrollbarHeight()) || 100; // 20px en moins pour le padding 10 en top et bottom
 			if (elm.hasClass('notrendered')) {
+				var height = (thumbnail.parentElement.offsetHeight - 20 - getScrollbarHeight()) || 100; // 20px en moins pour le padding 10 en top et bottom
 				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 				if (render) {
 					item.getPage().then(function (pdfPage) {
-						var view = pdfPage.view;
-						var scale = height / (view[3] - view[1]);
-						var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * 0.7) + "'></canvas>");
-						elm.find('canvas').replaceWith(jcanvas);
-						var canvas = jcanvas.get(0);
-						drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale).then(function () {
+						if (elm.hasClass('notrendered')) {
 							elm.removeClass('notrendered');
-						});
+							var view = pdfPage.view;
+							var scale = height / (view[3] - view[1]);
+							var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * 0.7) + "'></canvas>");
+							elm.find('canvas').replaceWith(jcanvas);
+							var canvas = jcanvas.get(0);
+							drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale);
+						}
 					});
 				}
 			}
@@ -141,11 +142,11 @@
 				var viewport = pdfPage.getViewport(scale, rot);
 				canvas.width = viewport.width;
 				canvas.height = viewport.height;
+				console.log("drawPdfPageToCanvas", canvas.width, canvas.height);
 				return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.catch(function (error) {
 					console.log(error);
 				});
 			}
-			return null;
 		}
 		/**
 		 * Détermine si le rectangle1 est visible entierement ou en partie horizontalement dans le rectangle2
@@ -183,16 +184,16 @@
 		 * @returns {Item}
 		 */
 		function cloneItem(item, itemsTarget) {
-			return {$$pdfid:item.$$pdfid, document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, getPage: item.getPage};
+			return {$$pdfid: item.$$pdfid, document: item.document, pageIdx: item.pageIdx, rotate: item.rotate, items: itemsTarget, getPage: item.getPage};
 		}
 		function getIndexOfItemInList(item, items) {
-			return item && __.findIndex(items, {$$pdfid:item.$$pdfid, pageIdx: item.pageIdx});
+			return item && __.findIndex(items, {$$pdfid: item.$$pdfid, pageIdx: item.pageIdx});
 		}
 		function isContainInList(item, items) {
-			return __.some(items, {$$pdfid:item.$$pdfid, pageIdx: item.pageIdx});
+			return __.some(items, {$$pdfid: item.$$pdfid, pageIdx: item.pageIdx});
 		}
 		function getItemInList(item, items) {
-			return item && __.find(items, {$$pdfid:item.$$pdfid, pageIdx: item.pageIdx});
+			return item && __.find(items, {$$pdfid: item.$$pdfid, pageIdx: item.pageIdx});
 		}
 		/**
 		 * Compare deux items pour determiner s'ils sont egaux
@@ -207,7 +208,7 @@
 			if (!item1 || !item2) {
 				return false;
 			}
-			return __.isMatch(item1, {$$pdfid:item2.$$pdfid, pageIdx: item2.pageIdx});
+			return __.isMatch(item1, {$$pdfid: item2.$$pdfid, pageIdx: item2.pageIdx});
 		}
 		/**
 		 * Genere l'id du pdf pour l'item 
@@ -216,8 +217,8 @@
 		 */
 		function id(pdf) {
 			var pdfid = pdf.id || pdf.url;
-			if(!pdfid) {
-				pdfid = !pdf.data?hash(pdf):uuid();
+			if (!pdfid) {
+				pdfid = !pdf.data ? hash(pdf) : uuid();
 			}
 			return pdfid;
 		}
