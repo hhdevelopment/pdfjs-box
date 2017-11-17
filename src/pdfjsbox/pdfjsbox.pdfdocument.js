@@ -67,7 +67,7 @@
 				var item = {$$pdfid:pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 						return deferred.promise;
 					}};
-				items.push(item);
+				items[idx] = item;
 				scope.$apply();
 				return pdfDocument.getPage(idx + 1).then(function (pdfPage) {
 					deferred.resolve(pdfPage);
@@ -99,7 +99,7 @@
 			var item = {$$pdfid:pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 					return pdfDocument.getPage(this.pageIdx);
 				}};
-			items.push(item);
+			items[idx] = item;
 			if ((idx + 1) === pdfDocument.numPages) {
 				console.log('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
 			}
