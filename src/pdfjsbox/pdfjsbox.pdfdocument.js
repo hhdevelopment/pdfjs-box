@@ -35,19 +35,22 @@
 		function updatePdf(scope, pdf) {
 			var items = scope.ngItems || [];
 			items.splice(0, items.length);
-			if (pdf) {
-				var pdfid = pdfjsboxItemServices.id(pdf);
-				var task = PDFJS.getDocument(pdf);
-				return task.promise.then(function (pdfDocument) {
-					var t0 = new Date().getTime();
-					return loadRecursivePage(scope, pdf, pdfid, pdfDocument, items, 0, pdfjsConfig.preloadRecursivePages).then(function () {
-						console.log('Preload recursive ' + Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
-					}, function (reason) {
-						console.log('Recursive preloading cancel cause document changed.');
+			var pdfid = pdfjsboxItemServices.id(pdf);
+			if (pdfid !== scope.pdfid) {
+				scope.pdfid = pdfid;
+				if(pdfid) {
+					var task = PDFJS.getDocument(pdf);
+					return task.promise.then(function (pdfDocument) {
+						var t0 = new Date().getTime();
+						return loadRecursivePage(scope, pdf, pdfid, pdfDocument, items, 0, pdfjsConfig.preloadRecursivePages).then(function () {
+							console.debug('Preload recursive ' + Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
+						}, function (reason) {
+							console.debug('Recursive preloading cancel cause document changed.');
+						});
+					}).catch(function (reason) {
+						console.error('Error: ' + reason);
 					});
-				}).catch(function (reason) {
-					console.error('Error: ' + reason);
-				});
+				}
 			}
 			return null;
 		}
@@ -101,7 +104,7 @@
 				}};
 			items[idx] = item;
 			if ((idx + 1) === pdfDocument.numPages) {
-				console.log('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
+				console.debug('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
 			}
 		}
 	}

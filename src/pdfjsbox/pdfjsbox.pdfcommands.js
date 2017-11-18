@@ -206,7 +206,7 @@
 						printFrame.contentWindow.print();
 					}
 				} catch (error) {
-//					console.log(error.message);
+//					console.error(error.message);
 				}
 			}
 			function drawItemToCanvas(item, canvas) {
