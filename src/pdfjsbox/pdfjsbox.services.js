@@ -142,9 +142,9 @@
 				var viewport = pdfPage.getViewport(scale, rot);
 				canvas.width = viewport.width;
 				canvas.height = viewport.height;
-				console.log("drawPdfPageToCanvas", canvas.width, canvas.height);
+				// console.debug("drawPdfPageToCanvas", canvas.width, canvas.height);
 				return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.catch(function (error) {
-					console.log(error);
+					console.error(error);
 				});
 			}
 		}
@@ -216,9 +216,12 @@
 		 * @returns {String}
 		 */
 		function id(pdf) {
-			var pdfid = pdf.id || pdf.url;
-			if (!pdfid) {
-				pdfid = !pdf.data ? hash(pdf) : uuid();
+			var pdfid;
+			if(pdf) {
+				pdfid = pdf.id || pdf.url;
+				if (!pdfid) {
+					pdfid = !pdf.data ? hash(pdf) : uuid();
+				}
 			}
 			return pdfid;
 		}

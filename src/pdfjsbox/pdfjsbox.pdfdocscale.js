@@ -53,7 +53,7 @@
 					var container = getPdfViewHTMLElement(pdfDocscaleElm, pdfviewSelector);
 					if (!container) {
 						scope.ngScale = 1;
-						console.log('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdfview-selector\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
+						console.info('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdfview-selector\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
 						return;
 					}
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
@@ -66,7 +66,7 @@
 					} else if (docScale === 'fitH') {
 						scope.ngScale = scaleFitH;
 					} else {
-						console.log('docScale feature : \'%s\' is not good value for doc-scale, set with \'fit\', \'fitH\' or \'fitV\' or number', docScale);
+						console.info('docScale feature : \'%s\' is not good value for doc-scale, set with \'fit\', \'fitH\' or \'fitV\' or number', docScale);
 					}
 				}
 			});
@@ -84,7 +84,7 @@
 			if (pdfviewSelector) {
 				container = ng.element(pdfviewSelector);
 				if (!container) {
-					console.log('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value of attribute \'pdfview-selector\' or Transclude \'pdf-docscale\' in \'pdf-view\'', pdfviewSelector);
+					console.info('"docScale" feature : Cannot find \'%s\' selector of \'pdf-view\'. set an other value of attribute \'pdfview-selector\' or Transclude \'pdf-docscale\' in \'pdf-view\'', pdfviewSelector);
 				}
 			} else {
 				container = pdfDocscaleElm.parents('pdf-view');
