@@ -20,7 +20,8 @@
 				'ngItem': '=',
 				'ngScale': '=',
 				'docScale': '=',
-				'allowPrint': '='
+				'allowPrint': '<',
+				'allowRefresh': '<'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -33,7 +34,8 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateNgItem(ctrl, scope.ngItem);
 				ctrl.jqPrintIframe = elm.find('iframe');
-				manageWheelHandler(ctrl, scope, elm.parents('pdf-view'));
+				ctrl.pdfView = elm.parents('pdf-view');
+				manageWheelHandler(ctrl, scope, ctrl.pdfView);
 			}
 		};
 		/**
@@ -99,6 +101,7 @@
 			ctrl.zoomPlus = zoomPlus;
 			ctrl.rotate = rotate;
 			ctrl.print = print;
+			ctrl.refresh = refresh;
 			ctrl.fit = fit;
 			/**
 			 * Dézoom
@@ -158,11 +161,20 @@
 				stopEvent(evt);
 				$scope.ngItem.getPage().then(function(pdfPage) {
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
-					var scaleFitV = ((ctrl.pdfView.height() || rectangle.height) - 25) / rectangle.height;
-					var scaleFitH = ((ctrl.pdfView.width() || rectangle.width) - 25) / rectangle.width;
+					var scaleFitV = (ctrl.pdfView.height() || rectangle.height) / rectangle.height;
+					var scaleFitH = (ctrl.pdfView.width() || rectangle.width) / rectangle.width;
 					$scope.ngScale = Math.min(scaleFitV, scaleFitH);
-					$scope.$apply();
 				});
+			}
+			/**
+			 * Refresh the pdf
+			 * @param {ClickEvent} evt
+			 */
+			function refresh(evt) {
+				stopEvent(evt);
+				if($scope.ngItem) {
+					$scope.$root.$broadcast('pdfdoc-refresh', $scope.ngItem.$$pdfid);
+				}
 			}
 			/**
 			 * Print current items link to ngItem
