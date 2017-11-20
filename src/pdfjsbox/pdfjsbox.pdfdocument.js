@@ -24,9 +24,22 @@
 					updatePdf(s, v1);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				manageRefreshHandler(scope);
 				updatePdf(scope, scope.pdf);
 			}
 		};
+		/**
+		 * Gestion des events refresh
+		 * @param {Angular scope} scope
+		 */
+		function manageRefreshHandler(scope) {
+			scope.$on('pdfdoc-refresh', function (event, data) {
+				if (data === scope.pdfid) {
+					scope.pdfid = null;
+					updatePdf(scope, scope.pdf);
+				}
+			});
+		}
 		/**
 		 * Changement de document
 		 * @param {Angular scope} scope
@@ -38,7 +51,7 @@
 			var pdfid = pdfjsboxItemServices.id(pdf);
 			if (pdfid !== scope.pdfid) {
 				scope.pdfid = pdfid;
-				if(pdfid) {
+				if (pdfid) {
 					var task = PDFJS.getDocument(pdf);
 					return task.promise.then(function (pdfDocument) {
 						var t0 = new Date().getTime();
@@ -67,7 +80,7 @@
 		function loadRecursivePage(scope, pdf, pdfid, pdfDocument, items, idx, max) {
 			if (idx < max && idx < pdfDocument.numPages) {
 				var deferred = $q.defer();
-				var item = {$$pdfid:pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+				var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 						return deferred.promise;
 					}};
 				items[idx] = item;
@@ -99,7 +112,7 @@
 		 * @param {Number} t0 : pour le timing
 		 */
 		function loadSinglePage(pdf, pdfid, pdfDocument, items, idx, skiped, t0) {
-			var item = {$$pdfid:pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+			var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 					return pdfDocument.getPage(this.pageIdx);
 				}};
 			items[idx] = item;
