@@ -86,9 +86,10 @@
 		 * @param {Angular Scope} $scope
 		 * @param {Angular PromiseAPI} $q
 		 * @param {Services} pdfjsboxDrawServices
+		 * @param {Services} pdfjsboxScaleServices
 		 */
 		/* @ngInject */
-		function PdfCommandsCtrl($scope, $q, pdfjsboxDrawServices) {
+		function PdfCommandsCtrl($scope, $q, pdfjsboxDrawServices, pdfjsboxScaleServices) {
 			var ctrl = this;
 			ctrl.index;
 			ctrl.total;
@@ -99,8 +100,6 @@
 			ctrl.rotate = rotate;
 			ctrl.print = print;
 			ctrl.fit = fit;
-			ctrl.fitH = fitH;
-			ctrl.fitV = fitV;
 			/**
 			 * Dézoom
 			 * @param {jEvent} evt
@@ -157,26 +156,13 @@
 			 */
 			function fit(evt) {
 				stopEvent(evt);
-				$scope.ngScale = null;
-				$scope.docScale = "fit";
-			}
-			/**
-			 * Set fitH to docScale
-			 * @param {ClickEvent} evt
-			 */
-			function fitH(evt) {
-				stopEvent(evt);
-				$scope.ngScale = null;
-				$scope.docScale = "fitH";
-			}
-			/**
-			 * Set fitV to docScale
-			 * @param {ClickEvent} evt
-			 */
-			function fitV(evt) {
-				stopEvent(evt);
-				$scope.ngScale = null;
-				$scope.docScale = "fitV";
+				$scope.ngItem.getPage().then(function(pdfPage) {
+					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
+					var scaleFitV = ((ctrl.pdfView.height() || rectangle.height) - 25) / rectangle.height;
+					var scaleFitH = ((ctrl.pdfView.width() || rectangle.width) - 25) / rectangle.width;
+					$scope.ngScale = Math.min(scaleFitV, scaleFitH);
+					$scope.$apply();
+				});
 			}
 			/**
 			 * Print current items link to ngItem
