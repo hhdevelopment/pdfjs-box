@@ -17,11 +17,12 @@
 				'ngItem': '=',
 				'ngScale': '=',
 				'docScale': '=',
+				'forceTrigger': '<', // quand cette valeur est changer, force le calcul du scale, par exemple une height est pertinent
 				'pdfviewSelector': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				watcherClears.push(scope.$watchGroup(['ngItem.document', 'docScale'], function (vs1, vs2, s) {
+				watcherClears.push(scope.$watchGroup(['ngItem.document', 'docScale', 'forceTrigger'], function (vs1, vs2, s) {
 //					if (vs1[0] && s.ctrl.document !== vs1[0]) {
 					computeScale(s, elm, s.ngItem, s.docScale, s.pdfviewSelector);
 //					}
