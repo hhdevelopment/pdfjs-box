@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfCommands', pdfCommands);
 	/* @ngInject */
-	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDrawServices) {
+	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDrawServices, pdfjsboxScaleServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfcommands.html',
@@ -19,7 +19,6 @@
 				// nom interne : nom externe
 				'ngItem': '=',
 				'ngScale': '=',
-				'docScale': '=',
 				'allowPrint': '<',
 				'allowRefresh': '<'
 			},
@@ -78,9 +77,16 @@
 		function updateNgItem(ctrl, item) {
 			if (item && item.items) {
 				ctrl.index = pdfjsboxItemServices.getIndexOfItemInList(item, item.items);
+				item.getPage().then(function (pdfPage) {
+					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
+					var scaleFitV = (ctrl.pdfView.height() || rectangle.height) / rectangle.height;
+					var scaleFitH = (ctrl.pdfView.width() || rectangle.width) / rectangle.width;
+					ctrl.scaleFited = Math.min(scaleFitV, scaleFitH);
+				});
 			} else {
 				ctrl.index = 0;
 				ctrl.total = 0;
+				ctrl.scaleFited = 1;
 			}
 		}
 		/**
@@ -159,12 +165,7 @@
 			 */
 			function fit(evt) {
 				stopEvent(evt);
-				$scope.ngItem.getPage().then(function(pdfPage) {
-					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
-					var scaleFitV = (ctrl.pdfView.height() || rectangle.height) / rectangle.height;
-					var scaleFitH = (ctrl.pdfView.width() || rectangle.width) / rectangle.width;
-					$scope.ngScale = Math.min(scaleFitV, scaleFitH);
-				});
+				$scope.ngScale = ctrl.scaleFited;
 			}
 			/**
 			 * Refresh the pdf
