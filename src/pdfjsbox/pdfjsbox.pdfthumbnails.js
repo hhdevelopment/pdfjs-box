@@ -269,17 +269,19 @@
 		 * @param {ClientRect} clientRect
 		 */
 		function drawVisiblePdfThumbnails(clientRect) {
-			var elm = document.elementFromPoint(clientRect.left, clientRect.top);
-			if (elm) {
-				var thumbnail;
-				if(elm.nodeName === 'CANVAS') {
-					thumbnail = elm.parentElement;
-				} else if(elm.nodeName === 'PDF-THUMBNAIL') {
-					thumbnail = elm;
-				}
-				while (thumbnail && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
-					pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, thumbnail.item, true);
-					thumbnail = thumbnail.nextElementSibling;
+			if(clientRect) {
+				var elm = document.elementFromPoint(clientRect.left, clientRect.top);
+				if (elm) {
+					var thumbnail;
+					if(elm.nodeName === 'CANVAS') {
+						thumbnail = elm.parentElement;
+					} else if(elm.nodeName === 'PDF-THUMBNAIL') {
+						thumbnail = elm;
+					}
+					while (thumbnail && pdfjsboxDrawServices.isHVisibleIn(thumbnail.getClientRects()[0], clientRect)) {
+						pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, thumbnail.item, true);
+						thumbnail = thumbnail.nextElementSibling;
+					}
 				}
 			}
 		}
