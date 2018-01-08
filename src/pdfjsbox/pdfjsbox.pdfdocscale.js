@@ -57,6 +57,7 @@
 						console.info('"docScale" feature : Transclude \'pdf-docscale\' in \'pdf-view\' or set \'pdfview-selector\' attribute on \'pdf-docscale\' with selector of \'pdf-view\' value');
 						return;
 					}
+					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
 					var pdfView = container[0];
 					var scaleFitV = (pdfView.clientHeight || rectangle.height) / rectangle.height;
 					var scaleFitH = (pdfView.clientWidth || rectangle.width) / rectangle.width;
