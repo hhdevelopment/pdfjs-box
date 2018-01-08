@@ -25,13 +25,13 @@
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['ngItem.document', 'ngItem.pageIdx', 'ngItem.items'], function (vs1, vs2, s) {
-					updateNgItem(s.ctrl, s.ngItem);
+					updateNgItem(s, s.ctrl, s.ngItem);
 				}, true));
 				watcherClears.push(scope.$watch('ngItem.items.length', function (v1, v2, s) {
 					updateItemsLength(s.ctrl, v1);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				updateNgItem(ctrl, scope.ngItem);
+				updateNgItem(scope, ctrl, scope.ngItem);
 				ctrl.jqPrintIframe = elm.find('iframe');
 				ctrl.pdfView = elm.parents('pdf-view');
 				manageWheelHandler(ctrl, scope, ctrl.pdfView);
@@ -71,23 +71,38 @@
 		}
 		/**
 		 * Met à jour l'index de la page, 
+		 * @param {Angular Scope directive} scope
 		 * @param {Angular Controller} ctrl
 		 * @param {Item} item
 		 */
-		function updateNgItem(ctrl, item) {
+		function updateNgItem(scope, ctrl, item) {
 			if (item && item.items) {
+				var fited = isFited(ctrl.pdfView[0].parentElement);
 				ctrl.index = pdfjsboxItemServices.getIndexOfItemInList(item, item.items);
 				item.getPage().then(function (pdfPage) {
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
 					var scaleFitV = (ctrl.pdfView.height() || rectangle.height) / rectangle.height;
 					var scaleFitH = (ctrl.pdfView.width() || rectangle.width) / rectangle.width;
 					ctrl.scaleFited = Math.min(scaleFitV, scaleFitH);
+					if(fited) {
+						scope.ngScale = ctrl.scaleFited;
+					}
 				});
 			} else {
 				ctrl.index = 0;
 				ctrl.total = 0;
 				ctrl.scaleFited = 1;
 			}
+		}
+		/**
+		 * Détermine si la vue est fité (pas de scrollbar)
+		 * @param {HTML Element} htmlElt
+		 */
+		/* @ngInject */
+		function isFited(htmlElt) {
+			var scrollbarWidth = htmlElt.offsetWidth - htmlElt.clientWidth;
+			var scrollbarHeight = htmlElt.offsetHeight - htmlElt.clientHeight;
+			return !scrollbarWidth && !scrollbarHeight;
 		}
 		/**
 		 * Controller
