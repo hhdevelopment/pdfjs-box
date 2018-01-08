@@ -77,12 +77,13 @@
 		 */
 		function updateNgItem(scope, ctrl, item) {
 			if (item && item.items) {
-				var fited = isFited(ctrl.pdfView[0].parentElement);
+				var pdfView = ctrl.pdfView[0];
+				var fited = isFited(pdfView.parentElement);				
 				ctrl.index = pdfjsboxItemServices.getIndexOfItemInList(item, item.items);
 				item.getPage().then(function (pdfPage) {
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
-					var scaleFitV = (ctrl.pdfView.height() || rectangle.height) / rectangle.height;
-					var scaleFitH = (ctrl.pdfView.width() || rectangle.width) / rectangle.width;
+					var scaleFitV = (pdfView.clientHeight || rectangle.height) / rectangle.height;
+					var scaleFitH = (pdfView.clientWidth || rectangle.width) / rectangle.width;
 					ctrl.scaleFited = Math.min(scaleFitV, scaleFitH);
 					if(fited) {
 						scope.ngScale = ctrl.scaleFited;
