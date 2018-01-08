@@ -78,6 +78,7 @@ pdf-thumbnail.moving {
 pdf-view {
 	display: block;
 	height: 100%;
+	overflow:auto;
 }
 pdf-view pdf-commands {
 	position:absolute;
