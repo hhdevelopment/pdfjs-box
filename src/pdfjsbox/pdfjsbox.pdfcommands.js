@@ -98,7 +98,6 @@
 		 * Détermine si la vue est fité (pas de scrollbar)
 		 * @param {HTML Element} htmlElt
 		 */
-		/* @ngInject */
 		function isFited(htmlElt) {
 			var scrollbarWidth = htmlElt.offsetWidth - htmlElt.clientWidth;
 			var scrollbarHeight = htmlElt.offsetHeight - htmlElt.clientHeight;
