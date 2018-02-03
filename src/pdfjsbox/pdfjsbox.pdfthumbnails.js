@@ -43,6 +43,22 @@
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
 				manageWheelHandler(scope, elm);
 				elm.addClass('scrollable');
+				var hasFocus = false;
+				ng.element(document).bind("click", function (event) {
+					hasFocus = elm[0].contains(event.target);
+				});
+				ng.element(document).bind("keydown", function (event) {
+					if(!hasFocus || (event.which < 37 && event.which > 40)) return;
+					scope.$apply(function () {
+						event.stopPropagation();
+						event.preventDefault();
+						if (event.which===37 || event.which===38) {
+							ctrl.previous();
+						} else {
+							ctrl.next();
+						}
+					});
+				});
 			}
 		};
 		/**
@@ -386,11 +402,35 @@
 		 */
 		function PdfThumbnailsCtrl($scope, pdfjsboxItemServices) {
 			var ctrl = this;
+			ctrl.previous = previous;
+			ctrl.next = next;
 			ctrl.areItemsEqual = pdfjsboxItemServices.areItemsEqual;
 			ctrl.selectByClick = selectByClick;
 			ctrl.copyByDblclick = copyByDblclick;
 			ctrl.trackItem = trackItem;
 
+			/**
+			 * set ngItem with previous item
+			 */
+			function previous() {
+				if($scope.selectedItem) {
+					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.selectedItem, $scope.selectedItem.items);
+					if (idx > 0) {
+						$scope.selectedItem = $scope.selectedItem.items[idx - 1];
+					}
+				}
+			}
+			/**
+			 * set ngItem with next item
+			 */
+			function next() {
+				if($scope.selectedItem) {
+					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.selectedItem, $scope.selectedItem.items);
+					if (idx < $scope.selectedItem.items.length - 1) {
+						$scope.selectedItem = $scope.selectedItem.items[idx + 1];
+					}
+				}
+			}
 			function trackItem(item) {
 				return item.pageIdx + '_' + item.$$pdfid;
 			}
