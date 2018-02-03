@@ -18,7 +18,7 @@
 			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
-				'ngItem': '<',
+				'ngItem': '=',
 				'ngScale': '='
 			},
 			link: function (scope, elm, attrs, ctrl) {
@@ -29,6 +29,22 @@
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateView(scope, elm, scope.ngItem);
+				var hasFocus = false;
+				ng.element(document).bind("click", function (event) {
+					hasFocus = elm[0].contains(event.target);
+				});
+				ng.element(document).bind("keydown", function (event) {
+					if(!hasFocus || (event.which < 37 && event.which > 40)) return;
+					event.stopPropagation();
+					event.preventDefault();
+					scope.$apply(function () {
+						if (event.which===38 || event.which===37) {
+							ctrl.previous();
+						} else {
+							ctrl.next();
+						}
+					});
+				});
 			}
 		};
 		function updateView(scope, elm, item) {
@@ -172,14 +188,40 @@
 		/**
 		 * Controller
 		 * @param {angular $q} $q
+		 * @param {scope} $scope
+		 * @param {service} pdfjsboxItemServices
 		 */
-		function PdfViewCtrl($q) {
+		function PdfViewCtrl($q, $scope, pdfjsboxItemServices) {
 			var ctrl = this;
+			ctrl.previous = previous;
+			ctrl.next = next;
 			var deferred = {defer: $q.defer()};
 			ctrl.readyToRender = readyToRender;
 			ctrl.setReadyToRender = setReadyToRender;
 			deferred.defer.resolve();
 
+			/**
+			 * set ngItem with previous item
+			 */
+			function previous() {
+				if($scope.ngItem) {
+					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
+					if (idx > 0) {
+						$scope.ngItem = $scope.ngItem.items[idx - 1];
+					}
+				}
+			}
+			/**
+			 * set ngItem with next item
+			 */
+			function next() {
+				if($scope.ngItem) {
+					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
+					if (idx < $scope.ngItem.items.length - 1) {
+						$scope.ngItem = $scope.ngItem.items[idx + 1];
+					}
+				}
+			}
 			function readyToRender() {
 				return deferred.defer.promise.then(function() {
 					deferred.defer = $q.defer();
