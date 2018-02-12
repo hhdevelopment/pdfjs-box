@@ -48,7 +48,7 @@
 					hasFocus = elm[0].contains(event.target);
 				});
 				ng.element(document).bind("keydown", function (event) {
-					if(!hasFocus || (event.which < 37 && event.which > 40)) return;
+					if(!hasFocus || event.which < 37 || event.which > 40) return;
 					scope.$apply(function () {
 						event.stopPropagation();
 						event.preventDefault();
