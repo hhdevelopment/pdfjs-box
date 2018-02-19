@@ -8,7 +8,13 @@ const cmapPath = './node_modules/pdfjs-dist/cmaps';
 module.exports = function (env) {
 	return [{
 		entry: () => new Promise((resolve) => fs.readdir(cmapPath, function(e, files) {
-			resolve(files.map(function(file) {return cmapPath+'/'+file;}));
+			if(files) {
+				resolve(files.filter(function(file) {
+					return file.indexOf('.bcmap') !== -1;
+				}).map(function(file) {
+					return cmapPath+'/'+file;
+				}));
+			}
 		})),
 		output: {
 			filename: '[name]',

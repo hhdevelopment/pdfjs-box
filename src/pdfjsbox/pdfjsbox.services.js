@@ -5,7 +5,7 @@
 	try {
 		pdfbox = ng.module('pdfjs-box');
 	} catch (e) {
-		pdfbox = ng.module('pdfjs-box', []);
+		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
 	pdfbox.factory('pdfjsboxScaleServices', scaleServices);
 	function scaleServices() {
@@ -71,15 +71,18 @@
 		function drawPageWhenAvailableIfVisible(thumbnail, item, forceRender) {
 			var elm = ng.element(thumbnail);
 			if (elm.hasClass('notrendered')) {
-				var height = (thumbnail.parentElement.offsetHeight - 20 - getScrollbarHeight()) || 100; // 20px en moins pour le padding 10 en top et bottom
+				var height = (elm.height() - 20) || 100; // 20px en moins pour le padding 10 en top et bottom
 				var render = forceRender || (thumbnail.parentElement && isHVisibleIn(thumbnail.getClientRects()[0], thumbnail.parentElement.getClientRects()[0]));
 				if (render) {
 					item.getPage().then(function (pdfPage) {
 						if (elm.hasClass('notrendered')) {
 							elm.removeClass('notrendered');
 							var view = pdfPage.view;
-							var scale = height / (view[3] - view[1]);
-							var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * 0.7) + "'></canvas>");
+							var w = view[2] - view[0];
+							var h = view[3] - view[1];
+							var scale = height / h;
+							var ratio = w/h;
+							var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * ratio) + "'></canvas>");
 							elm.find('canvas').replaceWith(jcanvas);
 							var canvas = jcanvas.get(0);
 							drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale);

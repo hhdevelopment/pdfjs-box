@@ -1,11 +1,11 @@
-/* global _ */
+/* global _, PDFJS */
 (function (ng, __, PDFJS) {
 	'use strict';
 	var pdfbox;
 	try {
 		pdfbox = ng.module('pdfjs-box');
 	} catch (e) {
-		pdfbox = ng.module('pdfjs-box', []);
+		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
@@ -25,20 +25,32 @@
 				var watcherClears = [];
 				// Don't survey ngItem because, ngItem.items cause infinitive loop
 				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
+					ctrl.showTransclude = true;
 					updateView(s, elm, s.ngItem);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				updateView(scope, elm, scope.ngItem);
+				elm.on('mouseenter', function(event) {
+					scope.$apply(function () {
+						ctrl.showTransclude = true;
+					});
+				});
+				elm.on('click', function(event) {
+					scope.$apply(function () {
+						ctrl.showTransclude = !ctrl.showTransclude;
+					});
+				});
 				var hasFocus = false;
-				ng.element(document).bind("click", function (event) {
+				ng.element(document).on("click", function (event) {
 					hasFocus = elm[0].contains(event.target);
 				});
-				ng.element(document).bind("keydown", function (event) {
-					if(!hasFocus || (event.which < 37 && event.which > 40)) return;
+				ng.element(document).on("keydown", function (event) {
+					if (!hasFocus || event.which < 37 || event.which > 40)
+						return;
 					event.stopPropagation();
 					event.preventDefault();
 					scope.$apply(function () {
-						if (event.which===38 || event.which===37) {
+						if (event.which === 38 || event.which === 37) {
 							ctrl.previous();
 						} else {
 							ctrl.next();
@@ -83,7 +95,7 @@
 				}
 			}
 		}
-		
+
 		/**
 		 * fix l'echelle pour que la page ne soit pas plus petite que la zone
 		 * @param {PDFPage} pdfPage
@@ -95,15 +107,15 @@
 		 */
 		function fixScale(pdfPage, scale, rotate, height, width) {
 			var scaleRetains = scale || 1;
-			if(pdfPage && pdfPage.view) {
+			if (pdfPage && pdfPage.view) {
 				var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, rotate);
 				var pageHeight = rectangle.height * scaleRetains;
 				var pageWidth = rectangle.width * scaleRetains;
-				if(pageHeight < height && pageWidth < width) { // la page est trop petite
-					var s =  scaleRetains / 0.9; // on agrandi la page
+				if (pageHeight < height && pageWidth < width) { // la page est trop petite
+					var s = scaleRetains / 0.9; // on agrandi la page
 					var pageHeight = rectangle.height * s;
 					var pageWidth = rectangle.width * s;
-					if(pageHeight <= height && pageWidth <= width) {
+					if (pageHeight <= height && pageWidth <= width) {
 						return s;
 					}
 				}
@@ -145,7 +157,7 @@
 		 * @returns {ViewPort or Object support width and height}
 		 */
 		function getViewport(pdfPage, scale, rotate) {
-			if(pdfPage) {
+			if (pdfPage) {
 				var rot = pdfPage.pageInfo.rotate + (rotate || 0);
 				return pdfPage.getViewport(scale || 1, rot);
 			}
@@ -159,6 +171,7 @@
 		 */
 		function defineSizes(pdfView, width, height) {
 			pdfView.find('canvas').attr('width', width).attr('height', height);
+			pdfView.find('canvas').css('width', '100%').css('height', '100%');
 			pdfView.find('.page,.canvasWrapper,.textLayer').css('width', width + 'px').css('height', height + 'px');
 		}
 		/**
@@ -170,7 +183,7 @@
 			var jcanvas = ng.element("<canvas></canvas>");
 			pdfView.find('canvas').replaceWith(jcanvas);
 			var canvas = jcanvas.get(0);
-			if(canvas) {
+			if (canvas) {
 				return canvas.getContext('2d');
 			}
 			return null;
@@ -198,13 +211,14 @@
 			var deferred = {defer: $q.defer()};
 			ctrl.readyToRender = readyToRender;
 			ctrl.setReadyToRender = setReadyToRender;
+			ctrl.showTransclude = false;
 			deferred.defer.resolve();
 
 			/**
 			 * set ngItem with previous item
 			 */
 			function previous() {
-				if($scope.ngItem) {
+				if ($scope.ngItem) {
 					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
 					if (idx > 0) {
 						$scope.ngItem = $scope.ngItem.items[idx - 1];
@@ -215,7 +229,7 @@
 			 * set ngItem with next item
 			 */
 			function next() {
-				if($scope.ngItem) {
+				if ($scope.ngItem) {
 					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
 					if (idx < $scope.ngItem.items.length - 1) {
 						$scope.ngItem = $scope.ngItem.items[idx + 1];
@@ -223,7 +237,7 @@
 				}
 			}
 			function readyToRender() {
-				return deferred.defer.promise.then(function() {
+				return deferred.defer.promise.then(function () {
 					deferred.defer = $q.defer();
 				});
 			}

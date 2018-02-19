@@ -1,7 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
-
 import angular from 'angular';
+import 'boxes-scroll/dist/boxesscroll.css';
+import 'boxes-scroll/dist/boxesscroll.js';
+
 //var angular = require('angular');
 
 require('./pdfs/conditions.pdf');

@@ -6,7 +6,7 @@
 	try {
 		pdfbox = ng.module('pdfjs-box');
 	} catch (e) {
-		pdfbox = ng.module('pdfjs-box', []);
+		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
 	pdfbox.run(config);
 	/* @ngInject */

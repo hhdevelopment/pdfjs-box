@@ -5,7 +5,7 @@
 	try {
 		pdfbox = ng.module('pdfjs-box');
 	} catch(e) {
-		pdfbox = ng.module('pdfjs-box', []);
+		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
 	pdfbox.directive('pdfThumbnail', pdfThumbnail);
 	/* @ngInject */
@@ -34,12 +34,27 @@
 		 * @param {Item} item
 		 */
 		function updateNgItem(scope, pdfThumbnailElm, item) {
-			pdfThumbnailElm.addClass('notrendered');
 			if(item) {
 				var thumbnail = pdfThumbnailElm.get(0);
 				thumbnail.item = item;
-				pdfjsboxDrawServices.drawPageWhenAvailableIfVisible(thumbnail, item, false);
+				drawPage(thumbnail, item);
 			}
+		}
+		function drawPage(thumbnail, item) {
+			var elm = ng.element(thumbnail);
+			var height = (elm.height() - 20) || 100; // 20px en moins pour le padding 10 autour
+			if(elm.css('display') === 'inline-block') elm.css('display', 'table-cell');
+			item.getPage().then(function (pdfPage) {
+				var view = pdfPage.view;
+				var w = view[2] - view[0];
+				var h = view[3] - view[1];
+				var scale = height / h;
+				var ratio = w/h;
+				var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * ratio) + "'></canvas>");
+				elm.find('canvas').replaceWith(jcanvas);
+				var canvas = jcanvas.get(0);
+				pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale);
+			});
 		}
 		/**
 		 * Angular Controller

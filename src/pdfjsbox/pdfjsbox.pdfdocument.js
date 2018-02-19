@@ -6,11 +6,11 @@
 	try {
 		pdfbox = ng.module('pdfjs-box');
 	} catch (e) {
-		pdfbox = ng.module('pdfjs-box', []);
+		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
 	pdfbox.directive('pdfDocument', pdfDocument);
 	/* @ngInject */
-	function pdfDocument($q, pdfjsConfig, pdfjsboxWatcherServices, pdfjsboxItemServices) {
+	function pdfDocument(pdfjsboxWatcherServices, pdfjsboxItemServices) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -47,19 +47,21 @@
 		 */
 		function updatePdf(scope, pdf) {
 			var items = scope.ngItems || [];
-			items.splice(0, items.length);
 			var pdfid = pdfjsboxItemServices.id(pdf);
 			if (pdfid !== scope.pdfid) {
 				scope.pdfid = pdfid;
 				if (pdfid) {
+					var t0 = new Date().getTime();
 					var task = PDFJS.getDocument(pdf);
-					return task.promise.then(function (pdfDocument) {
-						var t0 = new Date().getTime();
-						return loadRecursivePage(scope, pdf, pdfid, pdfDocument, items, 0, pdfjsConfig.preloadRecursivePages).then(function () {
-							console.debug('Preload recursive ' + Math.min(pdfjsConfig.preloadRecursivePages, pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
-						}, function (reason) {
-							console.debug('Recursive preloading cancel cause document changed.');
+					task.promise.then(function (pdfDocument) {
+						var args = [0, items.length];
+						for (var i = 0; i < pdfDocument.numPages; i++) {
+							args.push(createItem(pdf, pdfid, pdfDocument, items, i));
+						}
+						scope.$apply(function() {
+							[].splice.apply(items, args); // de cette maniere la liste n'est modifiée qu'une fois
 						});
+						console.debug('Load sequence ' + (pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
 					}).catch(function (reason) {
 						console.error('Error: ' + reason);
 					});
@@ -67,58 +69,11 @@
 			}
 			return null;
 		}
-		/**
-		 * Charge les pages de facon récursive ou mix si max est inferieur à numPages 
-		 * @param {Angular Scope} scope
-		 * @param {Document} pdf : document fournit par l'application
-		 * @param {String} pdfid : document id pour differencier avec le pageIndex
-		 * @param {PdfDocument} pdfDocument : le docuzment pdf fournit par le framework pdfjs
-		 * @param {Array<Item>} items : chaque item represente une page du pdf : {document: document, pageIdx: idx, rotate: 0}
-		 * @param {Number} idx : index de la page à charger
-		 * @param {Number} max : nombre de page à charger en mode récursive avant de passer au mode séquentiel
-		 */
-		function loadRecursivePage(scope, pdf, pdfid, pdfDocument, items, idx, max) {
-			if (idx < max && idx < pdfDocument.numPages) {
-				var deferred = $q.defer();
-				var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
-						return deferred.promise;
-					}};
-				items[idx] = item;
-				scope.$apply();
-				return pdfDocument.getPage(idx + 1).then(function (pdfPage) {
-					deferred.resolve(pdfPage);
-					if (scope.pdf === pdf) { // on s'assure que l'on a pas changé de document
-						return loadRecursivePage(scope, pdf, pdfid, pdfDocument, items, idx + 1, max);
-					} else {
-						throw new Error();
-					}
-				});
-			} else {
-				var t0 = new Date().getTime();
-				for (var i = idx; i < pdfDocument.numPages; i++) {
-					loadSinglePage(pdf, pdfid, pdfDocument, items, i, idx, t0);
-				}
-			}
-			return null;
-		}
-		/**
-		 * Pré-Charge une page, utilisé dans le mode séquenciel
-		 * @param {Document} pdf : document fournit par l'application
-		 * @param {String} pdfid : document id pour differencier avec le pageIndex
-		 * @param {PdfDocument} pdfDocument : le docuzment pdf fournit par le framework pdfjs
-		 * @param {Array<Item>} items : chaque item represente une page du pdf : {document: document, pageIdx: idx, rotate: 0}
-		 * @param {Number} idx : index de la page à charger
-		 * @param {Number} skiped : nombre d'element sauté avant de commencer l'iteration, sert pour le log
-		 * @param {Number} t0 : pour le timing
-		 */
-		function loadSinglePage(pdf, pdfid, pdfDocument, items, idx, skiped, t0) {
+		function createItem(pdf, pdfid, pdfDocument, items, idx) {
 			var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
 					return pdfDocument.getPage(this.pageIdx);
 				}};
-			items[idx] = item;
-			if ((idx + 1) === pdfDocument.numPages) {
-				console.debug('Preload sequence ' + (pdfDocument.numPages - skiped) + ' pages in %sms', new Date().getTime() - t0);
-			}
+			return item;
 		}
 	}
 })(angular, _, PDFJS);

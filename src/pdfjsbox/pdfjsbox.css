@@ -3,12 +3,13 @@
 }
 pdf-thumbnails {
 	display: block;
-	overflow-y: scroll;
-	overflow-x: hidden;
+	overflow: hidden;
+/*	overflow-y: scroll;
+	overflow-x: hidden;*/
 }
 pdf-thumbnails.pdf-thumbnails-horizontal {
-	overflow-x: scroll;
-	overflow-y: hidden;
+	display: block;
+	overflow: hidden;
 }
 pdf-thumbnails.active {
 	background-color: #c7ddef;
@@ -25,10 +26,16 @@ pdf-thumbnail.active {
 	z-index: 2;
 	background-color: #337ab7;
 }
-pdf-thumbnails.pdf-thumbnails-horizontal pdf-thumbnail {
-	display: table-cell;
+pdf-thumbnails > box-hscroll  {
+	height: 100%;
 }
-pdf-thumbnails pdf-thumbnail {
+box-hscroll > pdf-thumbnail {
+	display: inline-block;
+}
+pdf-thumbnails > box-vscroll {
+	width: 100%;
+}
+box-vscroll > pdf-thumbnail {
 	display: block;
 }
 pdf-thumbnails[removable="true"] pdf-thumbnail span.glyphicon-remove {
@@ -79,7 +86,13 @@ pdf-view {
 	display: block;
 	height: 100%;
 	overflow:auto;
+	position: relative;
 }
+/*pdf-view ng-transclude {
+	position:absolute;
+	width: 100%;
+	z-index: 3;
+}*/
 pdf-view pdf-commands {
 	position:absolute;
 	z-index: 3;

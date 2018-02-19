@@ -16,9 +16,10 @@
   "dependencies": {
     "angular": "^1.6.3",
     "bootstrap": "^3.3.7",
+    "boxes-scroll": "^2.x",
     "jquery": "^3.2.1",
-    "lodash": "4.17.4",
-    "pdfjs-dist": "^2.x"
+    "lodash": "4.17.5",
+    "pdfjs-dist": "2.0.378"
   },
   "devDependencies": {
     "angular-templatecache-loader": "^0.2.0",
