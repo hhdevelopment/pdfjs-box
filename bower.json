@@ -19,11 +19,11 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "^1.6.3",
-    "bootstrap": "^3.3.7",
+    "angular": "^1.x",
+    "bootstrap": "^3.x",
     "boxes-scroll": "^2.x",
-    "jquery": "^3.2.1",
-    "lodash": "4.17.5",
+    "jquery": "^3.x",
+    "lodash": "^4.x",
     "pdfjs-dist": "2.0.378"
   }
 }
