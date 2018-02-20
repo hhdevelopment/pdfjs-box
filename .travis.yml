@@ -4,6 +4,8 @@ node_js:
 cache:
   directories:
     - "node_modules"
+env:
+  - REPO_NAME=pdfjs-box
 branches:
   only:
   - master
@@ -19,7 +21,6 @@ script:
   - webpack
   - ls
   - ls public_html/
-  - echo $TRAVIS_REPO
   - echo $REPO_NAME
 deploy:
   - provider: script
@@ -47,12 +48,12 @@ deploy:
     on: 
       branch: master2
   - provider: script
-    script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p pdfjs-box; cd pdfjs-box; mrm *; mput *; bye"
+    script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p $REPO_NAME; cd $REPO_NAME; mrm *; mput *; bye"
     skip_cleanup: true
     on: 
       branch: master
   - provider: script
-    script: bower register pdfjs-box https://github.com/$TRAVIS_REPO_SLUG.git
+    script: bower register $REPO_NAME https://github.com/$TRAVIS_REPO_SLUG.git
     skip_cleanup: true
     on: 
       branch: register_bower
