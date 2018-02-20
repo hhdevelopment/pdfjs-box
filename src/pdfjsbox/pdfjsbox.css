@@ -1,11 +1,6 @@
-.all-scrollbars {
-	overflow: scroll;
-}
 pdf-thumbnails {
 	display: block;
 	overflow: hidden;
-/*	overflow-y: scroll;
-	overflow-x: hidden;*/
 }
 pdf-thumbnails.pdf-thumbnails-horizontal {
 	display: block;

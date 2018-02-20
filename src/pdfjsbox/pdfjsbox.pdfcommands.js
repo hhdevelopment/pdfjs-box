@@ -19,6 +19,7 @@
 				// nom interne : nom externe
 				'ngItem': '=',
 				'ngScale': '=',
+				'ngQuality': '=',
 				'allowPrint': '<',
 				'allowRefresh': '<'
 			},
@@ -33,7 +34,9 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				ctrl.jqPrintIframe = elm.find('iframe');
 				ctrl.pdfView = elm.parents('pdf-view');
-				manageWheelHandler(ctrl, scope, ctrl.pdfView);
+				if (ctrl.pdfView) {
+					manageWheelHandler(ctrl, scope, ctrl.pdfView);
+				}
 			}
 		};
 		/**
@@ -45,15 +48,15 @@
 		function manageWheelHandler(ctrl, scope, jpdfView) {
 			jpdfView.on('wheel', null, {ctrl: ctrl}, function (event) {
 				if (event.originalEvent.deltaY < 0) {
-					if(event.ctrlKey) {
+					if (event.ctrlKey) {
 						ctrl.zoomPlus(event);
-					} else if(!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+					} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
 						event.data.ctrl.previous(event.originalEvent);
 					}
 				} else {
-					if(event.ctrlKey) {
+					if (event.ctrlKey) {
 						ctrl.zoomMoins(event);
-					} else if(!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+					} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
 						event.data.ctrl.next(event.originalEvent);
 					}
 				}
@@ -77,14 +80,14 @@
 		function updateNgItem(scope, ctrl, item) {
 			if (item && item.items) {
 				var pdfView = ctrl.pdfView[0];
-				var fited = isFited(pdfView.parentElement);				
+				var fited = isFited(pdfView.parentElement);
 				ctrl.index = pdfjsboxItemServices.getIndexOfItemInList(item, item.items);
 				item.getPage().then(function (pdfPage) {
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
 					var scaleFitV = (pdfView.clientHeight || rectangle.height) / rectangle.height;
 					var scaleFitH = (pdfView.clientWidth || rectangle.width) / rectangle.width;
 					ctrl.scaleFited = Math.min(scaleFitV, scaleFitH);
-					if(fited) {
+					if (fited) {
 						scope.ngScale = ctrl.scaleFited;
 					}
 				});
@@ -119,10 +122,21 @@
 			ctrl.next = next;
 			ctrl.zoomMoins = zoomMoins;
 			ctrl.zoomPlus = zoomPlus;
+			ctrl.decQuality = decQuality;
+			ctrl.incQuality = incQuality;
 			ctrl.rotate = rotate;
 			ctrl.print = print;
 			ctrl.refresh = refresh;
 			ctrl.fit = fit;
+
+			function decQuality(evt) {
+				pdfjsboxDomServices.stopEvent(evt);
+				$scope.ngQuality = Math.max($scope.ngQuality - 1, 1);
+			}
+			function incQuality(evt) {
+				pdfjsboxDomServices.stopEvent(evt);
+				$scope.ngQuality = ($scope.ngQuality % 5) + 1;
+			}
 			/**
 			 * Dézoom
 			 * @param {jEvent} evt
@@ -177,7 +191,7 @@
 			 */
 			function refresh(evt) {
 				pdfjsboxDomServices.stopEvent(evt);
-				if($scope.ngItem) {
+				if ($scope.ngItem) {
 					$scope.$root.$broadcast('pdfdoc-refresh', $scope.ngItem.$$pdfid);
 				}
 			}

@@ -19,22 +19,23 @@
 			scope: {
 				// nom interne : nom externe
 				'ngItem': '=',
+				'ngQuality': '=',
 				'ngScale': '='
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
 				// Don't survey ngItem because, ngItem.items cause infinitive loop
-				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale'], function (vs1, vs2, s) {
+				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale', 'ngQuality'], function (vs1, vs2, s) {
 					ctrl.showTransclude = true;
 					updateView(s, elm, s.ngItem);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				elm.on('mouseenter', function(event) {
+				elm.on('mouseenter', function (event) {
 					scope.$apply(function () {
 						ctrl.showTransclude = true;
 					});
 				});
-				elm.on('click', function(event) {
+				elm.on('click', function (event) {
 					scope.$apply(function () {
 						ctrl.showTransclude = !ctrl.showTransclude;
 					});
@@ -81,13 +82,15 @@
 			var ctx = getAndClearCanvasContext(pdfView);
 			if (ctx) {
 				scope.ngScale = fixScale(pdfPage, scope.ngScale, rotate, pdfView.height(), pdfView.width());
-				var viewport = getViewport(pdfPage, scope.ngScale, rotate);
-				defineSizes(pdfView, viewport.width, viewport.height);
 				if (pdfPage) {
+					var quality = scope.ngQuality || 3;
+					var viewport = getViewport(pdfPage, scope.ngScale, rotate);
+					defineSizes(pdfView, viewport.width, viewport.height, quality);
+					var viewport2 = getViewport(pdfPage, scope.ngScale * quality, rotate);
 					pdfView.addClass('notrendered');
 					if (render) {
 						ctrl.readyToRender().then(function () {
-							drawPageToCtx(ctrl, pdfView, pdfPage, viewport, ctx);
+							drawPageToCtx(ctrl, pdfView, pdfPage, viewport, viewport2, ctx);
 						});
 					}
 				}
@@ -129,8 +132,8 @@
 		 * @param {CanvasContext} ctx
 		 * @returns {Promise}
 		 */
-		function drawPageToCtx(ctrl, pdfView, pdfPage, viewport, ctx) {
-			return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.then(function () {
+		function drawPageToCtx(ctrl, pdfView, pdfPage, viewport, viewport2, ctx) {
+			return pdfPage.render({canvasContext: ctx, viewport: viewport2}).promise.then(function () {
 				pdfView.removeClass('notrendered');
 				ctrl.setReadyToRender(); // emulate mutex unlock
 				var textLayer = pdfView.find('.textLayer').get(0);
@@ -166,9 +169,10 @@
 		 * @param {JQueryElement} pdfView
 		 * @param {number} width
 		 * @param {number} height
+		 * @param {number} quality
 		 */
-		function defineSizes(pdfView, width, height) {
-			pdfView.find('canvas').attr('width', width).attr('height', height);
+		function defineSizes(pdfView, width, height, quality) {
+			pdfView.find('canvas').attr('width', width * quality).attr('height', height * quality);
 			pdfView.find('canvas').css('width', '100%').css('height', '100%');
 			pdfView.find('.page,.canvasWrapper,.textLayer').css('width', width + 'px').css('height', height + 'px');
 		}

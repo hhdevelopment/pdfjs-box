@@ -31,6 +31,11 @@
 				<span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
 			</a>
 		</li>
+		<li ng-if="ngQuality" title="Quality : {{ngQuality}}">
+			<a href aria-label="incQuality" ng-click="ctrl.incQuality($event);">
+				<span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+			</a>
+		</li>
 		<li ng-if="allowPrint">
 			<a href aria-label="Print" ng-click="ctrl.print($event)">
 				<span class="glyphicon glyphicon-print" aria-hidden="true"></span>

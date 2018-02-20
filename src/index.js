@@ -34,6 +34,7 @@ require('./pdfjsbox/pdfjsbox.services.js');
 		ctrl.items2 = [];
 		ctrl.selectedDocument;
 		ctrl.docscale = 'fit';
+		ctrl.quality = 3;
 		ctrl.scale;
 		ctrl.selectedItem;
 		ctrl.onSave = onSave;

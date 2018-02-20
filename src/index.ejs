@@ -46,9 +46,9 @@
 										 placeholder="Sélectionnez un document PDF">
 					</pdf-thumbnails>
 					<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
-						<pdf-view id="myPdfViewer" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
+						<pdf-view id="myPdfViewer" ng-quality="ctrl.quality" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
 							<pdf-docscale ng-item="ctrl.selectedItem" pdfview-selector="#myPdfViewer" doc-scale="ctrl.docscale" ng-scale="ctrl.scale"></pdf-docscale>
-							<pdf-commands class="xl" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" doc-scale="ctrl.docscale" allow-print="true" allow-refresh="true"></pdf-commands>
+							<pdf-commands ng-quality="ctrl.quality" class="xl" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" doc-scale="ctrl.docscale" allow-print="true" allow-refresh="true"></pdf-commands>
 						</pdf-view>
 					</div>
 				</div>
