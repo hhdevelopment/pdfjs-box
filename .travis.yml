@@ -18,6 +18,9 @@ script:
   - gulp
   - webpack
   - ls
+  - ls public_html/
+  - echo $TRAVIS_REPO
+  - echo $REPO_NAME
 deploy:
   - provider: script
     script: npm version patch -m "[ci skip]"
