@@ -44,12 +44,12 @@ deploy:
     on: 
       branch: master2
   - provider: script
-    script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p $TRAVIS_REPO_SLUG cd $TRAVIS_REPO_SLUG; mrm *; mput *; bye"
+    script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p pdfjs-box; cd pdfjs-box; mrm *; mput *; bye"
     skip_cleanup: true
     on: 
       branch: master
   - provider: script
-    script: bower register boxes-scroll https://github.com/$TRAVIS_REPO_SLUG.git
+    script: bower register pdfjs-box https://github.com/$TRAVIS_REPO_SLUG.git
     skip_cleanup: true
     on: 
       branch: register_bower
