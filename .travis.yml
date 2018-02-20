@@ -21,18 +21,17 @@ script:
   - webpack
   - ls
   - ls public_html/
-  - echo $REPO_NAME
 deploy:
   - provider: script
     script: npm version patch -m "[ci skip]"
     skip_cleanup: true
     on:
-      branch: master2
+      branch: master
   - provider: script
     script: git push https://$GITHUB_TOKEN:x-oauth-basic@github.com/$TRAVIS_REPO_SLUG.git master
     skip_cleanup: true
     on:
-      branch: master2
+      branch: master
   - provider: releases
     user: "$GITHUB_USER"
     api_key: "$GITHUB_TOKEN"
@@ -40,13 +39,13 @@ deploy:
     file: dist/*
     skip_cleanup: true
     on:
-      branch: master2
+      branch: master
   - provider: npm
     email: "$NPM_MAIL"
     api_key: "$NPM_TOKEN"
     skip_cleanup: true
     on: 
-      branch: master2
+      branch: master
   - provider: script
     script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p $REPO_NAME; cd $REPO_NAME; mrm *; mput *; bye"
     skip_cleanup: true
