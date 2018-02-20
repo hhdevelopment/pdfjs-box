@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
-	function pdfView(pdfjsboxWatcherServices, pdfjsboxScaleServices) {
+	function pdfView(pdfjsboxWatcherServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfview.html',
@@ -42,13 +42,12 @@
 				});
 				var hasFocus = false;
 				ng.element(document).on("click", function (event) {
-					hasFocus = elm[0].contains(event.target);
+					hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
 				});
 				ng.element(document).on("keydown", function (event) {
 					if (!hasFocus || event.which < 37 || event.which > 40)
 						return;
-					event.stopPropagation();
-					event.preventDefault();
+					pdfjsboxDomServices.stopEvent(event);
 					scope.$apply(function () {
 						if (event.which === 38 || event.which === 37) {
 							ctrl.previous();
@@ -218,23 +217,13 @@
 			 * set ngItem with previous item
 			 */
 			function previous() {
-				if ($scope.ngItem) {
-					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
-					if (idx > 0) {
-						$scope.ngItem = $scope.ngItem.items[idx - 1];
-					}
-				}
+				$scope.ngItem = pdfjsboxItemServices.getPrevious($scope.ngItem);
 			}
 			/**
 			 * set ngItem with next item
 			 */
 			function next() {
-				if ($scope.ngItem) {
-					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
-					if (idx < $scope.ngItem.items.length - 1) {
-						$scope.ngItem = $scope.ngItem.items[idx + 1];
-					}
-				}
+				$scope.ngItem = pdfjsboxItemServices.getNext($scope.ngItem);
 			}
 			function readyToRender() {
 				return deferred.defer.promise.then(function () {

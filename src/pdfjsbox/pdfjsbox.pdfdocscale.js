@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfDocscale', pdfDocscale);
 	/* @ngInject */
-	function pdfDocscale(pdfjsboxWatcherServices, pdfjsboxScaleServices) {
+	function pdfDocscale(pdfjsboxWatcherServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -58,7 +58,7 @@
 						return;
 					}
 					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, 0);
-					var pdfView = container[0];
+					var pdfView = pdfjsboxDomServices.getElementFromJQueryElement(container);
 					var scaleFitV = (pdfView.clientHeight || rectangle.height) / rectangle.height;
 					var scaleFitH = (pdfView.clientWidth || rectangle.width) / rectangle.width;
 					if (docScale === 'fit') {

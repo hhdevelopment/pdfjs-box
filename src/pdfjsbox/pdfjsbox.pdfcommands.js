@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfCommands', pdfCommands);
 	/* @ngInject */
-	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDrawServices, pdfjsboxScaleServices) {
+	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDrawServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfcommands.html',
@@ -129,7 +129,7 @@
 			 * @param {jEvent} evt
 			 */
 			function zoomMoins(evt) {
-				stopEvent(evt);
+				pdfjsboxDomServices.stopEvent(evt);
 				$scope.ngScale = $scope.ngScale * 0.9;
 			}
 			/**
@@ -137,7 +137,7 @@
 			 * @param {jEvent} evt
 			 */
 			function zoomPlus(evt) {
-				stopEvent(evt);
+				pdfjsboxDomServices.stopEvent(evt);
 				$scope.ngScale = $scope.ngScale / 0.9;
 			}
 			/**
@@ -145,33 +145,23 @@
 			 * @param {ClickEvent} evt
 			 */
 			function previous(evt) {
-				stopEvent(evt);
-				if($scope.ngItem) {
-					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
-					if (idx > 0) {
-						$scope.ngItem = $scope.ngItem.items[idx - 1];
-					}
-				}
+				pdfjsboxDomServices.stopEvent(evt);
+				$scope.ngItem = pdfjsboxItemServices.getPrevious($scope.ngItem);
 			}
 			/**
 			 * set ngItem with next item
 			 * @param {ClickEvent} evt
 			 */
 			function next(evt) {
-				stopEvent(evt);
-				if($scope.ngItem) {
-					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.ngItem, $scope.ngItem.items);
-					if (idx < $scope.ngItem.items.length - 1) {
-						$scope.ngItem = $scope.ngItem.items[idx + 1];
-					}
-				}
+				pdfjsboxDomServices.stopEvent(evt);
+				$scope.ngItem = pdfjsboxItemServices.getNext($scope.ngItem);
 			}
 			/**
 			 * Add 90° to rotate
 			 * @param {ClickEvent} evt
 			 */
 			function rotate(evt) {
-				stopEvent(evt);
+				pdfjsboxDomServices.stopEvent(evt);
 				$scope.ngItem.rotate = ($scope.ngItem.rotate + 90) % 360;
 			}
 			/**
@@ -179,7 +169,7 @@
 			 * @param {ClickEvent} evt
 			 */
 			function fit(evt) {
-				stopEvent(evt);
+				pdfjsboxDomServices.stopEvent(evt);
 				$scope.ngScale = ctrl.scaleFited;
 			}
 			/**
@@ -187,7 +177,7 @@
 			 * @param {ClickEvent} evt
 			 */
 			function refresh(evt) {
-				stopEvent(evt);
+				pdfjsboxDomServices.stopEvent(evt);
 				if($scope.ngItem) {
 					$scope.$root.$broadcast('pdfdoc-refresh', $scope.ngItem.$$pdfid);
 				}
@@ -197,7 +187,7 @@
 			 * @param {ClickEvent} evt
 			 */
 			function print(evt) {
-				stopEvent(evt);
+				pdfjsboxDomServices.stopEvent(evt);
 				var jqSpanIcon = ng.element(evt.currentTarget).find('span');
 				jqSpanIcon.addClass('compute');
 				var jqBody = ctrl.jqPrintIframe.contents().find('body'); // ng.element(destDocument.body);
@@ -231,10 +221,6 @@
 					var scale2 = 1920 / Math.max(viewport.width, viewport.height);
 					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, Math.min(scale1, scale2));
 				});
-			}
-			function stopEvent(evt) {
-				evt.preventDefault();
-				evt.stopPropagation();
 			}
 		}
 	}

@@ -7,6 +7,21 @@
 	} catch (e) {
 		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
+	pdfbox.factory('pdfjsboxDomServices', domServices);
+	function domServices() {
+		return {
+			stopEvent: stopEvent,
+			getElementFromJQueryElement: getElementFromJQueryElement
+		};
+		function getElementFromJQueryElement(jqelt) {
+			return jqelt.get?jqelt.get(0):jqelt[0];
+		}
+		function stopEvent(event) {
+			event.stopImmediatePropagation();
+			event.stopPropagation();
+			event.preventDefault();
+		}
+	}
 	pdfbox.factory('pdfjsboxScaleServices', scaleServices);
 	function scaleServices() {
 		return {
@@ -81,7 +96,7 @@
 							var w = view[2] - view[0];
 							var h = view[3] - view[1];
 							var scale = height / h;
-							var ratio = w/h;
+							var ratio = w / h;
 							var jcanvas = ng.element("<canvas draggable='true' height='" + height + "' width='" + (height * ratio) + "'></canvas>");
 							elm.find('canvas').replaceWith(jcanvas);
 							var canvas = jcanvas.get(0);
@@ -173,6 +188,8 @@
 	pdfbox.factory('pdfjsboxItemServices', itemServices);
 	function itemServices() {
 		return {
+			getPrevious: getPrevious,
+			getNext: getNext,
 			getIndexOfItemInList: getIndexOfItemInList,
 			isContainInList: isContainInList,
 			getItemInList: getItemInList,
@@ -180,6 +197,24 @@
 			cloneItem: cloneItem,
 			id: id
 		};
+		function getPrevious(item) {
+			if (item) {
+				var idx = getIndexOfItemInList(item, item.items);
+				if (idx > 0) {
+					return item.items[idx - 1];
+				}
+			}
+			return item;
+		}
+		function getNext(item) {
+			if (item) {
+				var idx = getIndexOfItemInList(item, item.items);
+				if (idx < item.items.length - 1) {
+					return item.items[idx + 1];
+				}
+			}
+			return item;
+		}
 		/**
 		 * Clone l'tem pour la liste en parametre
 		 * @param {Item} item
@@ -220,7 +255,7 @@
 		 */
 		function id(pdf) {
 			var pdfid;
-			if(pdf) {
+			if (pdf) {
 				pdfid = pdf.id || pdf.url;
 				if (!pdfid) {
 					pdfid = !pdf.data ? hash(pdf) : uuid();

@@ -59,9 +59,10 @@
 		/**
 		 * Angular Controller
 		 * @param {type} $scope
+		 * @param {type} pdfjsboxDomServices
 		 * @returns {undefined}
 		 */
-		function PdfThumbnailCtrl($scope) {
+		function PdfThumbnailCtrl($scope, pdfjsboxDomServices) {
 			var ctrl = this;
 			ctrl.switchThumbnailSelected = switchThumbnailSelected;
 			ctrl.removeThumbnail = removeThumbnail;
@@ -70,16 +71,14 @@
 			 * @param {ClickEvent} evt
 			 */
 			function switchThumbnailSelected(evt) {
-				evt.stopPropagation();
-				evt.stopImmediatePropagation();
+				pdfjsboxDomServices.stopEvent(evt);
 			}
 			/**
 			 * Click sur la croix pour remove l'item
 			 * @param {ClickEvent} evt
 			 */
 			function removeThumbnail(evt) {
-				evt.stopPropagation();
-				evt.preventDefault();
+				pdfjsboxDomServices.stopEvent(evt);
 				var idx = $scope.ngItem.items.indexOf($scope.ngItem);
 				$scope.ngItem.items.splice(idx, 1);
 			}

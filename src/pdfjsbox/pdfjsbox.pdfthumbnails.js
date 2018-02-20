@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfThumbnails', pdfThumbnails);
 	/* @ngInject */
-	function pdfThumbnails(pdfjsboxWatcherServices, pdfjsboxItemServices) {
+	function pdfThumbnails(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDomServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnails.html',
@@ -39,23 +39,30 @@
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				manageDragAndDropHandler(scope, elm);
 				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
-				elm.addClass('scrollable');
 				var hasFocus = false;
 				elm.on("click", function (event) {
-					event.stopImmediatePropagation();
-					event.stopPropagation();
-					event.preventDefault();
+					pdfjsboxDomServices.stopEvent(event);
 					hasFocus = true;
+					var idx = Math.max(pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems), 0);
+					scope.selectedItem = scope.ngItems[idx];
+					elm.addClass('active');
 				});
 				ng.element(document).on("click", function (event) {
-					hasFocus = elm[0].contains(event.target);
+					hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
+					if (hasFocus) {
+						var idx = Math.max(pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems), 0);
+						scope.selectedItem = scope.ngItems[idx];
+						elm.addClass('active');
+					} else {
+						elm.removeClass('active');
+					}
 				});
 				ng.element(document).bind("keydown", function (event) {
-					if(!hasFocus || event.which < 37 || event.which > 40) return;
+					if (!hasFocus || event.which < 37 || event.which > 40)
+						return;
 					scope.$apply(function () {
-						event.stopPropagation();
-						event.preventDefault();
-						if (event.which===37 || event.which===38) {
+						pdfjsboxDomServices.stopEvent(event);
+						if (event.which === 37 || event.which === 38) {
 							ctrl.previous();
 						} else {
 							ctrl.next();
@@ -84,15 +91,11 @@
 				return handleDragStart(jqe.originalEvent, jqe.data);
 			}
 			function handleDragOverJQuery(jqe) {
-				jqe.stopImmediatePropagation();
-				jqe.stopPropagation();
-				jqe.preventDefault();
+				pdfjsboxDomServices.stopEvent(jqe);
 				return handleDragOver(jqe.originalEvent, jqe.data);
 			}
 			function handleDropJQuery(jqe) {
-				jqe.stopImmediatePropagation();
-				jqe.stopPropagation();
-				jqe.preventDefault();
+				pdfjsboxDomServices.stopEvent(jqe);
 				return handleDrop(jqe.originalEvent, jqe.data);
 			}
 			function handleDragStart(e, data) {
@@ -253,10 +256,10 @@
 				return;
 			}
 			var idx = pdfjsboxItemServices.getIndexOfItemInList(selectedItem, items);
-			if(idx < scope.ctrl.begin) {
+			if (idx < scope.ctrl.begin) {
 				scope.ctrl.begin = idx;
-			} 
-			if(idx > scope.ctrl.begin + scope.ctrl.limit - 1) {
+			}
+			if (idx > scope.ctrl.begin + scope.ctrl.limit - 1) {
 				scope.ctrl.begin = idx - scope.ctrl.limit + 1;
 			}
 			if (selectedItem.items === items) {
@@ -299,23 +302,13 @@
 			 * set ngItem with previous item
 			 */
 			function previous() {
-				if($scope.selectedItem) {
-					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.selectedItem, $scope.selectedItem.items);
-					if (idx > 0) {
-						$scope.selectedItem = $scope.selectedItem.items[idx - 1];
-					}
-				}
+				$scope.selectedItem = pdfjsboxItemServices.getPrevious($scope.selectedItem);
 			}
 			/**
 			 * set ngItem with next item
 			 */
 			function next() {
-				if($scope.selectedItem) {
-					var idx = pdfjsboxItemServices.getIndexOfItemInList($scope.selectedItem, $scope.selectedItem.items);
-					if (idx < $scope.selectedItem.items.length - 1) {
-						$scope.selectedItem = $scope.selectedItem.items[idx + 1];
-					}
-				}
+				$scope.selectedItem = pdfjsboxItemServices.getNext($scope.selectedItem);
 			}
 			function trackItem(item) {
 				return item.pageIdx + '_' + item.$$pdfid;
