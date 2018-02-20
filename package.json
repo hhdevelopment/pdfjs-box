@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/hhfrancois/pdfjs-box"
+    "url": "https://github.com/hhdevelopment/pdfjs-box.git"
   },
   "dependencies": {
     "angular": "^1.6.3",
