@@ -4,16 +4,16 @@
 
 pdfjs-box is a collection of angular directives for include easily pdfjs in angular 1.x application.
 
-[Demo](//jsfiddle.net/hhfrancois/chy4eesp/embedded/ "Demo on jsfiddle")
+[Demo](http://hhdev.fr/pdfjs-box/index.html#)
 
 ## Directives 
 
 ~~~~    
 <pdf-document pdf ng-items></pdf-document>
 <pdf-thumbnails ng-height ng-items removable allow-drag allow-drop selected-item placeholder></pdf-thumbnails>
-<pdf-view ng-item ng-scale></pdf-view>
+<pdf-view ng-item ng-scale ng-quality></pdf-view>
 <pdf-docscale ng-item ng-scale allow-print></pdf-docscale>
-<pdf-commands ng-item pdfview-selector doc-scale ng-scale></pdf-commands>
+<pdf-commands ng-item pdfview-selector doc-scale ng-scale ng-quality></pdf-commands>
 ~~~~    
 
   - pdf-document : from your document object implementation, computes the url to get pdf and supplies the items collections for other components   
