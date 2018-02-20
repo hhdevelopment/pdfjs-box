@@ -25,7 +25,6 @@
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				manageRefreshHandler(scope);
-				updatePdf(scope, scope.pdf);
 			}
 		};
 		/**

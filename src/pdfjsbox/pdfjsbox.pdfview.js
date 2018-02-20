@@ -29,7 +29,6 @@
 					updateView(s, elm, s.ngItem);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				updateView(scope, elm, scope.ngItem);
 				elm.on('mouseenter', function(event) {
 					scope.$apply(function () {
 						ctrl.showTransclude = true;

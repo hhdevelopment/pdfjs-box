@@ -38,7 +38,6 @@
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
 				manageDragAndDropHandler(scope, elm);
-				updateSelectedItem(scope, elm, scope.selectedItem, scope.ngItems);
 				var hasFocus = false;
 				elm.on("click", function (event) {
 					pdfjsboxDomServices.stopEvent(event);
@@ -256,14 +255,16 @@
 				return;
 			}
 			var idx = pdfjsboxItemServices.getIndexOfItemInList(selectedItem, items);
-			if (idx < scope.ctrl.begin) {
-				scope.ctrl.begin = idx;
-			}
-			if (idx > scope.ctrl.begin + scope.ctrl.limit - 1) {
-				scope.ctrl.begin = idx - scope.ctrl.limit + 1;
-			}
-			if (selectedItem.items === items) {
-				pdfthumbnailsElm.addClass('active');
+			if(idx !== -1) {
+				if (idx < scope.ctrl.begin) {
+					scope.ctrl.begin = idx;
+				}
+				if (idx > scope.ctrl.begin + scope.ctrl.limit - 1) {
+					scope.ctrl.begin = idx - scope.ctrl.limit + 1;
+				}
+				if (selectedItem.items === items) {
+					pdfthumbnailsElm.addClass('active');
+				}
 			}
 		}
 		/**

@@ -31,7 +31,6 @@
 					updateItemsLength(s.ctrl, v1);
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				updateNgItem(scope, ctrl, scope.ngItem);
 				ctrl.jqPrintIframe = elm.find('iframe');
 				ctrl.pdfView = elm.parents('pdf-view');
 				manageWheelHandler(ctrl, scope, ctrl.pdfView);

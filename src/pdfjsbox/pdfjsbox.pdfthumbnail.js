@@ -42,8 +42,7 @@
 		}
 		function drawPage(thumbnail, item) {
 			var elm = ng.element(thumbnail);
-			var height = (elm.height() - 20) || 100; // 20px en moins pour le padding 10 autour
-			if(elm.css('display') === 'inline-block') elm.css('display', 'table-cell');
+			var height = (elm.parent().height() - 20 - 4) || 100; // 20px en moins pour le padding 10 autour, - 4 pour la scrollbar
 			item.getPage().then(function (pdfPage) {
 				var view = pdfPage.view;
 				var w = view[2] - view[0];

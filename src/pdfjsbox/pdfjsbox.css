@@ -30,7 +30,7 @@ pdf-thumbnails > box-hscroll  {
 	height: 100%;
 }
 box-hscroll > pdf-thumbnail {
-	display: inline-block;
+	display: table-cell;
 }
 pdf-thumbnails > box-vscroll {
 	width: 100%;
