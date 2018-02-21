@@ -260,8 +260,8 @@
 				if (idx < scope.ctrl.begin) {
 					scope.ctrl.begin = idx;
 				}
-				if (idx > scope.ctrl.begin + scope.ctrl.limit - 1) {
-					scope.ctrl.begin = idx - scope.ctrl.limit + 1;
+				if (idx > scope.ctrl.begin + scope.ctrl.limit - 2) {
+					scope.ctrl.begin = idx - scope.ctrl.limit + 3;
 				}
 				if (selectedItem.items === items) {
 					pdfthumbnailsElm.addClass('active');
