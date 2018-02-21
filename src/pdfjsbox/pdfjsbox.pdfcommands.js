@@ -46,7 +46,7 @@
 		 * @param {jQueryElement} jpdfView
 		 */
 		function manageWheelHandler(ctrl, scope, jpdfView) {
-			jpdfView.on('wheel', null, {ctrl: ctrl}, function (event) {
+			jpdfView.find('.pdfViewer').on('wheel', null, {ctrl: ctrl}, function (event) {
 				if (event.originalEvent.deltaY < 0) {
 					if (event.ctrlKey) {
 						ctrl.zoomPlus(event);
