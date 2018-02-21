@@ -19,6 +19,7 @@ require('./pdfjsbox/pdfjsbox.pdfthumbnail.js');
 require('./pdfjsbox/pdfjsbox.pdfthumbnails.js');
 require('./pdfjsbox/pdfjsbox.pdfview.js');
 require('./pdfjsbox/pdfjsbox.services.js');
+require('./index.css');
 
 (function (ng, __) {
 	'use strict';
