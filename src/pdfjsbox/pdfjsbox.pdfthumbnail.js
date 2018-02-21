@@ -4,7 +4,7 @@
 	var pdfbox;
 	try {
 		pdfbox = ng.module('pdfjs-box');
-	} catch(e) {
+	} catch (e) {
 		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
 	pdfbox.directive('pdfThumbnail', pdfThumbnail);
@@ -35,26 +35,26 @@
 		 * @param {Item} item
 		 */
 		function updateNgItem(scope, pdfThumbnailElm, item) {
-			if(item) {
+			if (item) {
 				var thumbnail = pdfjsboxDomServices.getElementFromJQueryElement(pdfThumbnailElm);
 				thumbnail.item = item;
 				drawPage(pdfThumbnailElm, item);
 			}
 		}
 		function drawPage(pdfThumbnailElm, item) {
-			var height = (pdfThumbnailElm.parent().height() -  4) || 100; // 20px en moins pour le padding 10 autour, - 4 pour la scrollbar
+			var height = Math.max(pdfThumbnailElm.parent().height() - 4, 0) || 100; 
 			item.getPage().then(function (pdfPage) {
 				var view = pdfPage.view;
 				var w = view[2] - view[0];
 				var h = view[3] - view[1];
 				var scale = height / h;
-				var ratio = w/h;
+				var ratio = w / h;
 				var quality = 2;
 				var jcanvas = ng.element("<canvas draggable='true'></canvas>");
 				jcanvas.css('width', height * ratio).css('height', height);
 				pdfThumbnailElm.find('canvas').replaceWith(jcanvas);
 				var canvas = jcanvas.get(0);
-				pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function() {
+				pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function () {
 					pdfThumbnailElm.removeClass('notrendered');
 				});
 			});

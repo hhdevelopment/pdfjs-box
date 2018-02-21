@@ -35,9 +35,15 @@
 						ctrl.showTransclude = true;
 					});
 				});
-				elm.on('click', function (event) {
+				elm.on('mouseleave', function (event) {
 					scope.$apply(function () {
-						ctrl.showTransclude = !ctrl.showTransclude;
+						ctrl.showTransclude = false;
+					});
+				});
+				elm.on('click', function (event) {
+					console.log('click', window.getSelection, window.getSelection().type === 'Range');
+					scope.$apply(function () {
+						if(window.getSelection().type !== 'Range') ctrl.showTransclude = !ctrl.showTransclude;
 					});
 				});
 				var hasFocus = false;
@@ -129,6 +135,7 @@
 		 * @param {JQueryElement} pdfView
 		 * @param {PDFPage} pdfPage
 		 * @param {ViewPort} viewport
+		 * @param {ViewPort} viewport2
 		 * @param {CanvasContext} ctx
 		 * @returns {Promise}
 		 */
@@ -172,9 +179,9 @@
 		 * @param {number} quality
 		 */
 		function defineSizes(pdfView, width, height, quality) {
-			pdfView.find('canvas').attr('width', width * quality).attr('height', height * quality);
-			pdfView.find('canvas').css('width', '100%').css('height', '100%');
-			pdfView.find('.page,.canvasWrapper,.textLayer').css('width', width + 'px').css('height', height + 'px');
+			var pdfViewer = pdfView.find('.pdfViewer');
+			pdfViewer.find('canvas').attr('width', width * quality).attr('height', height * quality).css('width', '100%').css('height', '100%');
+			pdfViewer.find('.page,.canvasWrapper,.textLayer').css('width', width + 'px').css('height', height + 'px');
 		}
 		/**
 		 * RAZ le context du canvas et le retourne
@@ -183,7 +190,8 @@
 		 */
 		function getAndClearCanvasContext(pdfView) {
 			var jcanvas = ng.element("<canvas></canvas>");
-			pdfView.find('canvas').replaceWith(jcanvas);
+			var pdfViewer = pdfView.find('.pdfViewer');
+			pdfViewer.find('canvas').replaceWith(jcanvas);
 			var canvas = jcanvas.get(0);
 			if (canvas) {
 				return canvas.getContext('2d');

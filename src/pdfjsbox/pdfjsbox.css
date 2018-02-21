@@ -6,11 +6,11 @@ pdf-thumbnails.pdf-thumbnails-horizontal {
 	display: block;
 	overflow: hidden;
 }
-pdf-thumbnails.active {
-	background-color: #c7ddef;
+pdf-thumbnails {
+   background-color: transparent;
 }
-pdf-thumbnails.active pdf-thumbnail {
-	background-color: #c7ddef;
+pdf-thumbnails.active {
+	background-color: #eee;
 }
 pdf-thumbnails.active pdf-thumbnail:hover, 
 pdf-thumbnail:hover {
@@ -51,7 +51,7 @@ pdf-thumbnail {
 	background-color: #eee;
 }
 pdf-thumbnail > * {
-	padding: 10px 10px;
+	padding: 5px 5px;
 }
 pdf-thumbnail {
 	cursor:pointer;
@@ -83,14 +83,13 @@ pdf-view {
 	overflow:auto;
 	position: relative;
 }
-/*pdf-view ng-transclude {
+pdf-view ng-transclude {
 	position:absolute;
 	width: 100%;
 	z-index: 3;
-}*/
+}
 pdf-view pdf-commands {
-	position:absolute;
-	z-index: 3;
+	display: block;
 	width: 100%;
 	margin: -15px;
 }

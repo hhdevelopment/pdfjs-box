@@ -36,18 +36,18 @@
 					</div>
 				</div>
 				<div class="col-xs-6">
-					<pdf-thumbnails class="pdf-thumbnails-horizontal" style="height:150px"
-										 ng-items="ctrl.items"
-										 reverse-scroll="false"
-										 removable="false"
-										 allow-drag="true" allow-drop="false"
-										 selected-item="ctrl.selectedItem"
-										 dblclick-target="ctrl.items2"
-										 placeholder="Sélectionnez un document PDF">
-					</pdf-thumbnails>
-					<div style="background-color: #ddd;padding:10px 0px;height: 620px;overflow: auto">
+					<div style="background-color: #ddd;padding:0px 0px;height: 620px;overflow: auto">
 						<pdf-view id="myPdfViewer" ng-quality="ctrl.quality" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
 							<pdf-docscale ng-item="ctrl.selectedItem" pdfview-selector="#myPdfViewer" doc-scale="ctrl.docscale" ng-scale="ctrl.scale"></pdf-docscale>
+							<pdf-thumbnails class="pdf-thumbnails-horizontal" style="height:150px"
+												 ng-items="ctrl.items"
+												 reverse-scroll="false"
+												 removable="false"
+												 allow-drag="true" allow-drop="false"
+												 selected-item="ctrl.selectedItem"
+												 dblclick-target="ctrl.items2"
+												 placeholder="Sélectionnez un document PDF">
+							</pdf-thumbnails>
 							<pdf-commands ng-quality="ctrl.quality" class="xl" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" doc-scale="ctrl.docscale" allow-print="true" allow-refresh="true"></pdf-commands>
 						</pdf-view>
 					</div>

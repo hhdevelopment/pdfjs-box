@@ -27,6 +27,7 @@
 				'style': '@'
 			},
 			link: function (scope, elm, attrs, ctrl) {
+				elm.find('box-hscroll').css('height', elm.css('height'));
 				var watcherClears = [];
 				watcherClears.push(scope.$watchGroup(['selectedItem', 'ngItems.length'], function (vs1, vs2, s) {
 					// permet de detecter si l'tem selectionné est toujours dans une liste accessible

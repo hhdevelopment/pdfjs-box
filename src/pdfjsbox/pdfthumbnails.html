@@ -1,4 +1,4 @@
-<box-hscroll ng-if="ngItems.length" total="ngItems.length" ng-limit="ctrl.limit" ng-begin="ctrl.begin">
+<box-hscroll total="ngItems.length" ng-limit="ctrl.limit" ng-begin="ctrl.begin">
 	<pdf-thumbnail ng-repeat="item in ngItems|limitTo:ctrl.limit:ctrl.begin track by ctrl.trackItem(item)"
 						ng-class="{active:ctrl.areItemsEqual(selectedItem, item), moving:item.moving}"
 						ng-click="ctrl.selectByClick(item)" 
@@ -6,4 +6,4 @@
 						ng-item="item">
 	</pdf-thumbnail>
 </box-hscroll>
-<h2 ng-if="!ngItems || !ngItems.length" ng-bind="::placeholder"></h2>
+<!--<h2 ng-if="!ngItems || !ngItems.length" ng-bind="::placeholder"></h2>-->
