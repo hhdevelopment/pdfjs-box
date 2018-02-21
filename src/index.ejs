@@ -12,7 +12,7 @@
 			</div>
 			<pdf-document pdf="ctrl.selectedDocument.url" ng-items="ctrl.items"></pdf-document>
 			<div class="row">
-				<div class="col-xs-6">
+				<div class="col-xs-5">
 					<div class="list-group">
 						<a ng-repeat="doc in ctrl.documents track by $index" href class="list-group-item" 
 							ng-class="{'active':ctrl.selectedDocument === doc}"
@@ -35,7 +35,7 @@
 						</pdf-thumbnails>
 					</div>
 				</div>
-				<div class="col-xs-6">
+				<div class="col-xs-7">
 					<div style="background-color: #ddd;padding:0px 0px;height: 620px;overflow: auto">
 						<pdf-view id="myPdfViewer" ng-quality="ctrl.quality" ng-item="ctrl.selectedItem" ng-scale="ctrl.scale" >
 							<pdf-docscale ng-item="ctrl.selectedItem" pdfview-selector="#myPdfViewer" doc-scale="ctrl.docscale" ng-scale="ctrl.scale"></pdf-docscale>
