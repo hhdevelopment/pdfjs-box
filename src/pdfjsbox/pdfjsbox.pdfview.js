@@ -41,7 +41,6 @@
 					});
 				});
 				elm.on('click', function (event) {
-					console.log('click', window.getSelection, window.getSelection().type === 'Range');
 					scope.$apply(function () {
 						if(window.getSelection().type !== 'Range') ctrl.showTransclude = !ctrl.showTransclude;
 					});
