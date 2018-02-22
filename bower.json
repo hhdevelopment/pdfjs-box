@@ -2,7 +2,7 @@
   "name": "boxes-scroll",
   "description": "directive angular for pdfjs(mozilla)",
   "author": "Achache francois",
-  "license": "ISC",
+  "license": "MIT",
   "main": [
     "src/pdfjsbox.js",
     "src/pdfjsbox.css"
