@@ -12,7 +12,7 @@ branches:
 before_install:
   - sudo apt-get install lftp
 before_script:
-  - rm -f node_modules/boxes-scroll
+  - rm -rf node_modules/boxes-scroll
   - git config user.email "$GITHUB_MAIL"
   - git config user.name "$GITHUB_USER"
   - npm install -g gulp-cli
