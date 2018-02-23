@@ -1,6 +1,6 @@
 # PDFJS-BOX : include easyly pdfjs in your angular application
 
-[![npm version](https://badge.fury.io/js/pdfjs-box.svg)](https://www.npmjs.com/package/pdfjs-box)
+[![npm version](https://img.shields.io/npm/v/pdfjs-box.svg)](https://www.npmjs.com/package/pdfjs-box)
 [![Build Status](https://travis-ci.org/hhdevelopment/pdfjs-box.svg?branch=master)](https://travis-ci.org/hhdevelopment/pdfjs-box)
 
 pdfjs-box is a collection of angular directives for include easily pdfjs in angular 1.x application.
