@@ -9,8 +9,6 @@ env:
 branches:
   only:
   - master
-before_install:
-  - sudo apt-get install lftp
 before_script:
   - rm -rf node_modules/boxes-scroll
   - git config user.email "$GITHUB_MAIL"
@@ -20,9 +18,6 @@ before_script:
 script: 
   - git checkout master
   - gulp
-  - webpack
-  - ls
-  - ls public_html/
 deploy:
   - provider: script
     script: npm version patch -m "[ci skip]"
@@ -45,11 +40,6 @@ deploy:
   - provider: npm
     email: "$NPM_MAIL"
     api_key: "$NPM_TOKEN"
-    skip_cleanup: true
-    on: 
-      branch: master
-  - provider: script
-    script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p $REPO_NAME; cd $REPO_NAME; mrm *; mput *; bye"
     skip_cleanup: true
     on: 
       branch: master

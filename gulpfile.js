@@ -7,12 +7,12 @@ var gulp = require('gulp'),
 gulp.task('default', ['clean', 'build']);
 
 gulp.task('build', function () {
-	var pdfthumbnails = compact(fs.readFileSync('src/pdfjsbox/pdfthumbnails.html', 'utf8'));
-	var pdfthumbnail = compact(fs.readFileSync('src/pdfjsbox/pdfthumbnail.html', 'utf8'));
-	var pdfview = compact(fs.readFileSync('src/pdfjsbox/pdfview.html', 'utf8'));
-	var pdfcommands = compact(fs.readFileSync('src/pdfjsbox/pdfcommands.html', 'utf8'));
-	gulp.src('src/pdfjsbox/pdfjsbox.css').pipe(gulp.dest('dist'));
-	return gulp.src('src/pdfjsbox/pdfjsbox.*.js')
+	var pdfthumbnails = compact(fs.readFileSync('src/pdfthumbnails.html', 'utf8'));
+	var pdfthumbnail = compact(fs.readFileSync('src/pdfthumbnail.html', 'utf8'));
+	var pdfview = compact(fs.readFileSync('src/pdfview.html', 'utf8'));
+	var pdfcommands = compact(fs.readFileSync('src/pdfcommands.html', 'utf8'));
+	gulp.src('src/pdfjsbox.css').pipe(gulp.dest('dist'));
+	return gulp.src('src/pdfjsbox.*.js')
 			  .pipe(concat("pdfjsbox.js"))
 			  .pipe(replace("require('./pdfthumbnails.html')", "\"" + pdfthumbnails + "\""))
 			  .pipe(replace("require('./pdfthumbnail.html')", "\"" + pdfthumbnail + "\""))
