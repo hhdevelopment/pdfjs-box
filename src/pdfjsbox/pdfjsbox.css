@@ -92,6 +92,7 @@ pdf-view pdf-commands {
 	display: block;
 	width: 100%;
 	margin: -15px;
+   word-spacing: -1em;
 }
 pdf-commands .pager > li > a {
 	background-color: #ddd;
