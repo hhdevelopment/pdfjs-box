@@ -3,6 +3,8 @@ import 'bootstrap/dist/js/bootstrap.js';
 import angular from 'angular';
 import 'boxes-scroll/dist/boxesscroll.css';
 import 'boxes-scroll/dist/boxesscroll.js';
+import 'pdfjs-box/dist/pdfjsbox.css';
+import 'pdfjs-box/dist/pdfjsbox.js';
 
 //var angular = require('angular');
 
@@ -10,15 +12,6 @@ require('./pdfs/conditions.pdf');
 require('./pdfs/guide.pdf');
 require('./pdfs/UnicodeStandard.pdf');
 require('./favicon.ico');
-require('./pdfjsbox/pdfjsbox.css');
-require('./pdfjsbox/pdfjsbox.config.js');
-require('./pdfjsbox/pdfjsbox.pdfdocscale.js');
-require('./pdfjsbox/pdfjsbox.pdfcommands.js');
-require('./pdfjsbox/pdfjsbox.pdfdocument.js');
-require('./pdfjsbox/pdfjsbox.pdfthumbnail.js');
-require('./pdfjsbox/pdfjsbox.pdfthumbnails.js');
-require('./pdfjsbox/pdfjsbox.pdfview.js');
-require('./pdfjsbox/pdfjsbox.services.js');
 require('./index.css');
 
 (function (ng, __) {
@@ -28,6 +21,7 @@ require('./index.css');
 			  .controller('AppCtrl', AppCtrl);
 	function AppCtrl() {
 		var ctrl = this;
+		ctrl.module = 'pdfjs-box';
 		ctrl.documents = [{label:'Conditions générales', url:'conditions.pdf'}, 
 			{label:'guide renovation 2016', url:'guide.pdf'}, 
 			{label:'UnicodeStandard', url:'UnicodeStandard.pdf'}];

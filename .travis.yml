@@ -8,53 +8,18 @@ env:
   - REPO_NAME=pdfjs-box
 branches:
   only:
-  - master
+  - website
 before_install:
   - sudo apt-get install lftp
 before_script:
   - rm -rf node_modules/boxes-scroll
+  - rm -rf node_modules/pdfjs-box
   - git config user.email "$GITHUB_MAIL"
   - git config user.name "$GITHUB_USER"
   - npm install
-  - npm install -g gulp-cli
 script: 
-  - git checkout master
-  - gulp
   - webpack
-  - ls
-  - ls public_html/
 deploy:
-  - provider: script
-    script: npm version patch -m "[ci skip]"
-    skip_cleanup: true
-    on:
-      branch: master
-  - provider: script
-    script: git push https://$GITHUB_TOKEN:x-oauth-basic@github.com/$TRAVIS_REPO_SLUG.git master
-    skip_cleanup: true
-    on:
-      branch: master
-  - provider: releases
-    user: "$GITHUB_USER"
-    api_key: "$GITHUB_TOKEN"
-    file_glob: true
-    file: dist/*
-    skip_cleanup: true
-    on:
-      branch: master
-  - provider: npm
-    email: "$NPM_MAIL"
-    api_key: "$NPM_TOKEN"
-    skip_cleanup: true
-    on: 
-      branch: master
   - provider: script
     script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p $REPO_NAME; cd $REPO_NAME; mrm *; mput *; bye"
     skip_cleanup: true
-    on: 
-      branch: master
-  - provider: script
-    script: bower register $REPO_NAME https://github.com/$TRAVIS_REPO_SLUG.git
-    skip_cleanup: true
-    on: 
-      branch: register_bower
