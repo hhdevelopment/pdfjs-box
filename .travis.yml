@@ -23,5 +23,5 @@ deploy:
   - provider: script
     script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; mkdir -p $REPO_NAME; cd $REPO_NAME; mrm *; mput *; bye"
     skip_cleanup: true
-   on:
+    on:
       branch: website
