@@ -7,12 +7,12 @@
     "url": "https://github.com/hhdevelopment/pdfjs-box.git"
   },
   "dependencies": {
-	 "pdfjs-box":"1.x",
     "angular": "^1.x",
     "bootstrap": "^3.x",
     "boxes-scroll": "^2.x",
     "jquery": "^3.x",
     "lodash": "^4.x",
+    "pdfjs-box": "1.x",
     "pdfjs-dist": "2.0.378"
   },
   "devDependencies": {
