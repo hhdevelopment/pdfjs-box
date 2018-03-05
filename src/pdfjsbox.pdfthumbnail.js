@@ -43,6 +43,8 @@
 		}
 		function drawPage(pdfThumbnailElm, item) {
 			var height = Math.max(pdfThumbnailElm.parent().height() - 4, 0) || 100; 
+			var oldcanvas = pdfThumbnailElm.find("canvas");
+			oldcanvas.attr('width', height * 0.7).attr('height', height).css('width', height * 0.7+'px').css('height', height +'px');
 			item.getPage().then(function (pdfPage) {
 				var view = pdfPage.view;
 				var w = view[2] - view[0];
@@ -51,7 +53,7 @@
 				var ratio = w / h;
 				var quality = 2;
 				var jcanvas = ng.element("<canvas draggable='true'></canvas>");
-				jcanvas.css('width', height * ratio).css('height', height);
+				jcanvas.attr('width', height * ratio * quality).attr('height', height * quality).css('width', height * ratio+'px').css('height', height +'px');
 				pdfThumbnailElm.find('canvas').replaceWith(jcanvas);
 				var canvas = jcanvas.get(0);
 				pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function () {
