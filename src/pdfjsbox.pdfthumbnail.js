@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfThumbnail', pdfThumbnail);
 	/* @ngInject */
-	function pdfThumbnail(pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxDomServices) {
+	function pdfThumbnail(pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxDomServices, pdfjsboxScaleServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnail.html',
@@ -46,11 +46,9 @@
 			var oldcanvas = pdfThumbnailElm.find("canvas");
 			oldcanvas.attr('width', height * 0.7).attr('height', height).css('width', height * 0.7+'px').css('height', height +'px');
 			item.getPage().then(function (pdfPage) {
-				var view = pdfPage.view;
-				var w = view[2] - view[0];
-				var h = view[3] - view[1];
-				var scale = height / h;
-				var ratio = w / h;
+				var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, item.rotate);
+				var scale = height / rectangle.height;
+				var ratio = rectangle.width / rectangle.height;
 				var quality = 2;
 				var jcanvas = ng.element("<canvas draggable='true'></canvas>");
 				jcanvas.attr('width', height * ratio * quality).attr('height', height * quality).css('width', height * ratio+'px').css('height', height +'px');
