@@ -16,10 +16,14 @@
 			scope: {
 				// nom interne : nom externe
 				'pdf': '<', // le document sous forme d'objet
+				'rotate': '<', // le document sera t'il tourné
 				'ngItems': '=' // la liste de items representant les pages du document
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
+				watcherClears.push(scope.$watch('rotate', function (v1, v2, s) {
+					updateRotate(s, v1);
+				}, true));
 				watcherClears.push(scope.$watch('pdf', function (v1, v2, s) {
 					updatePdf(s, v1);
 				}, true));
@@ -40,6 +44,16 @@
 			});
 		}
 		/**
+		 * Changement de rotation pour tout le document
+		 * @param {Angular scope} scope
+		 * @param {Number} rotate
+		 */
+		function updateRotate(scope, rotate) {
+			scope.ngItems.forEach(function(item) {
+				item.rotate += rotate;
+			});
+		}
+		/**
 		 * Changement de document
 		 * @param {Angular scope} scope
 		 * @param {Document|url} pdf
@@ -55,7 +69,7 @@
 					task.promise.then(function (pdfDocument) {
 						var args = [0, items.length];
 						for (var i = 0; i < pdfDocument.numPages; i++) {
-							args.push(createItem(pdf, pdfid, pdfDocument, items, i));
+							args.push(createItem(pdf, pdfid, pdfDocument, items, i, scope.rotate | 0));
 						}
 						scope.$apply(function() {
 							[].splice.apply(items, args); // de cette maniere la liste n'est modifiée qu'une fois
@@ -68,8 +82,8 @@
 			}
 			return null;
 		}
-		function createItem(pdf, pdfid, pdfDocument, items, idx) {
-			var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: 0, items: items, getPage: function () {
+		function createItem(pdf, pdfid, pdfDocument, items, idx, rotate) {
+			var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: rotate, items: items, getPage: function () {
 					return pdfDocument.getPage(this.pageIdx);
 				}};
 			return item;
