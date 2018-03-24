@@ -40,7 +40,8 @@
     "webpack-clean-obsolete-chunks": "^0.x"
   },
   "scripts": {
-    "webpack": "webpack --progress --profile --colors",
-    "watch": "webpack --progress --profile --watch"
+    "build": "gulp build --dev",
+    "clean": "gulp clean",
+    "clean & build": "gulp clean build --dev"
   }
 }

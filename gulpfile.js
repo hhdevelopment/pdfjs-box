@@ -3,8 +3,9 @@ var gulp = require('gulp'),
 		  del = require('del'),
 		  concat = require("gulp-concat"),
 		  replace = require('gulp-replace'),
-		  dist = 'dist'; // '../websites/pdfjs-box/node_modules/pdfjs-box/dist'
+		  dist = process.argv.indexOf('--dev')!==-1?'../websites/pdfjs-box/node_modules/pdfjs-box/dist':'dist';
 
+console.log("Build folder '%s'", dist);
 gulp.task('default', ['clean', 'build']);
 
 gulp.task('build', function () {
