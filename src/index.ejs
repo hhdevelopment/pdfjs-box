@@ -15,13 +15,14 @@
 				<a href="https://travis-ci.org/hhdevelopment/pdfjs-box"><img src="https://travis-ci.org/hhdevelopment/pdfjs-box.svg?branch=master" alt="build status" height="18"></a>
 			</h2>
 		</div>
-		<pdf-document pdf="ctrl.selectedDocument.url" ng-items="ctrl.items"></pdf-document>
+		<pdf-document pdf="ctrl.selectedDocument.url" ng-items="ctrl.items" rotate="ctrl.globalRotate" on-error="ctrl.onError(reason)"></pdf-document>
+      <button class="btn btn-primary" ng-click="ctrl.rotate()"><i class="glyphicon glyphicon-repeat"></i></button>
 		<div class="row">
 			<div class="col-xs-5">
 				<div class="list-group">
 					<a ng-repeat="doc in ctrl.documents track by $index" href class="list-group-item" 
 						ng-class="{'active':ctrl.selectedDocument === doc}"
-						ng-click="ctrl.selectedDocument = doc;">
+						ng-click="ctrl.globalRotate = 0;ctrl.selectedDocument = doc;">
 						<span class="glyphicon glyphicon-file"></span>
 						<span ng-bind="doc.label + '(' + $index + ')'"></span></a>
 				</div>

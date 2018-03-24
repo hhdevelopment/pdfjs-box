@@ -22,19 +22,34 @@ require('./index.css');
 	function AppCtrl() {
 		var ctrl = this;
 		ctrl.module = 'pdfjs-box';
-		ctrl.documents = [{label:'Conditions générales', url:'conditions.pdf'}, 
+		ctrl.documents = [
+			{label:'Conditions générales', url:'conditions.pdf'}, 
 			{label:'guide renovation 2016', url:'guide.pdf'}, 
-			{label:'UnicodeStandard', url:'UnicodeStandard.pdf'}];
+			{label:'UnicodeStandard', url:'UnicodeStandard.pdf'},
+			{label:'ErrorFile', url:'foo.pdf'}
+		];
 		ctrl.items = [];
 		ctrl.items2 = [];
 		ctrl.selectedDocument;
 		ctrl.docscale = 'fit';
+		ctrl.globalRotate = 0;
 		ctrl.quality = 3;
 		ctrl.scale;
 		ctrl.selectedItem;
 		ctrl.onSave = onSave;
+		ctrl.rotate = rotate;
+		ctrl.onError = onError;
 		
+		function onError(reason) {
+			console.log("Error of loading", reason);
+		}
 		
+		function rotate() {
+			ctrl.globalRotate = ctrl.globalRotate + 90;
+			if(ctrl.globalRotate>270) {
+				ctrl.globalRotate = 0;
+			}
+		}
 		function onSave(items) {
 			alert('document PDF de '+items.length+' pages sauvegardées');
 			items.splice(0, items.length);
