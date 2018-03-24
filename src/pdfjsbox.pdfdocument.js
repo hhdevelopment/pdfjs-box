@@ -17,7 +17,8 @@
 				// nom interne : nom externe
 				'pdf': '<', // le document sous forme d'objet
 				'rotate': '<', // le document sera t'il tourné
-				'ngItems': '=' // la liste de items representant les pages du document
+				'ngItems': '=', // la liste de items representant les pages du document
+				'onError': '&'
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
@@ -78,7 +79,11 @@
 						});
 						console.debug('Load sequence ' + (pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
 					}).catch(function (reason) {
-						console.error('Error: ' + reason);
+						if(scope.onError) {
+							scope.onError({reason:reason});
+						} else {
+							console.error('Error: ' + reason);
+						}
 					});
 				}
 			}
