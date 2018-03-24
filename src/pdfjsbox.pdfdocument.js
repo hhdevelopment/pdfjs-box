@@ -50,7 +50,9 @@
 		 */
 		function updateRotate(scope, rotate) {
 			scope.ngItems.forEach(function(item) {
-				item.rotate += rotate;
+				item.rotate = item.rotate - item.pdfRotate;
+				item.pdfRotate = rotate;
+				item.rotate = item.pdfRotate + item.rotate;
 			});
 		}
 		/**
@@ -83,7 +85,7 @@
 			return null;
 		}
 		function createItem(pdf, pdfid, pdfDocument, items, idx, rotate) {
-			var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, rotate: rotate, items: items, getPage: function () {
+			var item = {$$pdfid: pdfid, document: pdf, pageIdx: idx + 1, pdfRotate:rotate, rotate:rotate , items: items, getPage: function () {
 					return pdfDocument.getPage(this.pageIdx);
 				}};
 			return item;
