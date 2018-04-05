@@ -43,21 +43,22 @@
 		}
 		function drawPage(pdfThumbnailElm, item) {
 			var height = Math.max(pdfThumbnailElm.parent().height() - 4, 0) || 100; 
-			var oldcanvas = pdfThumbnailElm.find("canvas");
-			oldcanvas.attr('width', height * 0.7).attr('height', height).css('width', height * 0.7+'px').css('height', height +'px');
-			item.getPage().then(function (pdfPage) {
-				var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, item.rotate);
-				var scale = height / rectangle.height;
-				var ratio = rectangle.width / rectangle.height;
-				var quality = 2;
-				var jcanvas = ng.element("<canvas draggable='true'></canvas>");
-				jcanvas.attr('width', height * ratio * quality).attr('height', height * quality).css('width', height * ratio+'px').css('height', height +'px');
-				pdfThumbnailElm.find('canvas').replaceWith(jcanvas);
-				var canvas = jcanvas.get(0);
-				pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function () {
-					pdfThumbnailElm.removeClass('notrendered');
+			var jcanvas = pdfThumbnailElm.find("canvas");
+			var canvas = jcanvas.get(0);
+			if (canvas) {
+				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+				jcanvas.attr('width', height * 0.7).attr('height', height).css('width', height * 0.7+'px').css('height', height +'px');
+				item.getPage().then(function (pdfPage) {
+					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, item.rotate);
+					var scale = height / rectangle.height;
+					var ratio = rectangle.width / rectangle.height;
+					var quality = 2;
+					jcanvas.attr('width', height * ratio * quality).attr('height', height * quality).css('width', height * ratio+'px').css('height', height +'px');
+					pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function () {
+						pdfThumbnailElm.removeClass('notrendered');
+					});
 				});
-			});
+			}
 		}
 		/**
 		 * Angular Controller
