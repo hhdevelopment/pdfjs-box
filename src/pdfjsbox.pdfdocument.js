@@ -11,6 +11,7 @@
 	pdfbox.directive('pdfDocument', pdfDocument);
 	/* @ngInject */
 	function pdfDocument(pdfjsboxWatcherServices, pdfjsboxItemServices) {
+		var task = null;
 		return {
 			restrict: 'E',
 			scope: {
@@ -65,10 +66,13 @@
 			var items = scope.ngItems || [];
 			var pdfid = pdfjsboxItemServices.id(pdf);
 			if (pdfid !== scope.pdfid) {
+				if(task) {
+					task.destroy();
+				}
 				scope.pdfid = pdfid;
 				if (pdfid) {
 					var t0 = new Date().getTime();
-					var task = PDFJS.getDocument(pdf);
+					task = PDFJS.getDocument(pdf);
 					task.promise.then(function (pdfDocument) {
 						var args = [0, items.length];
 						for (var i = 0; i < pdfDocument.numPages; i++) {
