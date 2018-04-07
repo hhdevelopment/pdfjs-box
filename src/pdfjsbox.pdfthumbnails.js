@@ -9,7 +9,8 @@
 	}
 	pdfbox.directive('pdfThumbnails', pdfThumbnails);
 	/* @ngInject */
-	function pdfThumbnails(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDomServices) {
+	function pdfThumbnails($document, pdfjsboxItemServices, pdfjsboxDomServices) {
+		var hasFocus = false;
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnails.html',
@@ -37,128 +38,148 @@
 						updateSelectedItem(s, elm, vs1[0], s.ngItems);
 					}
 				}, true));
-				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				manageDragAndDropHandler(scope, elm);
-				var hasFocus = false;
-				elm.on("click", function (event) {
-					pdfjsboxDomServices.stopEvent(event);
-					hasFocus = true;
-					var idx = Math.max(pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems), 0);
-					scope.selectedItem = scope.ngItems[idx];
-					elm.addClass('active');
-				});
-				ng.element(document).on("click", function (event) {
-					hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
-					if (hasFocus) {
-						var idx = Math.max(pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems), 0);
-						scope.selectedItem = scope.ngItems[idx];
-						elm.addClass('active');
-					} else {
-						elm.removeClass('active');
-					}
-				});
-				ng.element(document).bind("keydown", function (event) {
-					if (!hasFocus || event.which < 37 || event.which > 40)
-						return;
-					scope.$apply(function () {
-						pdfjsboxDomServices.stopEvent(event);
-						if (event.which === 37 || event.which === 38) {
-							ctrl.previous();
-						} else {
-							ctrl.next();
-						}
+				scope.$on('$destroy', function () {
+					elm.off("click", clickOnElt);
+					$document.off("click", clickOnDoc);
+					$document.off("keydown", keydownOnDoc);
+					elm.off('dragstart', handleDragStartJQuery);
+					$document.off('dragover', handleDragOverJQuery);
+					$document.off('drop', handleDropJQuery);
+					// stop watching when scope is destroyed
+					watcherClears.forEach(function (watcherClear) {
+						watcherClear();
 					});
 				});
+				manageDragAndDropHandler(scope, elm);
+				elm.on("click", {scope:scope, element:elm}, clickOnElt);
+				$document.on("click", {scope:scope, element:elm}, clickOnDoc);
+				$document.on("keydown", {scope:scope, ctrl:ctrl}, keydownOnDoc);
 			}
 		};
+		function clickOnElt(event) {
+			var scope = event.data.scope;
+			var elm = event.data.element;
+			pdfjsboxDomServices.stopEvent(event);
+			hasFocus = true;
+			var idx = Math.max(pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems), 0);
+			scope.selectedItem = scope.ngItems[idx];
+			elm.addClass('active');
+		}
+		function clickOnDoc(event) {
+			var scope = event.data.scope;
+			var elm = event.data.element;
+			hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
+			if (hasFocus) {
+				var idx = Math.max(pdfjsboxItemServices.getIndexOfItemInList(scope.selectedItem, scope.ngItems), 0);
+				scope.selectedItem = scope.ngItems[idx];
+				elm.addClass('active');
+			} else {
+				elm.removeClass('active');
+			}
+		}
+		function keydownOnDoc(event) {
+			var scope = event.data.scope;
+			var ctrl = event.data.ctrl;
+			if (!hasFocus || event.which < 37 || event.which > 40)
+				return;
+			scope.$apply(function () {
+				pdfjsboxDomServices.stopEvent(event);
+				if (event.which === 37 || event.which === 38) {
+					ctrl.previous();
+				} else {
+					ctrl.next();
+				}
+			});
+
+		}
 		function manageDragAndDropHandler(scope, elm) {
 			if (!window.dataTransfer) {
-				window.dataTransfer = {};
+				window.dataTransfer = {scope:scope};
 			}
 			if (scope.allowDrag) {
 				elm.on('dragstart', window.dataTransfer, handleDragStartJQuery);
 			}
 			if (scope.allowDrop) {
-				$(document).off('dragover', window.dataTransfer, handleDragOverJQuery);
-				$(document).on('dragover', window.dataTransfer, handleDragOverJQuery);
-				$(document).off('drop', window.dataTransfer, handleDropJQuery);
-				$(document).on('drop', window.dataTransfer, handleDropJQuery);
+				$document.on('dragover', window.dataTransfer, handleDragOverJQuery);
+				$document.on('drop', window.dataTransfer, handleDropJQuery);
 			}
-			function handleDragStartJQuery(jqe) {
-				jqe.stopImmediatePropagation();
-				jqe.stopPropagation();
+		}
+		function handleDragStartJQuery(jqe) {
+			jqe.stopImmediatePropagation();
+			jqe.stopPropagation();
 //				jqe.preventDefault(); // ne pas mettre
-				return handleDragStart(jqe.originalEvent, jqe.data);
+			return handleDragStart(jqe.originalEvent, jqe.data);
+		}
+		function handleDragOverJQuery(jqe) {
+			pdfjsboxDomServices.stopEvent(jqe);
+			return handleDragOver(jqe.originalEvent, jqe.data);
+		}
+		function handleDropJQuery(jqe) {
+			pdfjsboxDomServices.stopEvent(jqe);
+			return handleDrop(jqe.originalEvent, jqe.data);
+		}
+		function handleDragStart(e, data) {
+			data = data || window.dataTransfer;
+			var currentDrag = getFirstParentNamed(e.target, 'pdf-thumbnail');
+			data.item = currentDrag.item;
+			data.item.moving = true;
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/html', "<div></div>"); // si on set pas de data le drag and drop ne marche pas dans Firefox
+		}
+		function handleDragOver(e, data) {
+			data = data || window.dataTransfer;
+			var scope = data.scope;
+			if (e.preventDefault) {
+				e.preventDefault(); // Necessary. Allows us to drop.
 			}
-			function handleDragOverJQuery(jqe) {
-				pdfjsboxDomServices.stopEvent(jqe);
-				return handleDragOver(jqe.originalEvent, jqe.data);
-			}
-			function handleDropJQuery(jqe) {
-				pdfjsboxDomServices.stopEvent(jqe);
-				return handleDrop(jqe.originalEvent, jqe.data);
-			}
-			function handleDragStart(e, data) {
-				data = data || window.dataTransfer;
-				var currentDrag = getFirstParentNamed(e.target, 'pdf-thumbnail');
-				data.item = currentDrag.item;
-				data.item.moving = true;
-				e.dataTransfer.effectAllowed = 'move';
-				e.dataTransfer.setData('text/html', "<div></div>"); // si on set pas de data le drag and drop ne marche pas dans Firefox
-			}
-			function handleDragOver(e, data) {
-				data = data || window.dataTransfer;
-				if (e.preventDefault) {
-					e.preventDefault(); // Necessary. Allows us to drop.
-				}
-				e.dataTransfer.dropEffect = 'move';
-				if (data.item) {
-					var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
-					if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
-						var item = getItemInListOrClone(scope, data.item, scope.ngItems);
-						if (item) {
-							var thumbnailOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
-							if (thumbnailOver) { // on survole un autre thumbnail
-								addThumbnailAroundOver(scope, item, thumbnailOver, pdfthumbnails, e.clientX);
-							} else {
-								addThumbnailAtEnd(scope, item, pdfthumbnails);
-							}
+			e.dataTransfer.dropEffect = 'move';
+			if (data.item) {
+				var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
+				if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
+					var item = getItemInListOrClone(scope, data.item, scope.ngItems);
+					if (item) {
+						var thumbnailOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
+						if (thumbnailOver) { // on survole un autre thumbnail
+							addThumbnailAroundOver(scope, item, thumbnailOver, pdfthumbnails, e.clientX);
+						} else {
+							addThumbnailAtEnd(scope, item, pdfthumbnails);
 						}
 					}
 				}
-				return false;
 			}
-			function handleDrop(e, data) {
-				data = data || window.dataTransfer;
-				if (data.item) {
-					var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
-					data.item.moving = false;
-					if (!data.item.tmp) {
-						data.item = null;
-					} else {
-						if (pdfthumbnails) {
-							var rightContainer = false;
-							var pdfthumbnailElts = pdfthumbnails.getElementsByTagName('PDF-THUMBNAIL');
-							for (var i = 0; !rightContainer && i < pdfthumbnailElts.length; i++) {
-								var item = pdfthumbnailElts[i].item;
-								rightContainer = item === data.item;
-							}
-							if (rightContainer) {
-								data.item.tmp = false;
-								data.item = null;
-							} else {
-								var idx = pdfjsboxItemServices.getIndexOfItemInList(data.item, data.item.items);
-								data.item.items.splice(idx, 1);
-							}
+			return false;
+		}
+		function handleDrop(e, data) {
+			data = data || window.dataTransfer;
+			var scope = data.scope;
+			if (data.item) {
+				var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
+				data.item.moving = false;
+				if (!data.item.tmp) {
+					data.item = null;
+				} else {
+					if (pdfthumbnails) {
+						var rightContainer = false;
+						var pdfthumbnailElts = pdfthumbnails.getElementsByTagName('PDF-THUMBNAIL');
+						for (var i = 0; !rightContainer && i < pdfthumbnailElts.length; i++) {
+							var item = pdfthumbnailElts[i].item;
+							rightContainer = item === data.item;
+						}
+						if (rightContainer) {
+							data.item.tmp = false;
+							data.item = null;
 						} else {
 							var idx = pdfjsboxItemServices.getIndexOfItemInList(data.item, data.item.items);
 							data.item.items.splice(idx, 1);
 						}
+					} else {
+						var idx = pdfjsboxItemServices.getIndexOfItemInList(data.item, data.item.items);
+						data.item.items.splice(idx, 1);
 					}
-					scope.$apply();
 				}
-				return false;
+				scope.$apply();
 			}
+			return false;
 		}
 		/**
 		 * Retourne le noeud lui meme ou son ancetre le plus proche etant de type nodename 

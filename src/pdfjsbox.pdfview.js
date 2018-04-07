@@ -9,7 +9,8 @@
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
-	function pdfView(pdfjsboxWatcherServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
+	function pdfView($document, pdfjsboxWatcherServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
+		var hasFocus = false;
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfview.html',
@@ -29,40 +30,63 @@
 					ctrl.showTransclude = true;
 					updateView(s, elm, s.ngItem);
 				}, true));
-				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
-				elm.on('mouseenter', function (event) {
-					scope.$apply(function () {
-						ctrl.showTransclude = true;
+				scope.$on('$destroy', function () {
+					elm.off('mouseenter', mouseenterOnElt);
+					elm.off('mouseleave', mouseleaveOnElt);
+					elm.off('click', clickOnElt);
+					$document.off("click", clickOnDoc);
+					$document.off("keydown", keydownOnDoc);
+					// stop watching when scope is destroyed
+					watcherClears.forEach(function (watcherClear) {
+						watcherClear();
 					});
 				});
-				elm.on('mouseleave', function (event) {
-					scope.$apply(function () {
-						ctrl.showTransclude = false;
-					});
-				});
-				elm.on('click', function (event) {
-					scope.$apply(function () {
-						if(window.getSelection().type !== 'Range') ctrl.showTransclude = !ctrl.showTransclude;
-					});
-				});
-				var hasFocus = false;
-				ng.element(document).on("click", function (event) {
-					hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
-				});
-				ng.element(document).on("keydown", function (event) {
-					if (!hasFocus || event.which < 37 || event.which > 40)
-						return;
-					pdfjsboxDomServices.stopEvent(event);
-					scope.$apply(function () {
-						if (event.which === 38 || event.which === 37) {
-							ctrl.previous();
-						} else {
-							ctrl.next();
-						}
-					});
-				});
+				elm.on('mouseenter', {scope:scope, ctrl:ctrl}, mouseenterOnElt);
+				elm.on('mouseleave', {scope:scope, ctrl:ctrl}, mouseleaveOnElt);
+				elm.on('click', {scope:scope, ctrl:ctrl}, clickOnElt);
+				$document.on("click", {element:elm}, clickOnDoc);
+				$document.on("keydown", {scope:scope, ctrl:ctrl}, keydownOnDoc);
 			}
 		};
+		function clickOnDoc(event) {
+			var elm = event.data.element;
+			hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
+		}
+		function keydownOnDoc(event) {
+			var scope = event.data.scope;
+			var ctrl = event.data.ctrl;
+			if (!hasFocus || event.which < 37 || event.which > 40)
+				return;
+			pdfjsboxDomServices.stopEvent(event);
+			scope.$apply(function () {
+				if (event.which === 38 || event.which === 37) {
+					ctrl.previous();
+				} else {
+					ctrl.next();
+				}
+			});
+		}
+		function mouseenterOnElt(event) {
+			var scope = event.data.scope;
+			var ctrl = event.data.ctrl;
+			scope.$apply(function () {
+				ctrl.showTransclude = true;
+			});
+		}
+		function mouseleaveOnElt(event) {
+			var scope = event.data.scope;
+			var ctrl = event.data.ctrl;
+			scope.$apply(function () {
+				ctrl.showTransclude = false;
+			});
+		}
+		function clickOnElt(event) {
+			var scope = event.data.scope;
+			var ctrl = event.data.ctrl;
+			scope.$apply(function () {
+				if(window.getSelection().type !== 'Range') ctrl.showTransclude = !ctrl.showTransclude;
+			});
+		}
 		function updateView(scope, elm, item) {
 			if (item) {
 				elm.addClass('notrendered');

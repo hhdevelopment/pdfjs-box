@@ -31,7 +31,13 @@
 				watcherClears.push(scope.$watch('ngItem.items.length', function (v1, v2, s) {
 					updateItemsLength(s.ctrl, v1);
 				}, true));
-				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				scope.$on('$destroy', function () {
+					ctrl.jpdfView.find('.pdfViewer').off('wheel', wheelOnPdfViewer);
+					// stop watching when scope is destroyed
+					watcherClears.forEach(function (watcherClear) {
+						watcherClear();
+					});
+				});
 				ctrl.jqPrintIframe = elm.find('iframe');
 				ctrl.pdfView = elm.parents('pdf-view');
 				if (ctrl.pdfView) {
@@ -46,22 +52,26 @@
 		 * @param {jQueryElement} jpdfView
 		 */
 		function manageWheelHandler(ctrl, scope, jpdfView) {
-			jpdfView.find('.pdfViewer').on('wheel', null, {ctrl: ctrl}, function (event) {
-				if (event.originalEvent.deltaY < 0) {
-					if (event.ctrlKey) {
-						ctrl.zoomPlus(event);
-					} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
-						event.data.ctrl.previous(event.originalEvent);
-					}
-				} else {
-					if (event.ctrlKey) {
-						ctrl.zoomMoins(event);
-					} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
-						event.data.ctrl.next(event.originalEvent);
-					}
+			jpdfView.find('.pdfViewer').on('wheel', {ctrl: ctrl, scope:scope, jpdfView:jpdfView}, wheelOnPdfViewer);
+		}
+		function wheelOnPdfViewer(event) {
+			var ctrl = event.data.ctrl;
+			var scope = event.data.scope;
+			var jpdfView = event.data.jpdfView;
+			if (event.originalEvent.deltaY < 0) {
+				if (event.ctrlKey) {
+					ctrl.zoomPlus(event);
+				} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+					event.data.ctrl.previous(event.originalEvent);
 				}
-				scope.$apply();
-			});
+			} else {
+				if (event.ctrlKey) {
+					ctrl.zoomMoins(event);
+				} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+					event.data.ctrl.next(event.originalEvent);
+				}
+			}
+			scope.$apply();
 		}
 		/**
 		 * Met à jour le nombre total de pages
