@@ -13,9 +13,7 @@
 	function config($templateCache, pdfjsConfig) {
 		var pdfapi = PDFJS.PDFJS ? PDFJS.PDFJS : PDFJS;
 		if (pdfjsConfig.workerSrc) {
-			pdfapi.workerSrc = pdfjsConfig.workerSrc;
-		} else {
-			pdfapi.disableWorker = true;
+			pdfapi.GlobalWorkerOptions.workerSrc = pdfjsConfig.workerSrc;
 		}
 		pdfapi.cMapUrl = pdfjsConfig.cMapUrl || 'cmaps/';
 		pdfapi.cMapPacked = pdfjsConfig.cMapPacked === true;
