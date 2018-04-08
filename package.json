@@ -19,7 +19,7 @@
     "boxes-scroll": "^2.x",
     "jquery": "^3.x",
     "lodash": "^4.x",
-    "pdfjs-dist": "2.0.378"
+    "pdfjs-dist": "2.0.387"
   },
   "devDependencies": {
     "angular-templatecache-loader": "^0.x",
