@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
-	function pdfView($document, pdfjsboxScaleServices, pdfjsboxDomServices) {
+	function pdfView($document, pdfjsboxScaleServices, pdfjsboxDomServices, pdfjsboxSemServices) {
 		var hasFocus = false;
 		return {
 			restrict: 'E',
@@ -71,6 +71,7 @@
 			var ctrl = event.data.ctrl;
 			scope.$apply(function () {
 				ctrl.showTransclude = true;
+				$(window).trigger("resize");
 			});
 		}
 		function mouseleaveOnElt(event) {
@@ -78,6 +79,7 @@
 			var ctrl = event.data.ctrl;
 			scope.$apply(function () {
 				ctrl.showTransclude = false;
+				
 			});
 		}
 		function clickOnElt(event) {
@@ -106,7 +108,6 @@
 		 * @param {boolean} render
 		 */
 		function drawPdfPageToView(scope, pdfView, pdfPage, rotate, render) {
-			var ctrl = scope.ctrl;
 			clearTextLayer(pdfView);
 			var ctx = getAndClearCanvasContext(pdfView);
 			if (ctx) {
@@ -118,8 +119,8 @@
 					var viewport2 = getViewport(pdfPage, scope.ngScale * quality, rotate);
 					pdfView.addClass('notrendered');
 					if (render) {
-						ctrl.readyToRender().then(function () {
-							drawPageToCtx(ctrl, pdfView, pdfPage, viewport, viewport2, ctx);
+						pdfjsboxSemServices.acquire("pdfView").then(function () {
+							drawPageToCtx(pdfView, pdfPage, viewport, viewport2, ctx);
 						});
 					}
 				}
@@ -154,7 +155,6 @@
 		}
 		/**
 		 * Dessine la page dans le context du canvas
-		 * @param {Angular Ctrl} ctrl
 		 * @param {JQueryElement} pdfView
 		 * @param {PDFPage} pdfPage
 		 * @param {ViewPort} viewport
@@ -162,13 +162,13 @@
 		 * @param {CanvasContext} ctx
 		 * @returns {Promise}
 		 */
-		function drawPageToCtx(ctrl, pdfView, pdfPage, viewport, viewport2, ctx) {
+		function drawPageToCtx(pdfView, pdfPage, viewport, viewport2, ctx) {
 			return pdfPage.render({canvasContext: ctx, viewport: viewport2}).promise.then(function () {
 				pdfView.removeClass('notrendered');
-				ctrl.setReadyToRender(); // emulate mutex unlock
 				var textLayer = pdfView.find('.textLayer').get(0);
 				if (textLayer) {
 					return pdfPage.getTextContent().then(function (textContent) {
+						pdfjsboxSemServices.release("pdfView");
 						PDFJS.renderTextLayer({
 							textContent: textContent,
 							container: textLayer,
@@ -176,6 +176,8 @@
 							textDivs: []
 						});
 					});
+				} else {
+					pdfjsboxSemServices.release("pdfView");
 				}
 				return null;
 			});
@@ -244,16 +246,13 @@
 		 * @param {angular $q} $q
 		 * @param {scope} $scope
 		 * @param {service} pdfjsboxItemServices
+		 * @param {service} pdfjsboxSemServices
 		 */
-		function PdfViewCtrl($q, $scope, pdfjsboxItemServices) {
+		function PdfViewCtrl($q, $scope, pdfjsboxItemServices, pdfjsboxSemServices) {
 			var ctrl = this;
 			ctrl.previous = previous;
 			ctrl.next = next;
-			var deferred = {defer: $q.defer()};
-			ctrl.readyToRender = readyToRender;
-			ctrl.setReadyToRender = setReadyToRender;
 			ctrl.showTransclude = false;
-			deferred.defer.resolve();
 
 			/**
 			 * set ngItem with previous item
@@ -266,14 +265,6 @@
 			 */
 			function next() {
 				$scope.ngItem = pdfjsboxItemServices.getNext($scope.ngItem);
-			}
-			function readyToRender() {
-				return deferred.defer.promise.then(function () {
-					deferred.defer = $q.defer();
-				});
-			}
-			function setReadyToRender() {
-				deferred.defer.resolve();
 			}
 		}
 	}
