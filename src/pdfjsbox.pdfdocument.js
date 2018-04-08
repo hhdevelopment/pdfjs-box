@@ -67,7 +67,7 @@
 			var pdfid = pdfjsboxItemServices.id(pdf);
 			if (pdfid !== scope.pdfid) {
 				if(task) {
-					task.destroy();
+					//task.destroy();
 				}
 				scope.pdfid = pdfid;
 				if (pdfid) {

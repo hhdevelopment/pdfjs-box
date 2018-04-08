@@ -36,8 +36,8 @@
 		 */
 		function updateNgItem(scope, pdfThumbnailElm, item) {
 			if (item) {
-				var thumbnail = pdfjsboxDomServices.getElementFromJQueryElement(pdfThumbnailElm);
-				thumbnail.item = item;
+//				var thumbnail = pdfjsboxDomServices.getElementFromJQueryElement(pdfThumbnailElm);
+//				thumbnail.item = item;
 				drawPage(pdfThumbnailElm, item);
 			}
 		}

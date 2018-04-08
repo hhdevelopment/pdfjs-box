@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
-	function pdfView($document, pdfjsboxWatcherServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
+	function pdfView($document, pdfjsboxScaleServices, pdfjsboxDomServices) {
 		var hasFocus = false;
 		return {
 			restrict: 'E',
@@ -212,14 +212,22 @@
 		 * @returns {CanvasContext}
 		 */
 		function getAndClearCanvasContext(pdfView) {
-			var jcanvas = pdfView.find('.pdfViewer').find('canvas');
+			var jcanvas = ng.element("<canvas></canvas>");
+			var pdfViewer = pdfView.find('.pdfViewer');
+			pdfViewer.find('canvas').replaceWith(jcanvas);
 			var canvas = jcanvas.get(0);
 			if (canvas) {
-				var context = canvas.getContext('2d');
-				context.clearRect(0, 0, canvas.width, canvas.height);
-				return context;
+				return canvas.getContext('2d');
 			}
 			return null;
+//			var jcanvas = pdfView.find('.pdfViewer').find('canvas');
+//			var canvas = jcanvas.get(0);
+//			if (canvas) {
+//				var context = canvas.getContext('2d');
+//				context.clearRect(0, 0, canvas.width, canvas.height);
+//				return context;
+//			}
+//			return null;
 		}
 		/**
 		 * RAZ le calque du texte

@@ -94,14 +94,14 @@
 		}
 		function manageDragAndDropHandler(scope, elm) {
 			if (!window.dataTransfer) {
-				window.dataTransfer = {scope:scope};
+				window.dataTransfer = {item:null};
 			}
 			if (scope.allowDrag) {
-				elm.on('dragstart', window.dataTransfer, handleDragStartJQuery);
+				elm.on('dragstart', {scope:scope, element:elm}, handleDragStartJQuery);
 			}
 			if (scope.allowDrop) {
-				$document.on('dragover', window.dataTransfer, handleDragOverJQuery);
-				$document.on('drop', window.dataTransfer, handleDropJQuery);
+				$document.on('dragover', {scope:scope, element:elm}, handleDragOverJQuery);
+				$document.on('drop', {scope:scope, element:elm}, handleDropJQuery);
 			}
 		}
 		function handleDragStartJQuery(jqe) {
@@ -119,30 +119,32 @@
 			return handleDrop(jqe.originalEvent, jqe.data);
 		}
 		function handleDragStart(e, data) {
-			data = data || window.dataTransfer;
+			var elm = data.element;
+			var scope = data.scope;
 			var currentDrag = getFirstParentNamed(e.target, 'pdf-thumbnail');
-			data.item = currentDrag.item;
-			data.item.moving = true;
+			window.dataTransfer.item = scope.ngItems[elm.find("pdf-thumbnail").index(currentDrag)];
+			window.dataTransfer.item.moving = true;
 			e.dataTransfer.effectAllowed = 'move';
 			e.dataTransfer.setData('text/html', "<div></div>"); // si on set pas de data le drag and drop ne marche pas dans Firefox
 		}
 		function handleDragOver(e, data) {
-			data = data || window.dataTransfer;
 			var scope = data.scope;
+			var elm = data.element;
 			if (e.preventDefault) {
 				e.preventDefault(); // Necessary. Allows us to drop.
 			}
 			e.dataTransfer.dropEffect = 'move';
-			if (data.item) {
+			if (window.dataTransfer.item) {
 				var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
 				if (pdfthumbnails && ng.element(pdfthumbnails).attr('allow-drop') === 'true') {
-					var item = getItemInListOrClone(scope, data.item, scope.ngItems);
+					var item = getItemInListOrClone(scope, window.dataTransfer.item, scope.ngItems);
 					if (item) {
 						var thumbnailOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
 						if (thumbnailOver) { // on survole un autre thumbnail
-							addThumbnailAroundOver(scope, item, thumbnailOver, pdfthumbnails, e.clientX);
+							var itemOver = scope.ngItems[elm.find("pdf-thumbnail").index(thumbnailOver)];
+							addThumbnailAroundOver(scope, item, thumbnailOver, itemOver, e.clientX);
 						} else {
-							addThumbnailAtEnd(scope, item, pdfthumbnails);
+							addThumbnailAtEnd(scope, item);
 						}
 					}
 				}
@@ -150,31 +152,18 @@
 			return false;
 		}
 		function handleDrop(e, data) {
-			data = data || window.dataTransfer;
 			var scope = data.scope;
-			if (data.item) {
-				var pdfthumbnails = getFirstParentNamed(e.target, 'pdf-thumbnails');
-				data.item.moving = false;
-				if (!data.item.tmp) {
-					data.item = null;
+			if (window.dataTransfer.item) {
+				window.dataTransfer.item.moving = false;
+				if (!window.dataTransfer.item.tmp) {
+					window.dataTransfer.item = null;
 				} else {
-					if (pdfthumbnails) {
-						var rightContainer = false;
-						var pdfthumbnailElts = pdfthumbnails.getElementsByTagName('PDF-THUMBNAIL');
-						for (var i = 0; !rightContainer && i < pdfthumbnailElts.length; i++) {
-							var item = pdfthumbnailElts[i].item;
-							rightContainer = item === data.item;
-						}
-						if (rightContainer) {
-							data.item.tmp = false;
-							data.item = null;
-						} else {
-							var idx = pdfjsboxItemServices.getIndexOfItemInList(data.item, data.item.items);
-							data.item.items.splice(idx, 1);
-						}
+					if (pdfjsboxItemServices.isContainInList(window.dataTransfer.item, scope.ngItems)) {
+						window.dataTransfer.item.tmp = false;
+						window.dataTransfer.item = null;
 					} else {
-						var idx = pdfjsboxItemServices.getIndexOfItemInList(data.item, data.item.items);
-						data.item.items.splice(idx, 1);
+						var idx = pdfjsboxItemServices.getIndexOfItemInList(window.dataTransfer.item, window.dataTransfer.item.items);
+						window.dataTransfer.item.items.splice(idx, 1); 
 					}
 				}
 				scope.$apply();
@@ -205,9 +194,8 @@
 		 * Ajoute un thumbnail à la fin de la liste
 		 * @param {Angular scope} scope : Scope du thumbnails survolé
 		 * @param {Item} item
-		 * @param {HTMLElement} pdfthumbnails : Thumbnails survolé
 		 */
-		function addThumbnailAtEnd(scope, item, pdfthumbnails) {
+		function addThumbnailAtEnd(scope, item) {
 			removeOldPosition(scope, item);
 			scope.ngItems.push(item);
 			scope.$apply();
@@ -217,14 +205,14 @@
 		 * @param {Angular scope} scope : Scope du thumbnails survolé
 		 * @param {Item} item
 		 * @param {HTMLElement} thumbnailOver : Thumbnail survolé éventuellement
-		 * @param {HTMLElement} pdfthumbnails : Thumbnails survolé
+		 * @param {Item} itemOver : item survolé
 		 * @param {Number} clientX : x de la souris
 		 */
-		function addThumbnailAroundOver(scope, item, thumbnailOver, pdfthumbnails, clientX) {
+		function addThumbnailAroundOver(scope, item, thumbnailOver, itemOver, clientX) {
 			var items = scope.ngItems;
-			if (thumbnailOver.item && !pdfjsboxItemServices.areItemsEqual(thumbnailOver.item, item)) { // on n'est pas dessus
+			if (itemOver && !pdfjsboxItemServices.areItemsEqual(itemOver, item)) { // on n'est pas dessus
 				removeOldPosition(scope, item);
-				var idx = pdfjsboxItemServices.getIndexOfItemInList(thumbnailOver.item, items);
+				var idx = pdfjsboxItemServices.getIndexOfItemInList(itemOver, items);
 				var median = getHMedian(thumbnailOver.getClientRects()[0]);
 				if (clientX < median) {
 					items.splice(idx, 0, item);
