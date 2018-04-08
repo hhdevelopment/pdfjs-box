@@ -7,6 +7,29 @@
 	} catch (e) {
 		pdfbox = ng.module('pdfjs-box', ['boxes.scroll']);
 	}
+	pdfbox.factory('pdfjsboxSemServices', semServices);
+	function semServices($q) {
+		var sems = {};
+		return {
+			acquire : acquire,
+			release : release
+		};
+		function acquire(name) {
+			if(!sems[name]) {
+				sems[name] = {defer: $q.defer()};
+				sems[name].defer.resolve();
+			}
+			return sems[name].defer.promise.then(function () {
+				sems[name].defer = $q.defer();
+			});
+		}
+		function release(name) {
+			if(!sems[name]) {
+				sems[name] = {defer: $q.defer()};
+			}
+			sems[name].defer.resolve();
+		}
+	}
 	pdfbox.factory('pdfjsboxDomServices', domServices);
 	function domServices() {
 		return {
@@ -97,7 +120,6 @@
 			if (canvas) {
 				var ctx = canvas.getContext('2d');
 				var rot = pdfPage.pageInfo.rotate + (rotate || 0);
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				var viewport = pdfPage.getViewport(scale, rot);
 				canvas.width = viewport.width;
 				canvas.height = viewport.height;
