@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfThumbnail', pdfThumbnail);
 	/* @ngInject */
-	function pdfThumbnail(pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxDomServices, pdfjsboxScaleServices) {
+	function pdfThumbnail(pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxSemServices, pdfjsboxScaleServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnail.html',
@@ -21,44 +21,61 @@
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				watcherClears.push(scope.$watchGroup(['ngItem.rotate'], function (vs1, vs2, s) {
-					elm.addClass('notrendered');
-					updateNgItem(s, elm, s.ngItem);
+				var height = Math.max(elm.parent().height() - 4, 0) || 100; 
+				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate'], function (vs1, vs2, s) {
+					if(vs1[0] !== vs2[0] || vs1[1] !== vs2[1] || vs1[2] !== vs2[2]) {
+						updateNgItem(s);
+					}
 				}, true));
 				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				updateNgItem(scope);
+				function updateNgItem(s) {
+					elm.addClass('notrendered');
+					var jcanvas = elm.find("canvas");
+					drawItemInCanvas(s.ngItem, jcanvas.get(0), height).then(function() {
+						elm.removeClass('notrendered');
+					});
+				}
 			}
 		};
 		/**
-		 * Mise à jour de l'item du thumbnail
-		 * @param {Angular scope} scope
-		 * @param {JQueryElement} pdfThumbnailElm
+		 * Dessine l'item dans le canvas
 		 * @param {Item} item
+		 * @param {HTMLElement} canvas
+		 * @param {number} height
+		 * @returns promise
 		 */
-		function updateNgItem(scope, pdfThumbnailElm, item) {
-			if (item) {
-//				var thumbnail = pdfjsboxDomServices.getElementFromJQueryElement(pdfThumbnailElm);
-//				thumbnail.item = item;
-				drawPage(pdfThumbnailElm, item);
-			}
-		}
-		function drawPage(pdfThumbnailElm, item) {
-			var height = Math.max(pdfThumbnailElm.parent().height() - 4, 0) || 100; 
-			var jcanvas = pdfThumbnailElm.find("canvas");
-			var canvas = jcanvas.get(0);
+		function drawItemInCanvas(item, canvas, height) {
 			if (canvas) {
-				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-				jcanvas.attr('width', height * 0.7).attr('height', height).css('width', height * 0.7+'px').css('height', height +'px');
-				item.getPage().then(function (pdfPage) {
-					var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, item.rotate);
-					var scale = height / rectangle.height;
-					var ratio = rectangle.width / rectangle.height;
-					var quality = 2;
-					jcanvas.attr('width', height * ratio * quality).attr('height', height * quality).css('width', height * ratio+'px').css('height', height +'px');
-					pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function () {
-						pdfThumbnailElm.removeClass('notrendered');
+				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); // on efface l'ancien dessin
+				setCanvasSize(canvas, height * 0.7, height, 1); // on met un ration format A4
+				return pdfjsboxSemServices.acquire("pdfthmbnail").then(function() {
+					return item.getPage().then(function (pdfPage) {
+						var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, item.rotate);
+						var scale = height / rectangle.height;
+						var ratio = rectangle.width / rectangle.height;
+						var quality = 2;
+						setCanvasSize(canvas, height * ratio, height, quality);
+						return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function() {
+							pdfjsboxSemServices.release("pdfthmbnail");
+						});
 					});
 				});
 			}
+			return {then:function() {}};
+		}
+		/**
+		 * 
+		 * @param {HTMLElement} canvas
+		 * @param {number} width
+		 * @param {number} height
+		 * @param {number} quality
+		 */
+		function setCanvasSize(canvas, width, height, quality) {
+			canvas.setAttribute("width", width * quality);
+			canvas.setAttribute("height", height * quality);
+			canvas.style.width = width+"px";
+			canvas.style.height = height+"px";
 		}
 		/**
 		 * Angular Controller
