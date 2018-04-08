@@ -7,7 +7,7 @@ pdf-thumbnails.pdf-thumbnails-horizontal {
 	overflow: hidden;
 }
 pdf-thumbnails {
-   background-color: transparent;
+   background-color: white;
 }
 pdf-thumbnails.active {
 	background-color: #eee;
