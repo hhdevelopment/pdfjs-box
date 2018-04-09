@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfCommands', pdfCommands);
 	/* @ngInject */
-	function pdfCommands(pdfjsboxWatcherServices, pdfjsboxItemServices, pdfjsboxDrawServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
+	function pdfCommands(pdfjsboxItemServices, pdfjsboxDrawServices, pdfjsboxScaleServices, pdfjsboxDomServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfcommands.html',
