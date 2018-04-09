@@ -39,6 +39,7 @@
 					elm.off('click', clickOnElt);
 					$document.off("click", clickOnDoc);
 					$document.off("keydown", keydownOnDoc);
+					elm.empty();
 					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
