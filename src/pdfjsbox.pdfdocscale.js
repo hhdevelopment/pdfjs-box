@@ -27,7 +27,13 @@
 					computeScale(s, elm, s.ngItem, s.docScale, s.pdfviewSelector);
 //					}
 				}, true));
-				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				scope.$on('$destroy', function () {
+					elm.empty();
+					// stop watching when scope is destroyed
+					watcherClears.forEach(function (watcherClear) {
+						watcherClear();
+					});
+				});
 			}
 		};
 		/**
