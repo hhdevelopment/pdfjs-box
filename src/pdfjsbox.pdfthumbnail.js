@@ -27,7 +27,13 @@
 						updateNgItem(s);
 					}
 				}, true));
-				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				scope.$on('$destroy', function () {
+					elm.empty();
+					// stop watching when scope is destroyed
+					watcherClears.forEach(function (watcherClear) {
+						watcherClear();
+					});
+				});
 				updateNgItem(scope);
 				function updateNgItem(s) {
 					elm.addClass('notrendered');
