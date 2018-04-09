@@ -85,10 +85,8 @@ pdf-view {
 }
 pdf-view ng-transclude {
 	position:fixed;
-	width: 100%;
 	z-index: 3;
 	padding-left: 16px;
-	padding-right: 16px;
 }
 pdf-view pdf-commands {
 	display: block;

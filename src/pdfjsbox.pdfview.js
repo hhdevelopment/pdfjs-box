@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfView', pdfView);
 	/* @ngInject */
-	function pdfView($document, pdfjsboxScaleServices, pdfjsboxDomServices, pdfjsboxSemServices) {
+	function pdfView($window, $document, pdfjsboxScaleServices, pdfjsboxDomServices, pdfjsboxSemServices) {
 		var hasFocus = false;
 		return {
 			restrict: 'E',
@@ -39,6 +39,7 @@
 					elm.off('click', clickOnElt);
 					$document.off("click", clickOnDoc);
 					$document.off("keydown", keydownOnDoc);
+					ng.element($window).off("resize", updateSizeHandler);
 					elm.empty();
 					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
@@ -50,8 +51,16 @@
 				elm.on('click', {scope:scope, ctrl:ctrl}, clickOnElt);
 				$document.on("click", {element:elm}, clickOnDoc);
 				$document.on("keydown", {scope:scope, ctrl:ctrl}, keydownOnDoc);
+				ng.element($window).on("resize", {element:elm}, updateSizeHandler);
+				updateSize(elm);
 			}
 		};
+		function updateSizeHandler(event) {
+			updateSize(event.data.element);
+		}
+		function updateSize(elm) {
+			elm.find("ng-transclude").css("width", elm.width() - 16);
+		}
 		function clickOnDoc(event) {
 			var elm = event.data.element;
 			hasFocus = pdfjsboxDomServices.getElementFromJQueryElement(elm).contains(event.target);
