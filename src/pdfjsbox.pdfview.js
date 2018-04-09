@@ -19,6 +19,7 @@
 			controllerAs: 'ctrl',
 			scope: {
 				// nom interne : nom externe
+				'showTranscludeOnLoad': '<',
 				'ngItem': '=',
 				'ngQuality': '=',
 				'ngScale': '='
@@ -27,7 +28,9 @@
 				var watcherClears = [];
 				// Don't survey ngItem because, ngItem.items cause infinitive loop
 				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate', 'ngScale', 'ngQuality'], function (vs1, vs2, s) {
-					ctrl.showTransclude = true;
+					if(scope.showTranscludeOnLoad) {
+						ctrl.showTransclude = true;
+					}
 					updateView(s, elm, s.ngItem);
 				}, true));
 				scope.$on('$destroy', function () {
