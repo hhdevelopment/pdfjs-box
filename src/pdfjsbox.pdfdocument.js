@@ -29,7 +29,15 @@
 				watcherClears.push(scope.$watch('pdf', function (v1, v2, s) {
 					updatePdf(s, v1);
 				}, true));
-				pdfjsboxWatcherServices.cleanWatchersOnDestroy(scope, watcherClears);
+				scope.$on('$destroy', function () {
+					if(task) {
+						task.destroy();
+					}
+					// stop watching when scope is destroyed
+					watcherClears.forEach(function (watcherClear) {
+						watcherClear();
+					});
+				});				
 				manageRefreshHandler(scope);
 			}
 		};
