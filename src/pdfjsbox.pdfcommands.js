@@ -62,13 +62,13 @@
 			if (event.originalEvent.deltaY < 0) {
 				if (event.ctrlKey) {
 					ctrl.zoomPlus(event);
-				} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+				} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView)) {
 					event.data.ctrl.previous(event.originalEvent);
 				}
 			} else {
 				if (event.ctrlKey) {
 					ctrl.zoomMoins(event);
-				} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView.parent())) {
+				} else if (!pdfjsboxDrawServices.isVerticalScrollbarPresent(jpdfView)) {
 					event.data.ctrl.next(event.originalEvent);
 				}
 			}
