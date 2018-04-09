@@ -32,7 +32,7 @@
 					updateItemsLength(s.ctrl, v1);
 				}, true));
 				scope.$on('$destroy', function () {
-					ctrl.jpdfView.find('.pdfViewer').off('wheel', wheelOnPdfViewer);
+					ctrl.pdfView.find('.pdfViewer').off('wheel', wheelOnPdfViewer);
 					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
