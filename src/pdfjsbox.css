@@ -84,15 +84,17 @@ pdf-view {
 	position: relative;
 }
 pdf-view ng-transclude {
-	position:absolute;
+	position:fixed;
 	width: 100%;
 	z-index: 3;
+	padding-left: 16px;
+	padding-right: 16px;
 }
 pdf-view pdf-commands {
 	display: block;
 	width: 100%;
 	margin: -15px;
-   word-spacing: -0.3em;
+   	word-spacing: -0.3em;
 }
 pdf-commands .pager > li > a {
 	background-color: #ddd;
@@ -100,7 +102,7 @@ pdf-commands .pager > li > a {
 	-webkit-box-shadow: none;
 	box-shadow: none;
 	opacity: .75;
-   border: 1px solid #ddd;
+	border: 1px solid #ddd;
 	padding: 5px 9px;
 	border-radius: 0px;
 }
