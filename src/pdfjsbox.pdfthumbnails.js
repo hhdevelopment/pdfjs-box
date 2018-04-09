@@ -45,6 +45,7 @@
 					elm.off('dragstart', handleDragStartJQuery);
 					$document.off('dragover', handleDragOverJQuery);
 					$document.off('drop', handleDropJQuery);
+					elm.empty();
 					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
