@@ -214,14 +214,16 @@
 				pdfjsboxDomServices.stopEvent(evt);
 				var jqSpanIcon = ng.element(evt.currentTarget).find('span');
 				jqSpanIcon.addClass('compute');
-				var jqBody = ctrl.jqPrintIframe.contents().find('body'); // ng.element(destDocument.body);
+				var jqPrintIframe = ctrl.pdfView.find('iframe');
+				var jqBody = jqPrintIframe.contents().find('body'); // ng.element(destDocument.body);
 				jqBody.empty(); // on supprime le document precedent
 				var promises = $scope.ngItem.items.map(function (item, idx, arr) { // transforme les items en promesses
-					return drawItemToCanvas(item, ng.element("<canvas style='page-break-after:always'></canvas>").appendTo(jqBody).get(0)).promise;
+					var jcanvas = ng.element("<canvas style='page-break-after:always'></canvas>").appendTo(jqBody);
+					return drawItemToCanvas(item, jcanvas.get(0));
 				});
 				$q.all(promises).then(function () {
 					jqSpanIcon.removeClass('compute');
-					printIframe(ctrl.jqPrintIframe.get(0));
+					printIframe(jqPrintIframe.get(0));
 					return;
 				});
 			}
@@ -243,7 +245,7 @@
 					var viewport = pdfPage.getViewport(1, rot);
 					var scale1 = 1080 / Math.min(viewport.width, viewport.height);
 					var scale2 = 1920 / Math.max(viewport.width, viewport.height);
-					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, Math.min(scale1, scale2));
+					return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, 0, Math.min(scale1, scale2)).promise;
 				});
 			}
 		}

@@ -126,6 +126,8 @@
 				canvas.height = viewport.height;
 				// console.debug("drawPdfPageToCanvas", canvas.width, canvas.height);
 				return pdfPage.render({canvasContext: ctx, viewport: viewport});
+			} else {
+				return {promise:Promise.resolve(), cancel:function(){}};
 			}
 		}
 		/**
