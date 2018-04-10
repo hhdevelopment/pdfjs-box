@@ -217,7 +217,7 @@
 				var jqBody = ctrl.jqPrintIframe.contents().find('body'); // ng.element(destDocument.body);
 				jqBody.empty(); // on supprime le document precedent
 				var promises = $scope.ngItem.items.map(function (item, idx, arr) { // transforme les items en promesses
-					return drawItemToCanvas(item, ng.element("<canvas style='page-break-after:always'></canvas>").appendTo(jqBody).get(0));
+					return drawItemToCanvas(item, ng.element("<canvas style='page-break-after:always'></canvas>").appendTo(jqBody).get(0)).promise;
 				});
 				$q.all(promises).then(function () {
 					jqSpanIcon.removeClass('compute');

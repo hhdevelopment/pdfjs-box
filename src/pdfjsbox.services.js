@@ -115,6 +115,7 @@
 		 * @param {type} pdfPage
 		 * @param {type} rotate
 		 * @param {type} scale
+		 * @return {renderTask} 
 		 */
 		function drawPdfPageToCanvas(canvas, pdfPage, rotate, scale) {
 			if (canvas) {
@@ -124,9 +125,7 @@
 				canvas.width = viewport.width;
 				canvas.height = viewport.height;
 				// console.debug("drawPdfPageToCanvas", canvas.width, canvas.height);
-				return pdfPage.render({canvasContext: ctx, viewport: viewport}).promise.catch(function (error) {
-					console.error(error);
-				});
+				return pdfPage.render({canvasContext: ctx, viewport: viewport});
 			}
 		}
 		/**

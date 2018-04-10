@@ -9,7 +9,7 @@
 	}
 	pdfbox.directive('pdfThumbnail', pdfThumbnail);
 	/* @ngInject */
-	function pdfThumbnail(pdfjsboxWatcherServices, pdfjsboxDrawServices, pdfjsboxSemServices, pdfjsboxScaleServices) {
+	function pdfThumbnail(pdfjsboxDrawServices, pdfjsboxSemServices, pdfjsboxScaleServices) {
 		return {
 			restrict: 'E',
 			templateUrl: 'pdfthumbnail.html',
@@ -28,8 +28,11 @@
 					}
 				}, true));
 				scope.$on('$destroy', function () {
+					if(scope.renderTask) {
+						scope.renderTask.cancel();
+						scope.renderTask = null;
+					}
 					elm.empty();
-					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
 					});
@@ -38,7 +41,7 @@
 				function updateNgItem(s) {
 					elm.addClass('notrendered');
 					var jcanvas = elm.find("canvas");
-					drawItemInCanvas(s.ngItem, jcanvas.get(0), height).then(function() {
+					drawItemInCanvas(s, s.ngItem, jcanvas.get(0), height).then(function() {
 						elm.removeClass('notrendered');
 					});
 				}
@@ -46,12 +49,17 @@
 		};
 		/**
 		 * Dessine l'item dans le canvas
+		 * @param {Angular Scope} scope
 		 * @param {Item} item
 		 * @param {HTMLElement} canvas
 		 * @param {number} height
 		 * @returns promise
 		 */
-		function drawItemInCanvas(item, canvas, height) {
+		function drawItemInCanvas(scope, item, canvas, height) {
+			if(scope.renderTask) {
+				scope.renderTask.cancel();
+				scope.renderTask = null;
+			}
 			if (canvas) {
 				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); // on efface l'ancien dessin
 				setCanvasSize(canvas, height * 0.7, height, 1); // on met un ration format A4
@@ -62,7 +70,10 @@
 						var ratio = rectangle.width / rectangle.height;
 						var quality = 2;
 						setCanvasSize(canvas, height * ratio, height, quality);
-						return pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality).then(function() {
+						scope.renderTask = pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality);
+						return scope.renderTask.then(function() {
+							pdfjsboxSemServices.release("pdfthmbnail");
+						}, function() {
 							pdfjsboxSemServices.release("pdfthmbnail");
 						});
 					});
@@ -85,7 +96,7 @@
 		}
 		/**
 		 * Angular Controller
-		 * @param {type} $scope
+		 * @param {Angular Scope} $scope
 		 * @param {type} pdfjsboxDomServices
 		 * @returns {undefined}
 		 */

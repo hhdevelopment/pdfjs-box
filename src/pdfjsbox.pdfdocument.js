@@ -10,8 +10,7 @@
 	}
 	pdfbox.directive('pdfDocument', pdfDocument);
 	/* @ngInject */
-	function pdfDocument(pdfjsboxWatcherServices, pdfjsboxItemServices) {
-		var task = null;
+	function pdfDocument(pdfjsboxItemServices) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -30,8 +29,8 @@
 					updatePdf(s, v1);
 				}, true));
 				scope.$on('$destroy', function () {
-					if(task) {
-						task.destroy();
+					if(scope.renderTask) {
+						scope.renderTask.destroy();
 					}
 					elm.empty();
 					// stop watching when scope is destroyed
@@ -47,7 +46,7 @@
 		 * @param {Angular scope} scope
 		 */
 		function manageRefreshHandler(scope) {
-			scope.$on('pdfdoc-refresh', function (event, data) {
+			scope.$root.$on('pdfdoc-refresh', function (event, data) {
 				if (data === scope.pdfid) {
 					scope.pdfid = null;
 					updatePdf(scope, scope.pdf);
@@ -75,23 +74,19 @@
 			var items = scope.ngItems || [];
 			var pdfid = pdfjsboxItemServices.id(pdf);
 			if (pdfid !== scope.pdfid) {
-				if(task) {
-					//task.destroy();
-				}
+				items.splice(0, items.length);
 				scope.pdfid = pdfid;
 				if (pdfid) {
 					var t0 = new Date().getTime();
-					task = PDFJS.getDocument(pdf);
-					task.promise.then(function (pdfDocument) {
-						var args = [0, items.length];
-						for (var i = 0; i < pdfDocument.numPages; i++) {
-							args.push(createItem(pdf, pdfid, pdfDocument, items, i, scope.rotate | 0));
-						}
+					scope.renderTask = PDFJS.getDocument(pdf);
+					scope.renderTask.then(function (pdfDocument) {
 						scope.$apply(function() {
-							[].splice.apply(items, args); // de cette maniere la liste n'est modifiée qu'une fois
+							[].push.apply(items, Array.apply(null, {length: pdfDocument.numPages}).map(function(e, i) {
+								return createItem(pdf, pdfid, pdfDocument, items, i, scope.rotate | 0);
+							}, Number));
 						});
-						console.debug('Load sequence ' + (pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
-					}).catch(function (reason) {
+						console.debug('Load ' + (pdfDocument.numPages) + ' pages in %sms', new Date().getTime() - t0);
+					}, function (reason) {
 						if(scope.onError) {
 							scope.onError({reason:reason});
 						} else {
