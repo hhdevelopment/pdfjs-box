@@ -96,7 +96,7 @@ pdf-view pdf-commands {
 	display: block;
 	width: 100%;
 	margin: -15px;
-   word-spacing: -0.3em;
+   	word-spacing: -0.3em;
 }
 pdf-commands .pager > li > a {
 	background-color: #ddd;
@@ -243,7 +243,7 @@ pdf-view .pdfViewer .textLayer .highlight.selected {
 pdf-view .pdfViewer .textLayer ::-moz-selection,
 pdf-view .pdfViewer .textLayer ::selection { 
 	background: rgb(0,0,255); 
-	color:transparent;
+	color:white;
 }
 
 pdf-view .pdfViewer .textLayer .endOfContent {
