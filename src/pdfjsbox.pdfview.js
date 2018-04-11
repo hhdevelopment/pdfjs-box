@@ -87,7 +87,10 @@
 			var ctrl = event.data.ctrl;
 			scope.$apply(function () {
 				ctrl.showTransclude = true;
-				$(window).trigger("resize");
+				var boxhscroll = ng.element(event.currentTarget).find('box-hscroll');
+				if(boxhscroll) {
+					boxhscroll.scope().$$childHead.ctrl.updateSize();
+				}
 			});
 		}
 		function mouseleaveOnElt(event) {
