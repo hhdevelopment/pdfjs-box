@@ -31,6 +31,7 @@
 					if (scope.renderTask) {
 						scope.renderTask.cancel();
 						scope.renderTask = null;
+						pdfjsboxSemServices.release("pdfthumbnail");
 					}
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
@@ -73,7 +74,11 @@
 						scope.renderTask = pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality);
 						return scope.renderTask.then(function () {
 							pdfjsboxSemServices.release("pdfthumbnail");
+						}, function () {
+							pdfjsboxSemServices.release("pdfthumbnail");
 						});
+					}, function () {
+						pdfjsboxSemServices.release("pdfthumbnail");
 					});
 				}, function () {
 					pdfjsboxSemServices.release("pdfthumbnail");
