@@ -87,7 +87,7 @@
 			scope.$apply(function () {
 				ctrl.showTransclude = true;
 				var boxhscroll = ng.element(event.currentTarget).find('box-hscroll');
-				if(boxhscroll) {
+				if(boxhscroll && boxhscroll.scope()) {
 					boxhscroll.scope().$$childHead.ctrl.updateSize();
 				}
 			});
