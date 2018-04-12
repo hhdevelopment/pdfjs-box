@@ -21,18 +21,17 @@
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				var height = Math.max(elm.parent().height() - 4, 0) || 100; 
+				var height = Math.max(elm.parent().height() - 4, 0) || 100;
 				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate'], function (vs1, vs2, s) {
-					if(vs1[0] !== vs2[0] || vs1[1] !== vs2[1] || vs1[2] !== vs2[2]) {
+					if (vs1[0] !== vs2[0] || vs1[1] !== vs2[1] || vs1[2] !== vs2[2]) {
 						updateNgItem(s);
 					}
 				}, true));
 				scope.$on('$destroy', function () {
-					if(scope.renderTask) {
+					if (scope.renderTask) {
 						scope.renderTask.cancel();
 						scope.renderTask = null;
 					}
-					elm.empty();
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
 					});
@@ -41,7 +40,7 @@
 				function updateNgItem(s) {
 					elm.addClass('notrendered');
 					var jcanvas = elm.find("canvas");
-					drawItemInCanvas(s, s.ngItem, jcanvas.get(0), height).then(function() {
+					drawItemInCanvas(s, s.ngItem, jcanvas.get(0), height).then(function () {
 						elm.removeClass('notrendered');
 					});
 				}
@@ -56,14 +55,15 @@
 		 * @returns promise
 		 */
 		function drawItemInCanvas(scope, item, canvas, height) {
-			if(scope.renderTask) {
+			if (scope.renderTask) {
 				scope.renderTask.cancel();
 				scope.renderTask = null;
+				pdfjsboxSemServices.release("pdfthumbnail");
 			}
 			if (canvas) {
 				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); // on efface l'ancien dessin
 				setCanvasSize(canvas, height * 0.7, height, 1); // on met un ration format A4
-				return pdfjsboxSemServices.acquire("pdfthmbnail").then(function() {
+				return pdfjsboxSemServices.acquire("pdfthumbnail").then(function () {
 					return item.getPage().then(function (pdfPage) {
 						var rectangle = pdfjsboxScaleServices.getRectangle(pdfPage, item.rotate);
 						var scale = height / rectangle.height;
@@ -71,15 +71,15 @@
 						var quality = 2;
 						setCanvasSize(canvas, height * ratio, height, quality);
 						scope.renderTask = pdfjsboxDrawServices.drawPdfPageToCanvas(canvas, pdfPage, item.rotate, scale * quality);
-						return scope.renderTask.then(function() {
-							pdfjsboxSemServices.release("pdfthmbnail");
-						}, function() {
-							pdfjsboxSemServices.release("pdfthmbnail");
+						return scope.renderTask.then(function () {
+							pdfjsboxSemServices.release("pdfthumbnail");
 						});
 					});
+				}, function () {
+					pdfjsboxSemServices.release("pdfthumbnail");
 				});
 			}
-			return {then:function() {}};
+			return {then: function () {}};
 		}
 		/**
 		 * 
@@ -91,8 +91,8 @@
 		function setCanvasSize(canvas, width, height, quality) {
 			canvas.setAttribute("width", width * quality);
 			canvas.setAttribute("height", height * quality);
-			canvas.style.width = width+"px";
-			canvas.style.height = height+"px";
+			canvas.style.width = width + "px";
+			canvas.style.height = height + "px";
 		}
 		/**
 		 * Angular Controller

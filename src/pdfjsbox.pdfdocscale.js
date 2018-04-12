@@ -28,8 +28,6 @@
 //					}
 				}, true));
 				scope.$on('$destroy', function () {
-					elm.empty();
-					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
 					});

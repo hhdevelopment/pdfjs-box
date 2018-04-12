@@ -32,8 +32,6 @@
 					if(scope.renderTask) {
 						scope.renderTask.destroy();
 					}
-					elm.empty();
-					// stop watching when scope is destroyed
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
 					});

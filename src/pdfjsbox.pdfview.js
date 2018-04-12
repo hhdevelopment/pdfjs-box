@@ -44,7 +44,6 @@
 					$document.off("click", clickOnDoc);
 					$document.off("keydown", keydownOnDoc);
 					ng.element($window).off("resize", updateSizeHandler);
-					elm.empty();
 					watcherClears.forEach(function (watcherClear) {
 						watcherClear();
 					});
