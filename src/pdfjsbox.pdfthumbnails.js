@@ -120,10 +120,8 @@
 			return handleDrop(jqe.originalEvent, jqe.data);
 		}
 		function handleDragStart(e, data) {
-			var elm = data.element;
-			var scope = data.scope;
 			var currentDrag = getFirstParentNamed(e.target, 'pdf-thumbnail');
-			window.dataTransfer.item = scope.ngItems[elm.find("pdf-thumbnail").index(currentDrag)];
+			window.dataTransfer.item = ng.element(currentDrag).scope().item;
 			window.dataTransfer.item.moving = true;
 			e.dataTransfer.effectAllowed = 'move';
 			e.dataTransfer.setData('text/html', "<div></div>"); // si on set pas de data le drag and drop ne marche pas dans Firefox
@@ -142,7 +140,7 @@
 					if (item) {
 						var thumbnailOver = getFirstParentNamed(e.target, 'pdf-thumbnail');
 						if (thumbnailOver) { // on survole un autre thumbnail
-							var itemOver = scope.ngItems[elm.find("pdf-thumbnail").index(thumbnailOver)];
+							var itemOver = ng.element(thumbnailOver).scope().item;
 							addThumbnailAroundOver(scope, item, thumbnailOver, itemOver, e.clientX);
 						} else {
 							addThumbnailAtEnd(scope, item);
