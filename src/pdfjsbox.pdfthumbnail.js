@@ -21,7 +21,13 @@
 			},
 			link: function (scope, elm, attrs, ctrl) {
 				var watcherClears = [];
-				var height = Math.max(elm.parent().height() - 4, 0) || 100;
+				var pertinentParent = elm.parent();
+				var height;
+				if(pertinentParent.is("div")) {
+					 height = Math.max(pertinentParent.parent().height() - 16, 0) || 100;
+				} else {
+					height = Math.max(pertinentParent.height() - 4, 0) || 100;
+				}
 				watcherClears.push(scope.$watchGroup(['ngItem.$$pdfid', 'ngItem.pageIdx', 'ngItem.rotate'], function (vs1, vs2, s) {
 					if (vs1[0] !== vs2[0] || vs1[1] !== vs2[1] || vs1[2] !== vs2[2]) {
 						updateNgItem(s);

@@ -2,6 +2,17 @@ pdf-thumbnails {
 	display: block;
 	overflow: hidden;
 }
+pdf-thumbnails > div {
+	display: block;
+	overflow-x: scroll;
+	overflow-y: hidden;
+	width: 100%;
+	height: 100%;
+}
+pdf-thumbnails > div > pdf-thumbnail {
+	display: table-cell;
+	height: 100%;
+}
 pdf-thumbnails > h2 {
 	padding-left: 20px;
    padding-top: 10px;

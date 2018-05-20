@@ -299,8 +299,8 @@
 		 */
 		function PdfThumbnailsCtrl($scope, pdfjsboxItemServices) {
 			var ctrl = this;
-			ctrl.begin;
-			ctrl.limit;
+			ctrl.begin = 0;
+			ctrl.limit = 10000;
 			ctrl.previous = previous;
 			ctrl.next = next;
 			ctrl.areItemsEqual = pdfjsboxItemServices.areItemsEqual;
