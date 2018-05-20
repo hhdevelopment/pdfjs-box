@@ -4,24 +4,19 @@ node_js:
 cache:
   directories:
     - "node_modules"
-env:
-  - REPO_NAME=pdfjs-box
 branches:
   only:
   - website
-before_install:
-  - sudo apt-get install lftp
 before_script:
-  - rm -rf node_modules/boxes-scroll
   - rm -rf node_modules/pdfjs-box
-  - git config user.email "$GITHUB_MAIL"
-  - git config user.name "$GITHUB_USER"
   - npm install
 script: 
   - webpack
 deploy:
-  - provider: script
-    script: lftp sftp://$SFTP_1AND1_HOST -u $SFTP_1AND1_USER,$SFTP_1AND1_PWD -e "lcd public_html; cd $REPO_NAME; mrm **/*; mirror -R; bye"
-    skip_cleanup: true
+  - provider: pages
+    local-dir: public_html
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    keep-history: true
     on:
       branch: website
