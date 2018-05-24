@@ -11,6 +11,7 @@
 	function semServices($q) {
 		var sems = {};
 		return {
+			releaseAll:releaseAll,
 			acquire : acquire,
 			release : release
 		};
@@ -28,6 +29,13 @@
 				sems[name] = {defer: $q.defer()};
 			}
 			sems[name].defer.resolve();
+		}
+		function releaseAll() {
+			__.keys(sems).forEach(function(name) {
+				if(sems.hasOwnProperty(name)) {
+					sems[name].defer.resolve();
+				}
+			});
 		}
 	}
 	pdfbox.factory('pdfjsboxDomServices', domServices);

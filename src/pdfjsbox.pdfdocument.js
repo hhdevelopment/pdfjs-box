@@ -10,7 +10,7 @@
 	}
 	pdfbox.directive('pdfDocument', pdfDocument);
 	/* @ngInject */
-	function pdfDocument(pdfjsboxItemServices) {
+	function pdfDocument(pdfjsboxItemServices, pdfjsboxSemServices) {
 		return {
 			restrict: 'E',
 			scope: {
@@ -29,6 +29,7 @@
 					updatePdf(s, v1);
 				}, true));
 				scope.$on('$destroy', function () {
+					pdfjsboxSemServices.releaseAll();
 					if(scope.renderTask) {
 						scope.renderTask.destroy();
 					}
@@ -44,6 +45,7 @@
 		 * @param {Angular scope} scope
 		 */
 		function manageRefreshHandler(scope) {
+			pdfjsboxSemServices.releaseAll();
 			scope.$root.$on('pdfdoc-refresh', function (event, data) {
 				if (data === scope.pdfid) {
 					scope.pdfid = null;
@@ -69,6 +71,7 @@
 		 * @param {Document|url} pdf
 		 */
 		function updatePdf(scope, pdf) {
+			pdfjsboxSemServices.releaseAll();
 			var items = scope.ngItems || [];
 			var pdfid = pdfjsboxItemServices.id(pdf);
 			if (pdfid !== scope.pdfid) {
