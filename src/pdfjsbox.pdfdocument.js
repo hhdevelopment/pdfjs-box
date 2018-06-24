@@ -20,7 +20,7 @@
 				'ngItems': '=', // la liste de items representant les pages du document
 				'onError': '&'
 			},
-			link: function (scope, elm, attrs, ctrl) {
+			link: function (scope, elm, attrs) {
 				var watcherClears = [];
 				watcherClears.push(scope.$watch('rotate', function (v1, v2, s) {
 					updateRotate(s, v1);
@@ -30,6 +30,9 @@
 				}, true));
 				scope.$on('$destroy', function () {
 					pdfjsboxSemServices.releaseAll();
+					if(scope.handlerRefresh) {
+						scope.handlerRefresh();
+					}
 					if(scope.renderTask) {
 						scope.renderTask.destroy();
 					}
@@ -46,7 +49,10 @@
 		 */
 		function manageRefreshHandler(scope) {
 			pdfjsboxSemServices.releaseAll();
-			scope.$root.$on('pdfdoc-refresh', function (event, data) {
+			if(scope.handlerRefresh) {
+				scope.handlerRefresh();
+			}
+			scope.handlerRefresh = scope.$root.$on('pdfdoc-refresh', function (event, data) {
 				if (data === scope.pdfid) {
 					scope.pdfid = null;
 					updatePdf(scope, scope.pdf);
